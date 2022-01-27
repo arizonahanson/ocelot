@@ -1,0 +1,2 @@
+# ocelot
+Trading Platform CLI
