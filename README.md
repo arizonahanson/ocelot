@@ -1,2 +1,2 @@
 # ocelot
-Trading Platform CLI
+Brokerage CLI
