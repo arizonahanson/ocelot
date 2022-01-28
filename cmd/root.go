@@ -35,8 +35,8 @@ var version = "unknown"
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "ocelot",
-	Short:   "Algorithmic Trading Platform CLI",
-	Long:    `A command-line algorithmic trading platform written in Go`,
+	Short:   "Brokerage CLI",
+	Long:    `A command-line trading platform written in Go`,
 	Version: version,
 }
 
