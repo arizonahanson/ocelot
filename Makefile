@@ -4,7 +4,7 @@ GITHASH=$(shell git rev-parse --short HEAD)
 UTCTIME=$(shell date -u '+%Y%m%d%H%M%S')
 LDFLAGS=-X $(PKGPATH)/cmd.version=$(UTCTIME)-$(GITHASH)
 GONAME=$(HOME)/go/bin/$(NAME)
-GODEPS=main.go cmd/*.go Makefile
+GODEPS=main.go cmd/*.go pkg/ocelot/*.go internal/api/*.go Makefile
 
 default: install
 
