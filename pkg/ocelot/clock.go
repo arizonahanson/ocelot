@@ -27,6 +27,5 @@ func (ocelot *Ocelot) GetClock() (*Clock, error) {
 		return nil, fmt.Errorf("DELAY 1s exceeded: %s", owd)
 	}
 	lag := rtt - owd
-	clock.Timestamp = clock.Timestamp.Round(time.Millisecond)
 	return &Clock{clock, rtt, owd, lag}, nil
 }

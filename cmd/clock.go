@@ -24,6 +24,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/starlight/ocelot/pkg/ocelot"
@@ -42,7 +43,12 @@ Includes round-trip time, one-way delay and response lag.`,
 		if err != nil {
 			log.Printf("error: %s", err)
 		}
-		fmt.Printf("MarketTime: %s\n", clock.Market.Timestamp)
+		fmt.Printf("Market Time: %s\n", clock.Market.Timestamp.Round(time.Second))
+		if clock.Market.IsOpen {
+			fmt.Printf("OPEN until %s\n", clock.Market.NextClose)
+		} else {
+			fmt.Printf("CLOSED until %s\n", clock.Market.NextOpen)
+		}
 		fmt.Printf("RTT: %s\n", clock.RTT)
 		fmt.Printf("OWD: %s\n", clock.OWD)
 		fmt.Printf("LAG: %s\n", clock.LAG)
@@ -51,5 +57,6 @@ Includes round-trip time, one-way delay and response lag.`,
 
 func init() {
 	Ocelot = ocelot.GetOcelot()
+	Ocelot.GetClock() // exercise api
 	showCmd.AddCommand(clockCmd)
 }

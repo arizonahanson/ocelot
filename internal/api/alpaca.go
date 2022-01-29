@@ -8,9 +8,9 @@ type AlpacaClient struct {
 	client alpaca.Client
 }
 
-func GetAlpaca() *AlpacaClient {
+func GetAlpacaClient(baseUrl string) *AlpacaClient {
 	client := alpaca.NewClient(alpaca.ClientOpts{
-		BaseURL: "https://paper-api.alpaca.markets",
+		BaseURL: baseUrl,
 	})
 	return &AlpacaClient{client}
 }
