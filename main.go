@@ -21,8 +21,26 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/starlight/ocelot/cmd"
+import (
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/starlight/ocelot/cmd"
+)
 
 func main() {
 	cmd.Execute()
+}
+
+// trap OS termination signals
+func trap() {
+	traps := make(chan os.Signal, 1)
+	signal.Notify(traps, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-traps
+		log.Printf("SIGNAL %s", sig)
+		cmd.Quit()
+	}()
 }
