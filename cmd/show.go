@@ -24,9 +24,8 @@ package cmd
 import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
-
-var noColor bool
 
 // showCmd represents the show command
 var showCmd = &cobra.Command{
@@ -36,6 +35,7 @@ var showCmd = &cobra.Command{
 Output is intended for human-consumption.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		rootCmd.PersistentPreRun(cmd, args)
+		noColor := viper.GetBool("show.no-color")
 		if noColor {
 			color.NoColor = noColor
 		}
@@ -47,6 +47,7 @@ Output is intended for human-consumption.`,
 }
 
 func init() {
-	showCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "disable color tty output")
+	showCmd.PersistentFlags().Bool("no-color", false, "disable color tty output")
+	viper.BindPFlag("show.no-color", showCmd.PersistentFlags().Lookup("no-color"))
 	rootCmd.AddCommand(showCmd)
 }
