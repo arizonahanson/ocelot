@@ -28,10 +28,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"github.com/starlight/ocelot/pkg/ocelot"
 )
-
-var Ocelot *ocelot.Ocelot
 
 // clockCmd represents the clock command
 var clockCmd = &cobra.Command{
@@ -39,6 +36,9 @@ var clockCmd = &cobra.Command{
 	Short: "Show the current Market Time, according to the API",
 	Long: `Show the current Market Time, according to the API.
 Includes round-trip time, one-way delay and response lag.`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		Ocelot.GetClock()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		clock, err := Ocelot.GetClock()
 		if err != nil {
@@ -57,7 +57,5 @@ Includes round-trip time, one-way delay and response lag.`,
 }
 
 func init() {
-	Ocelot = ocelot.GetOcelot()
-	Ocelot.GetClock() // exercise api
 	showCmd.AddCommand(clockCmd)
 }
