@@ -26,6 +26,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/starlight/ocelot/pkg/ocelot"
 )
@@ -45,9 +46,9 @@ Includes round-trip time, one-way delay and response lag.`,
 		}
 		fmt.Printf("Market Time: %s\n", clock.Market.Timestamp.Round(time.Second))
 		if clock.Market.IsOpen {
-			fmt.Printf("OPEN until %s\n", clock.Market.NextClose)
+			fmt.Printf("%s until %s\n", color.GreenString("Market OPEN"), clock.Market.NextClose)
 		} else {
-			fmt.Printf("CLOSED until %s\n", clock.Market.NextOpen)
+			fmt.Printf("%s until %s\n", color.HiYellowString("Market CLOSED"), clock.Market.NextOpen)
 		}
 		fmt.Printf("RTT: %s\n", clock.RTT)
 		fmt.Printf("OWD: %s\n", clock.OWD)
