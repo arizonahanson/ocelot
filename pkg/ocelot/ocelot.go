@@ -10,7 +10,6 @@ type Ocelot struct {
 
 func GetOcelot() *Ocelot {
 	// uses Alpaca; but behind an interface
-	alpaca := api.GetAlpacaClient("https://paper-api.alpaca.markets")
-	client := api.ApiClient(alpaca)
+	client := api.GetAlpacaClient("https://paper-api.alpaca.markets")
 	return &Ocelot{client}
 }

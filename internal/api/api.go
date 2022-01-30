@@ -1,9 +1,20 @@
 package api
 
-import "time"
+import (
+	"time"
+
+	"github.com/shopspring/decimal"
+)
 
 type ApiClient interface {
 	GetClock() (*Clock, error)
+	GetPositions() ([]Position, error)
+}
+
+type Position struct {
+	Symbol   string
+	Quantity decimal.Decimal
+	Value    decimal.Decimal
 }
 
 type Clock struct {
