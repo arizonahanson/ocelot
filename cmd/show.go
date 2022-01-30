@@ -31,9 +31,9 @@ var noColor bool
 // showCmd represents the show command
 var showCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Displays information for various objects.",
-	Long: `Displays information for various objects,
-indended for human-consumption.`,
+	Short: "Shows information for various objects.",
+	Long: `Shows information for various objects.
+Output is intended for human-consumption.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		rootCmd.PersistentPreRun(cmd, args)
 		if noColor {
@@ -47,6 +47,6 @@ indended for human-consumption.`,
 }
 
 func init() {
-	showCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "disable color output (automatically disabled on non-tty output)")
+	showCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "disable color tty output")
 	rootCmd.AddCommand(showCmd)
 }

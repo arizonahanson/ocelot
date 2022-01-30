@@ -23,7 +23,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -52,9 +51,7 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
+	cobra.CheckErr(err)
 }
 
 func init() {
@@ -87,6 +84,6 @@ func initConfig() {
 }
 
 func Quit() {
-	log.Printf("BYE")
+	fmt.Fprintln(os.Stderr, "exiting")
 	os.Exit(0)
 }

@@ -23,7 +23,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/fatih/color"
@@ -41,18 +40,16 @@ Includes round-trip time, one-way delay and response lag.`,
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		clock, err := Ocelot.GetClock()
-		if err != nil {
-			log.Printf("error: %s", err)
-		}
-		fmt.Printf("Market Time: %s\n", clock.Market.Timestamp.Round(time.Second))
+		cobra.CheckErr(err)
+		fmt.Println("Market Time:", clock.Market.Timestamp.Round(time.Second))
 		if clock.Market.IsOpen {
 			fmt.Printf("%s until %s\n", color.GreenString("Market OPEN"), clock.Market.NextClose)
 		} else {
 			fmt.Printf("%s until %s\n", color.HiYellowString("Market CLOSED"), clock.Market.NextOpen)
 		}
-		fmt.Printf("RTT: %s\n", clock.RTT)
-		fmt.Printf("OWD: %s\n", clock.OWD)
-		fmt.Printf("LAG: %s\n", clock.LAG)
+		fmt.Println("RTT:", clock.RTT)
+		fmt.Println("OWD:", clock.OWD)
+		fmt.Println("LAG:", clock.LAG)
 	},
 }
 

@@ -22,7 +22,7 @@ THE SOFTWARE.
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -40,7 +40,7 @@ func trap() {
 	signal.Notify(traps, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-traps
-		log.Printf("SIGNAL %s", sig)
+		fmt.Fprintln(os.Stderr, "signal:", sig)
 		cmd.Quit()
 	}()
 }

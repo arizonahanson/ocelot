@@ -23,7 +23,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -31,14 +30,12 @@ import (
 // positionsCmd represents the positions command
 var positionsCmd = &cobra.Command{
 	Use:   "positions",
-	Short: "Display the currently held positions.",
-	Long:  `Display the currently held positions.`,
+	Short: "Show the currently held positions.",
+	Long:  `Show the currently held positions.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		positions, err := Ocelot.GetPositions()
-		if err != nil {
-			log.Printf("error: %s", err)
-		}
-		fmt.Printf("positions: %d\n", len(positions))
+		cobra.CheckErr(err)
+		fmt.Println("positions:", len(positions))
 	},
 }
 
