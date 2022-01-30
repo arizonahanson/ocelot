@@ -31,7 +31,6 @@ import (
 )
 
 var (
-	cfgFile string
 	version string
 	Ocelot  *ocelot.Ocelot
 )
@@ -56,27 +55,19 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ocelot.toml)")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".ocelot" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("toml")
-		viper.SetConfigName(".ocelot")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
+	// Find home directory.
+	home, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+	// Search config in home directory with filename ".ocelot.toml".
+	viper.AddConfigPath(home)
+	viper.SetConfigName(".ocelot")
+	viper.SetConfigType("toml")
+	// read in environment variables that match.
+	viper.AutomaticEnv()
 	// If a config file is found, read it in.
 	viper.ReadInConfig()
 }
