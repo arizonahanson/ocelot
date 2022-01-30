@@ -32,20 +32,21 @@ import (
 // clockCmd represents the clock command
 var clockCmd = &cobra.Command{
 	Use:   "clock",
-	Short: "Show the current Market Time, according to the API",
-	Long: `Show the current Market Time, according to the API.
+	Short: "Show the current market time, according to the API",
+	Long: `Show the current market time, according to the API.
 Includes round-trip time, one-way delay and response lag.`,
-	PreRun: func(cmd *cobra.Command, args []string) {
-		Ocelot.GetClock()
-	},
 	Run: func(cmd *cobra.Command, args []string) {
+		// first request to init api
+		_, err := Ocelot.GetClock()
+		cobra.CheckErr(err)
+		// second request measurements used
 		clock, err := Ocelot.GetClock()
 		cobra.CheckErr(err)
 		fmt.Println("Market Time:", clock.Market.Timestamp.Round(time.Second))
 		if clock.Market.IsOpen {
-			fmt.Printf("%s until %s\n", color.GreenString("Market OPEN"), clock.Market.NextClose)
+			fmt.Printf("Market %s until %s\n", color.GreenString("OPEN"), clock.Market.NextClose)
 		} else {
-			fmt.Printf("%s until %s\n", color.HiYellowString("Market CLOSED"), clock.Market.NextOpen)
+			fmt.Printf("Market %s until %s\n", color.HiYellowString("CLOSED"), clock.Market.NextOpen)
 		}
 		fmt.Println("RTT:", clock.RTT)
 		fmt.Println("OWD:", clock.OWD)
