@@ -22,8 +22,11 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
+
+var noColor bool
 
 // showCmd represents the show command
 var showCmd = &cobra.Command{
@@ -31,6 +34,12 @@ var showCmd = &cobra.Command{
 	Short: "Displays information for various objects.",
 	Long: `Displays information for various objects,
 indended for human-consumption.`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		rootCmd.PersistentPreRun(cmd, args)
+		if noColor {
+			color.NoColor = noColor
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// for now, just runs clock command
 		clockCmd.Run(cmd, args)
@@ -38,5 +47,6 @@ indended for human-consumption.`,
 }
 
 func init() {
+	showCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "disable color output (automatically disabled on non-tty output)")
 	rootCmd.AddCommand(showCmd)
 }
