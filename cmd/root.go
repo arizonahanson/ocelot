@@ -70,6 +70,7 @@ func initConfig() {
 	viper.AutomaticEnv()
 	// If a config file is found, read it in.
 	viper.ReadInConfig()
+	viper.WatchConfig()
 }
 
 func Quit() {
