@@ -39,6 +39,7 @@ var rootCmd = &cobra.Command{
 	Use:     "ocelot",
 	Short:   "Brokerage CLI",
 	Long:    `A command-line trading platform written in Go`,
+	Args:    cobra.MaximumNArgs(0),
 	Version: version,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		Ocelot = ocelot.GetOcelot()

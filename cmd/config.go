@@ -33,6 +33,7 @@ var configCmd = &cobra.Command{
 	Use:   "config [key]",
 	Short: "Configure ocelot behavior.",
 	Long:  `Configure ocelot behavior.`,
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
 			value := viper.Get(args[0])

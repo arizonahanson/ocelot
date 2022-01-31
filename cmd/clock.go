@@ -35,6 +35,7 @@ var clockCmd = &cobra.Command{
 	Short: "Show the current market time, according to the API",
 	Long: `Show the current market time, according to the API.
 Includes round-trip time, one-way delay and response lag.`,
+	Args: cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		// first request to init api
 		_, err := Ocelot.GetClock()

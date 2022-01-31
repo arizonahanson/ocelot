@@ -33,6 +33,7 @@ var showCmd = &cobra.Command{
 	Short: "Shows information for various objects.",
 	Long: `Shows information for various objects.
 Output is intended for human-consumption.`,
+	Args: cobra.MaximumNArgs(0),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		rootCmd.PersistentPreRun(cmd, args)
 		noColor := viper.GetBool("show.no-color")
