@@ -22,7 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -50,7 +49,9 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
-	cobra.CheckErr(err)
+	if err != nil {
+		os.Exit(1)
+	}
 }
 
 func init() {
@@ -59,21 +60,29 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	// Find home directory.
-	home, err := os.UserHomeDir()
-	cobra.CheckErr(err)
 	// Search config in home directory with filename ".ocelot.toml".
-	viper.AddConfigPath(home)
+	viper.AddConfigPath("$HOME")
 	viper.SetConfigName(".ocelot")
 	viper.SetConfigType("toml")
+	viper.SetTypeByDefaultValue(true)
+	// If a config file is found, read it in.
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			// found but could not read?
+			cobra.CheckErr(err)
+		}
+		// create default config
+		viper.SafeWriteConfig()
+		if err := viper.ReadInConfig(); err != nil {
+			// still not found or could not read?
+			cobra.CheckErr(err)
+		}
+	}
+	viper.WatchConfig()
 	// read in environment variables that match.
 	viper.AutomaticEnv()
-	// If a config file is found, read it in.
-	viper.ReadInConfig()
-	viper.WatchConfig()
 }
 
 func Quit() {
-	fmt.Fprintln(os.Stderr, "exiting")
 	os.Exit(0)
 }

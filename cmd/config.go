@@ -22,17 +22,22 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
-	Use:   "config",
+	Use:   "config [key]",
 	Short: "Configure ocelot behavior.",
-	Long:  `Configure ocelot behavior. Calling without options creates a default config file.`,
+	Long:  `Configure ocelot behavior.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		viper.SafeWriteConfig()
+		if len(args) == 1 {
+			value := viper.Get(args[0])
+			fmt.Println(value)
+		}
 	},
 }
 
