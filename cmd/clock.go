@@ -44,9 +44,11 @@ Includes round-trip time, one-way delay and response lag.`,
 		cobra.CheckErr(err)
 		fmt.Println("Market Time:", clock.Market.Timestamp.Round(time.Second))
 		if clock.Market.IsOpen {
-			fmt.Printf("Market %s until %s\n", color.GreenString("OPEN"), clock.Market.NextClose)
+			duration := time.Until(clock.Market.NextClose).Round(time.Second)
+			fmt.Printf("Market %s until %s (%s)\n", color.GreenString("OPEN"), clock.Market.NextClose, duration)
 		} else {
-			fmt.Printf("Market %s until %s\n", color.HiYellowString("CLOSED"), clock.Market.NextOpen)
+			duration := time.Until(clock.Market.NextOpen).Round(time.Second)
+			fmt.Printf("Market %s until %s (%s)\n", color.HiYellowString("CLOSED"), clock.Market.NextOpen, duration)
 		}
 		fmt.Println("RTT:", clock.RTT)
 		fmt.Println("OWD:", clock.OWD)
