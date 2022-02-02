@@ -37,17 +37,24 @@ var configCmd = &cobra.Command{
 	Long:  `Configure ocelot behavior.`,
 	Args:  cobra.RangeArgs(1, 2),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		if len(args) != 0 {
-			// don't complete more than the key
-			return nil, cobra.ShellCompDirectiveNoFileComp
-		}
-		ret := []string{}
-		for _, key := range viper.AllKeys() {
-			if strings.Contains(key, toComplete) {
-				ret = append(ret, key)
+		// key
+		if len(args) == 0 {
+			ret := []string{}
+			for _, key := range viper.AllKeys() {
+				if strings.Contains(key, toComplete) {
+					ret = append(ret, key)
+				}
 			}
+			return ret, cobra.ShellCompDirectiveNoFileComp
 		}
-		return ret, cobra.ShellCompDirectiveNoFileComp
+		// value
+		switch viper.Get(args[0]).(type) {
+		default:
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		case bool:
+			// only complete bools
+			return []string{"true", "false"}, cobra.ShellCompDirectiveNoFileComp
+		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		key := args[0]
