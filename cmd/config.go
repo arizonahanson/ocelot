@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
@@ -31,18 +32,31 @@ import (
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
-	Use:   "config [key [value]]",
-	Short: "Configure ocelot behavior.",
+	Use:   "config key [value]",
+	Short: "Configure ocelot behavior",
 	Long:  `Configure ocelot behavior.`,
 	Args:  cobra.RangeArgs(1, 2),
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) != 0 {
+			// don't complete more than the key
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+		ret := []string{}
+		for _, key := range viper.AllKeys() {
+			if strings.Contains(key, toComplete) {
+				ret = append(ret, key)
+			}
+		}
+		return ret, cobra.ShellCompDirectiveNoFileComp
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		key := args[0]
-		if !viper.IsSet(key) {
-			// key not bound by viper
-			return fmt.Errorf("Unknown config key")
-		}
 		if len(args) == 1 {
 			value := viper.Get(key)
+			if value == nil {
+				// not a key with a value set
+				return fmt.Errorf("Unknown config key \"%s\"", key)
+			}
 			fmt.Println(value)
 		} else if len(args) == 2 {
 			value := args[1]
@@ -50,12 +64,33 @@ var configCmd = &cobra.Command{
 			switch viper.Get(key).(type) {
 			default:
 				// trying to set a group value
-				return fmt.Errorf("Unknown config type")
+				return fmt.Errorf("Invalid config key \"%s\"", key)
+			case nil:
+				// not a key with a value set
+				return fmt.Errorf("Unknown config key \"%s\"", key)
 			case string:
 				viper.Set(key, value)
 				break
 			case bool:
-				viper.Set(key, cast.ToBool(value))
+				boolValue, err := cast.ToBoolE(value)
+				if err != nil {
+					return fmt.Errorf("Invalid boolean value \"%s\" for key \"%s\"", value, key)
+				}
+				viper.Set(key, boolValue)
+				break
+			case int64:
+				intValue, err := cast.ToInt64E(value)
+				if err != nil {
+					return fmt.Errorf("Invalid integer value \"%s\" for key \"%s\"", value, key)
+				}
+				viper.Set(key, intValue)
+				break
+			case float64:
+				floatValue, err := cast.ToFloat64E(value)
+				if err != nil {
+					return fmt.Errorf("Invalid float value \"%s\" for key \"%s\"", value, key)
+				}
+				viper.Set(key, floatValue)
 				break
 			}
 			viper.WriteConfig()

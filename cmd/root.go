@@ -32,14 +32,15 @@ import (
 
 var (
 	version string
+	cfgFile string
 	Ocelot  *ocelot.Ocelot
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "ocelot",
-	Short:   "Brokerage CLI",
-	Long:    `A command-line trading platform written in Go`,
+	Short:   "Open command-line trading",
+	Long:    `An open command-line trading system written in Go.`,
 	Args:    cobra.MaximumNArgs(0),
 	Version: version,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
@@ -58,32 +59,39 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default ~/.ocelot.toml)")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	// Search config in home directory with filename ".ocelot.toml".
-	viper.AddConfigPath("$HOME")
-	viper.SetConfigName(".ocelot")
 	viper.SetConfigType("toml")
-	viper.SetTypeByDefaultValue(true)
+	if cfgFile == "" {
+		// Search config in home directory with filename ".ocelot.toml".
+		viper.AddConfigPath("$HOME")
+		viper.SetConfigName(".ocelot")
+		// create default config
+		viper.SafeWriteConfig()
+	} else {
+		// Use specified file
+		viper.SetConfigFile(cfgFile)
+		// create if not exists
+		viper.SafeWriteConfigAs(cfgFile)
+	}
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			// found but could not read?
 			cobra.CheckErr(err)
 		}
-		// create default config
-		viper.SafeWriteConfig()
-		if err := viper.ReadInConfig(); err != nil {
-			// still not found or could not read?
-			cobra.CheckErr(err)
-		}
 	}
+	// watch the config file for changes
 	viper.WatchConfig()
 	// read in environment variables that match.
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
+	viper.SetEnvPrefix("OCLT")
+	// cast types on `Get` to match default values
+	viper.SetTypeByDefaultValue(true)
 }
 
 func Quit() {
