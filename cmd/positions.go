@@ -30,7 +30,7 @@ import (
 // positionsCmd represents the positions command
 var positionsCmd = &cobra.Command{
 	Use:   "positions",
-	Short: "Show the currently held positions.",
+	Short: "Show the currently held positions",
 	Long:  `Show the currently held positions.`,
 	Args:  cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {

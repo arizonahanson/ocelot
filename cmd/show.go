@@ -30,7 +30,7 @@ import (
 // showCmd represents the show command
 var showCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Shows information for various objects.",
+	Short: "Shows information for various objects",
 	Long: `Shows information for various objects.
 Output is intended for human-consumption.`,
 	Args: cobra.MaximumNArgs(0),

@@ -1,2 +1,2 @@
 # ocelot
-Brokerage CLI
+Open Command-Line Trading
