@@ -66,8 +66,11 @@ func init() {
 func initConfig() {
 	viper.SetConfigType("toml")
 	if cfgFile == "" {
+		// Find home directory.
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
 		// Search config in home directory with filename ".ocelot.toml".
-		viper.AddConfigPath("$HOME")
+		viper.AddConfigPath(home)
 		viper.SetConfigName(".ocelot")
 		// create default config
 		viper.SafeWriteConfig()
