@@ -60,7 +60,7 @@ Includes round-trip time, one-way delay and response time-to-live.`,
 }
 
 func init() {
-	clockCmd.Flags().DurationP("max-ttl", "m", 0, "maximum market time-to-live duration (default none: 0s)")
+	clockCmd.Flags().DurationP("max-ttl", "m", 0, "maximum market time-to-live delay (default 0s for no maximum)")
 	viper.BindPFlag("clock.max-ttl", clockCmd.Flags().Lookup("max-ttl"))
 	showCmd.AddCommand(clockCmd)
 }
