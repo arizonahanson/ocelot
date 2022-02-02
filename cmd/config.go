@@ -24,21 +24,43 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
-	Use:   "config [key]",
+	Use:   "config [key [value]]",
 	Short: "Configure ocelot behavior.",
 	Long:  `Configure ocelot behavior.`,
-	Args:  cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
-			value := viper.Get(args[0])
-			fmt.Println(value)
+	Args:  cobra.RangeArgs(1, 2),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		key := args[0]
+		if !viper.IsSet(key) {
+			// key not bound by viper
+			return fmt.Errorf("Unknown config key")
 		}
+		if len(args) == 1 {
+			value := viper.Get(key)
+			fmt.Println(value)
+		} else if len(args) == 2 {
+			value := args[1]
+			// don't change the type from the default
+			switch viper.Get(key).(type) {
+			default:
+				// trying to set a group value
+				return fmt.Errorf("Unknown config type")
+			case string:
+				viper.Set(key, value)
+				break
+			case bool:
+				viper.Set(key, cast.ToBool(value))
+				break
+			}
+			viper.WriteConfig()
+		}
+		return nil
 	},
 }
 
