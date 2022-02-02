@@ -27,6 +27,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // clockCmd represents the clock command
@@ -34,14 +35,15 @@ var clockCmd = &cobra.Command{
 	Use:   "clock",
 	Short: "Show the current market time, according to the API",
 	Long: `Show the current market time, according to the API.
-Includes round-trip time, one-way delay and response lag.`,
+Includes round-trip time, one-way delay and response time-to-live.`,
 	Args: cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		// first request to init api
-		_, err := Ocelot.GetClock()
+		maxTTL := viper.GetDuration("clock.max-ttl")
+		_, err := Ocelot.GetClock(maxTTL)
 		cobra.CheckErr(err)
 		// second request measurements used
-		clock, err := Ocelot.GetClock()
+		clock, err := Ocelot.GetClock(maxTTL)
 		cobra.CheckErr(err)
 		fmt.Println("Market Time:", clock.Market.Timestamp.Round(time.Second))
 		if clock.Market.IsOpen {
@@ -53,10 +55,12 @@ Includes round-trip time, one-way delay and response lag.`,
 		}
 		fmt.Println("RTT:", clock.RTT)
 		fmt.Println("OWD:", clock.OWD)
-		fmt.Println("LAG:", clock.LAG)
+		fmt.Println("TTL:", clock.TTL)
 	},
 }
 
 func init() {
+	clockCmd.Flags().DurationP("max-ttl", "m", 0, "maximum market time-to-live duration (default none: 0s)")
+	viper.BindPFlag("clock.max-ttl", clockCmd.Flags().Lookup("max-ttl"))
 	showCmd.AddCommand(clockCmd)
 }
