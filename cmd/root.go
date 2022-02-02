@@ -84,6 +84,7 @@ func initConfig() {
 			cobra.CheckErr(err)
 		}
 	}
+	cfgFile = viper.ConfigFileUsed()
 	// watch the config file for changes
 	viper.WatchConfig()
 	// read in environment variables that match.
