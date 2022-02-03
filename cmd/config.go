@@ -48,12 +48,14 @@ var configCmd = &cobra.Command{
 			return ret, cobra.ShellCompDirectiveNoFileComp
 		}
 		// value
-		switch viper.Get(args[0]).(type) {
+		value := viper.Get(args[0])
+		switch value.(type) {
 		default:
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		case bool:
-			// only complete bools
-			return []string{"true", "false"}, cobra.ShellCompDirectiveNoFileComp
+			// complete boolean values using `not`
+			notValue := cast.ToString(!cast.ToBool(value))
+			return []string{notValue}, cobra.ShellCompDirectiveNoFileComp
 		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
