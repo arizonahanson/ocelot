@@ -45,7 +45,7 @@ Includes round-trip time, one-way delay and response time-to-live.`,
 		// second request measurements used
 		clock, err := Ocelot.GetClock(maxTTL)
 		cobra.CheckErr(err)
-		fmt.Println("Market Time:", clock.Market.Timestamp.Round(time.Second))
+		fmt.Printf("Market Time: %s (%s TTL)\n", clock.Market.Timestamp.Round(time.Second), clock.TTL)
 		if clock.Market.IsOpen {
 			duration := time.Until(clock.Market.NextClose).Round(time.Second)
 			fmt.Printf("Market %s until %s (%s)\n", color.GreenString("OPEN"), clock.Market.NextClose, duration)
@@ -53,9 +53,6 @@ Includes round-trip time, one-way delay and response time-to-live.`,
 			duration := time.Until(clock.Market.NextOpen).Round(time.Second)
 			fmt.Printf("Market %s until %s (%s)\n", color.HiYellowString("CLOSED"), clock.Market.NextOpen, duration)
 		}
-		fmt.Println("RTT:", clock.RTT)
-		fmt.Println("OWD:", clock.OWD)
-		fmt.Println("TTL:", clock.TTL)
 	},
 }
 
