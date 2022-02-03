@@ -8,8 +8,8 @@ type Ocelot struct {
 	client api.ApiClient
 }
 
-func GetOcelot() *Ocelot {
+func GetOcelot(alpacaUrl string) *Ocelot {
 	// uses Alpaca; but behind an interface
-	client := api.GetAlpacaClient("https://paper-api.alpaca.markets")
+	client := api.GetAlpacaClient(alpacaUrl)
 	return &Ocelot{client}
 }

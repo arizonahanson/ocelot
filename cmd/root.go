@@ -44,7 +44,7 @@ var rootCmd = &cobra.Command{
 	Args:    cobra.MaximumNArgs(0),
 	Version: version,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		Ocelot = ocelot.GetOcelot()
+		Ocelot = ocelot.GetOcelot(viper.GetString("alpaca.api-url"))
 	},
 }
 
@@ -60,6 +60,8 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default ~/.ocelot.toml)")
+	rootCmd.PersistentFlags().String("api-url", "https://paper-api.alpaca.markets", "Alpaca API URL")
+	viper.BindPFlag("alpaca.api-url", rootCmd.PersistentFlags().Lookup("api-url"))
 }
 
 // initConfig reads in config file and ENV variables if set.
