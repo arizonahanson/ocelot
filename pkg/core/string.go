@@ -2,19 +2,12 @@ package core
 
 import (
 	"strconv"
-
-	"github.com/shopspring/decimal"
 )
 
 type String string
 
 func (value String) ToNumber() (*Number, error) {
-	d, err := decimal.NewFromString(string(value))
-	if err != nil {
-		return nil, err
-	}
-	n := Number(d)
-	return &n, nil
+	return numberFromString(value)
 }
 
 func (value String) Unquote() (*String, error) {

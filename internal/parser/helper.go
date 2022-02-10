@@ -10,7 +10,7 @@ func slice(v interface{}) []interface{} {
 	return v.([]interface{})
 }
 
-// build []interface{} from first, rest=[[_, next], ...]
+// build []core.Any from first, rest=[[_, next], ...]
 func join(first, rest interface{}, index int) []core.Any {
 	result := []core.Any{first}
 	for _, group := range slice(rest) {
