@@ -27,13 +27,11 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/starlight/ocelot/pkg/ocelot"
 )
 
 var (
 	version string
 	cfgFile string
-	Ocelot  *ocelot.Ocelot
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -43,9 +41,6 @@ var rootCmd = &cobra.Command{
 	Long:    `An open command-line trading system written in Go.`,
 	Args:    cobra.MaximumNArgs(0),
 	Version: version,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		Ocelot = ocelot.GetOcelot(viper.GetString("alpaca.api-url"))
-	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -60,8 +55,6 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default ~/.ocelot.toml)")
-	rootCmd.PersistentFlags().String("api-url", "https://paper-api.alpaca.markets", "Alpaca API URL")
-	viper.BindPFlag("alpaca.api-url", rootCmd.PersistentFlags().Lookup("api-url"))
 }
 
 // initConfig reads in config file and ENV variables if set.

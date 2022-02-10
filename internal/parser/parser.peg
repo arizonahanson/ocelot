@@ -1,0 +1,62 @@
+{
+package parser
+
+import "github.com/starlight/ocelot/pkg/core"
+}
+// root of AST
+Module ←  expr:Expr EOF {
+  return expr, nil
+}
+// expression list without parentheses
+Expr ←  _* first:Any rest:(_+ Any)* _* {
+  return core.List(join(first, rest, 1)), nil
+}
+// parent `any` type
+Any ←  List / atom
+// expression list
+List ←  '(' expr:Expr ')' {
+  return expr, nil
+} / '(' expr !')' {
+  return nil, errors.New("List not terminated")
+}
+// singletons
+atom ←  String / Nil / Bool / Number / Symbol
+// literal string
+String ←  '"' runeChr* '"' {
+  return core.ParseString(string(c.text))
+} / '"' runeChr* !'"' {
+	return nil, errors.New("String not terminated")
+}
+// no bare " or \ inside a String, supports \\, \", \abfnrtv, \xff, \uffff, \Uffffffff
+runeChr ←  [^"\\] / runeEsc
+runeEsc ←  `\` ([abfnrtv"\\] /
+           ('x' hexDigit hexDigit) /
+           ('u' hexDigit hexDigit hexDigit hexDigit) /
+           ('U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit))
+hexDigit ← [0-9a-f]i
+// literal nil
+Nil ←  "nil" {
+  return core.Nil{}, nil
+}
+// literal boolean
+Bool ←  "true" {
+  return core.Bool(true), nil
+} / "false" {
+  return core.Bool(false), nil
+}
+// literal real number like (-123.45e-67)
+Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
+	return core.ParseNumber(string(c.text))
+}
+// identifiers (like ϕa_2)
+Symbol ←  letter (letter / digit)* {
+  return core.Symbol(string(c.text)), nil
+}
+// integer part of Number
+digit ←  [0-9]
+// unicode letters, and underscore, in indentifiers
+letter ←  [\p{L}] / '_'
+// UTF-8: whitespace and control chars/unused codes
+_ "whitespace" ←  [\p{Z}] / [\p{C}]
+// End of file
+EOF ←  !.
