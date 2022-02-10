@@ -23,7 +23,7 @@ List ←  '(' expr:Expr ')' {
 atom ←  String / Nil / Bool / Number / Symbol
 // literal string
 String ←  '"' runeChr* '"' {
-  return core.ParseString(string(c.text))
+  return core.String(string(c.text)).Unquote()
 } / '"' runeChr* !'"' {
 	return nil, errors.New("String not terminated")
 }
@@ -46,7 +46,7 @@ Bool ←  "true" {
 }
 // literal real number like (-123.45e-67)
 Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
-	return core.ParseNumber(string(c.text))
+  return core.String(string(c.text)).ToNumber()
 }
 // identifiers (like ϕa_2)
 Symbol ←  letter (letter / digit)* {
