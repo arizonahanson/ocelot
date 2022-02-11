@@ -3,6 +3,9 @@ module github.com/starlight/ocelot
 go 1.16
 
 require (
+	github.com/c-bata/go-prompt v0.2.6
+	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/mattn/go-tty v0.0.4 // indirect
 	github.com/shopspring/decimal v1.3.1
 	github.com/spf13/afero v1.8.1 // indirect
 	github.com/spf13/cast v1.4.1
