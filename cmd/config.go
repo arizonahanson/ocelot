@@ -33,8 +33,8 @@ import (
 // configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config key [value]",
-	Short: "Configure ocelot behavior",
-	Long:  `Configure ocelot behavior.`,
+	Short: "Configure Ocelot behavior",
+	Long:  `Configure Ocelot behavior.`,
 	Args:  cobra.RangeArgs(1, 2),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		// key
@@ -68,6 +68,7 @@ var configCmd = &cobra.Command{
 			}
 			fmt.Println(value)
 		} else if len(args) == 2 {
+			// TODO refactor out typed Set function
 			value := args[1]
 			// don't change the type from the default
 			switch viper.Get(key).(type) {
