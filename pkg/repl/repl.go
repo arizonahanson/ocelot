@@ -1,13 +1,24 @@
 package repl
 
 import (
-	"github.com/c-bata/go-prompt"
+	goprompt "github.com/c-bata/go-prompt"
 )
 
-func completer(d prompt.Document) []prompt.Suggest {
-	return []prompt.Suggest{}
+func completer(d goprompt.Document) []goprompt.Suggest {
+	return []goprompt.Suggest{}
 }
 
-func Read() string {
-	return prompt.Input(">> ", completer)
+func Read(prompt string) string {
+	return goprompt.Input(prompt, completer)
+}
+
+func Repl() {
+	for {
+		input := Read(">> ")
+		if input == "(exit)" {
+			break
+		}
+		// TODO: Eval
+		println(input)
+	}
 }
