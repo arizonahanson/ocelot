@@ -18,7 +18,11 @@ func Repl() {
 		if input == "(exit)" {
 			break
 		}
-		// TODO: Eval
-		println(input)
+		output := eval(input)
+		println(output)
 	}
+}
+
+func eval(input string) string {
+	return input // stub
 }
