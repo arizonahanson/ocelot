@@ -27,6 +27,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/starlight/ocelot/pkg/repl"
 )
 
 var (
@@ -41,6 +42,9 @@ var rootCmd = &cobra.Command{
 	Long:    `An open command-line trading system written in Go.`,
 	Args:    cobra.MaximumNArgs(0),
 	Version: version,
+	Run: func(cmd *cobra.Command, args []string) {
+		repl.Repl(">>> ")
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
