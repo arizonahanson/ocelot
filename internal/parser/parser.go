@@ -733,16 +733,134 @@ var g = &grammar{
 						ignoreCase: false,
 						inverted:   false,
 					},
+					&ruleRefExpr{
+						pos:  position{line: 68, col: 39, offset: 1917},
+						name: "Comment",
+					},
+				},
+			},
+		},
+		{
+			name: "Comment",
+			pos:  position{line: 70, col: 1, offset: 1937},
+			expr: &choiceExpr{
+				pos: position{line: 70, col: 12, offset: 1950},
+				alternatives: []interface{}{
+					&ruleRefExpr{
+						pos:  position{line: 70, col: 12, offset: 1950},
+						name: "SingleLineComment",
+					},
+					&ruleRefExpr{
+						pos:  position{line: 70, col: 32, offset: 1970},
+						name: "MultiLineComment",
+					},
+				},
+			},
+		},
+		{
+			name: "SingleLineComment",
+			pos:  position{line: 71, col: 1, offset: 1987},
+			expr: &seqExpr{
+				pos: position{line: 71, col: 21, offset: 2009},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 71, col: 21, offset: 2009},
+						val:        "//",
+						ignoreCase: false,
+						want:       "\"//\"",
+					},
+					&zeroOrMoreExpr{
+						pos: position{line: 71, col: 26, offset: 2014},
+						expr: &seqExpr{
+							pos: position{line: 71, col: 27, offset: 2015},
+							exprs: []interface{}{
+								&notExpr{
+									pos: position{line: 71, col: 27, offset: 2015},
+									expr: &ruleRefExpr{
+										pos:  position{line: 71, col: 28, offset: 2016},
+										name: "EOL",
+									},
+								},
+								&anyMatcher{
+									line: 71, col: 32, offset: 2020,
+								},
+							},
+						},
+					},
+					&ruleRefExpr{
+						pos:  position{line: 71, col: 36, offset: 2024},
+						name: "EOL",
+					},
+				},
+			},
+		},
+		{
+			name: "MultiLineComment",
+			pos:  position{line: 72, col: 1, offset: 2028},
+			expr: &seqExpr{
+				pos: position{line: 72, col: 21, offset: 2050},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 72, col: 21, offset: 2050},
+						val:        "/*",
+						ignoreCase: false,
+						want:       "\"/*\"",
+					},
+					&zeroOrMoreExpr{
+						pos: position{line: 72, col: 26, offset: 2055},
+						expr: &seqExpr{
+							pos: position{line: 72, col: 27, offset: 2056},
+							exprs: []interface{}{
+								&notExpr{
+									pos: position{line: 72, col: 27, offset: 2056},
+									expr: &litMatcher{
+										pos:        position{line: 72, col: 28, offset: 2057},
+										val:        "*/",
+										ignoreCase: false,
+										want:       "\"*/\"",
+									},
+								},
+								&anyMatcher{
+									line: 72, col: 33, offset: 2062,
+								},
+							},
+						},
+					},
+					&litMatcher{
+						pos:        position{line: 72, col: 37, offset: 2066},
+						val:        "*/",
+						ignoreCase: false,
+						want:       "\"*/\"",
+					},
+				},
+			},
+		},
+		{
+			name: "EOL",
+			pos:  position{line: 74, col: 1, offset: 2086},
+			expr: &choiceExpr{
+				pos: position{line: 74, col: 8, offset: 2095},
+				alternatives: []interface{}{
+					&litMatcher{
+						pos:        position{line: 74, col: 8, offset: 2095},
+						val:        "\n",
+						ignoreCase: false,
+						want:       "\"\\n\"",
+					},
+					&ruleRefExpr{
+						pos:  position{line: 74, col: 15, offset: 2102},
+						name: "EOF",
+					},
 				},
 			},
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 70, col: 1, offset: 1930},
+			pos:  position{line: 76, col: 1, offset: 2121},
 			expr: &notExpr{
-				pos: position{line: 70, col: 8, offset: 1939},
+				pos: position{line: 76, col: 8, offset: 2130},
 				expr: &anyMatcher{
-					line: 70, col: 9, offset: 1940,
+					line: 76, col: 9, offset: 2131,
 				},
 			},
 		},

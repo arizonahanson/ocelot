@@ -65,6 +65,12 @@ digit ←  [0-9]
 // unicode letters, and underscore, in indentifiers
 letter ←  [\p{L}] / '_'
 // UTF-8: whitespace and control chars/unused codes
-_ "whitespace" ←  [\p{Z}] / [\p{C}]
+_ "whitespace" ←  [\p{Z}] / [\p{C}] / Comment
+// comments
+Comment ←  SingleLineComment / MultiLineComment
+SingleLineComment ← "//" (!EOL .)* EOL
+MultiLineComment ←  "/*" (!"*/" .)* "*/"
+// end of line
+EOL ←  '\n' / EOF
 // End of file
 EOF ←  !.
