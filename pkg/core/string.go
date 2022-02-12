@@ -6,7 +6,7 @@ import (
 
 type String string
 
-func (value String) ToNumber() (Number, error) {
+func (value String) Number() (Number, error) {
 	return numberFromString(value)
 }
 

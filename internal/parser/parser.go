@@ -557,28 +557,28 @@ var g = &grammar{
 		},
 		{
 			name: "Symbol",
-			pos:  position{line: 52, col: 1, offset: 1382},
+			pos:  position{line: 52, col: 1, offset: 1380},
 			expr: &actionExpr{
-				pos: position{line: 52, col: 11, offset: 1394},
+				pos: position{line: 52, col: 11, offset: 1392},
 				run: (*parser).callonSymbol1,
 				expr: &seqExpr{
-					pos: position{line: 52, col: 11, offset: 1394},
+					pos: position{line: 52, col: 11, offset: 1392},
 					exprs: []interface{}{
 						&ruleRefExpr{
-							pos:  position{line: 52, col: 11, offset: 1394},
+							pos:  position{line: 52, col: 11, offset: 1392},
 							name: "letter",
 						},
 						&zeroOrMoreExpr{
-							pos: position{line: 52, col: 18, offset: 1401},
+							pos: position{line: 52, col: 18, offset: 1399},
 							expr: &choiceExpr{
-								pos: position{line: 52, col: 19, offset: 1402},
+								pos: position{line: 52, col: 19, offset: 1400},
 								alternatives: []interface{}{
 									&ruleRefExpr{
-										pos:  position{line: 52, col: 19, offset: 1402},
+										pos:  position{line: 52, col: 19, offset: 1400},
 										name: "letter",
 									},
 									&ruleRefExpr{
-										pos:  position{line: 52, col: 28, offset: 1411},
+										pos:  position{line: 52, col: 28, offset: 1409},
 										name: "digit",
 									},
 								},
@@ -590,9 +590,9 @@ var g = &grammar{
 		},
 		{
 			name: "digit",
-			pos:  position{line: 56, col: 1, offset: 1491},
+			pos:  position{line: 56, col: 1, offset: 1489},
 			expr: &charClassMatcher{
-				pos:        position{line: 56, col: 10, offset: 1502},
+				pos:        position{line: 56, col: 10, offset: 1500},
 				val:        "[0-9]",
 				ranges:     []rune{'0', '9'},
 				ignoreCase: false,
@@ -601,19 +601,19 @@ var g = &grammar{
 		},
 		{
 			name: "letter",
-			pos:  position{line: 58, col: 1, offset: 1560},
+			pos:  position{line: 58, col: 1, offset: 1558},
 			expr: &choiceExpr{
-				pos: position{line: 58, col: 11, offset: 1572},
+				pos: position{line: 58, col: 11, offset: 1570},
 				alternatives: []interface{}{
 					&charClassMatcher{
-						pos:        position{line: 58, col: 11, offset: 1572},
+						pos:        position{line: 58, col: 11, offset: 1570},
 						val:        "[\\p{L}]",
 						classes:    []*unicode.RangeTable{rangeTable("L")},
 						ignoreCase: false,
 						inverted:   false,
 					},
 					&litMatcher{
-						pos:        position{line: 58, col: 21, offset: 1582},
+						pos:        position{line: 58, col: 21, offset: 1580},
 						val:        "_",
 						ignoreCase: false,
 						want:       "\"_\"",
@@ -624,19 +624,19 @@ var g = &grammar{
 		{
 			name:        "_",
 			displayName: "\"whitespace\"",
-			pos:         position{line: 60, col: 1, offset: 1638},
+			pos:         position{line: 60, col: 1, offset: 1636},
 			expr: &choiceExpr{
-				pos: position{line: 60, col: 19, offset: 1658},
+				pos: position{line: 60, col: 19, offset: 1656},
 				alternatives: []interface{}{
 					&charClassMatcher{
-						pos:        position{line: 60, col: 19, offset: 1658},
+						pos:        position{line: 60, col: 19, offset: 1656},
 						val:        "[\\p{Z}]",
 						classes:    []*unicode.RangeTable{rangeTable("Z")},
 						ignoreCase: false,
 						inverted:   false,
 					},
 					&charClassMatcher{
-						pos:        position{line: 60, col: 29, offset: 1668},
+						pos:        position{line: 60, col: 29, offset: 1666},
 						val:        "[\\p{C}]",
 						classes:    []*unicode.RangeTable{rangeTable("C")},
 						ignoreCase: false,
@@ -647,11 +647,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 62, col: 1, offset: 1691},
+			pos:  position{line: 62, col: 1, offset: 1689},
 			expr: &notExpr{
-				pos: position{line: 62, col: 8, offset: 1700},
+				pos: position{line: 62, col: 8, offset: 1698},
 				expr: &anyMatcher{
-					line: 62, col: 9, offset: 1701,
+					line: 62, col: 9, offset: 1699,
 				},
 			},
 		},
@@ -749,7 +749,7 @@ func (p *parser) callonBool4() (interface{}, error) {
 }
 
 func (c *current) onNumber1() (interface{}, error) {
-	return core.String(string(c.text)).ToNumber()
+	return core.String(string(c.text)).Number()
 }
 
 func (p *parser) callonNumber1() (interface{}, error) {

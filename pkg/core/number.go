@@ -18,7 +18,6 @@ func (value Number) toDecimal() decimal.Decimal {
 	return d
 }
 
-func (value Number) ToString() String {
-	s := String(value.toDecimal().String())
-	return s
+func (value Number) String() string {
+	return value.toDecimal().String()
 }

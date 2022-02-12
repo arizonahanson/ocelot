@@ -46,7 +46,7 @@ Bool ←  "true" {
 }
 // literal real number like (-123.45e-67)
 Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
-  return core.String(string(c.text)).ToNumber()
+  return core.String(string(c.text)).Number()
 }
 // identifiers (like ϕa_2)
 Symbol ←  letter (letter / digit)* {
