@@ -59,7 +59,7 @@ Symbol ←  letter (letter / digit)* suffix? {
   return core.Symbol(string(c.text)), nil
 }
 // suffix
-suffix ← [!?]
+suffix ← [!?*]
 // integer part of Number
 digit ←  [0-9]
 // unicode letters, and underscore, in indentifiers

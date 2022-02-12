@@ -673,17 +673,17 @@ var g = &grammar{
 			pos:  position{line: 62, col: 1, offset: 1687},
 			expr: &charClassMatcher{
 				pos:        position{line: 62, col: 10, offset: 1698},
-				val:        "[!?]",
-				chars:      []rune{'!', '?'},
+				val:        "[!?*]",
+				chars:      []rune{'!', '?', '*'},
 				ignoreCase: false,
 				inverted:   false,
 			},
 		},
 		{
 			name: "digit",
-			pos:  position{line: 64, col: 1, offset: 1729},
+			pos:  position{line: 64, col: 1, offset: 1730},
 			expr: &charClassMatcher{
-				pos:        position{line: 64, col: 10, offset: 1740},
+				pos:        position{line: 64, col: 10, offset: 1741},
 				val:        "[0-9]",
 				ranges:     []rune{'0', '9'},
 				ignoreCase: false,
@@ -692,19 +692,19 @@ var g = &grammar{
 		},
 		{
 			name: "letter",
-			pos:  position{line: 66, col: 1, offset: 1798},
+			pos:  position{line: 66, col: 1, offset: 1799},
 			expr: &choiceExpr{
-				pos: position{line: 66, col: 11, offset: 1810},
+				pos: position{line: 66, col: 11, offset: 1811},
 				alternatives: []interface{}{
 					&charClassMatcher{
-						pos:        position{line: 66, col: 11, offset: 1810},
+						pos:        position{line: 66, col: 11, offset: 1811},
 						val:        "[\\p{L}]",
 						classes:    []*unicode.RangeTable{rangeTable("L")},
 						ignoreCase: false,
 						inverted:   false,
 					},
 					&litMatcher{
-						pos:        position{line: 66, col: 21, offset: 1820},
+						pos:        position{line: 66, col: 21, offset: 1821},
 						val:        "_",
 						ignoreCase: false,
 						want:       "\"_\"",
@@ -715,19 +715,19 @@ var g = &grammar{
 		{
 			name:        "_",
 			displayName: "\"whitespace\"",
-			pos:         position{line: 68, col: 1, offset: 1876},
+			pos:         position{line: 68, col: 1, offset: 1877},
 			expr: &choiceExpr{
-				pos: position{line: 68, col: 19, offset: 1896},
+				pos: position{line: 68, col: 19, offset: 1897},
 				alternatives: []interface{}{
 					&charClassMatcher{
-						pos:        position{line: 68, col: 19, offset: 1896},
+						pos:        position{line: 68, col: 19, offset: 1897},
 						val:        "[\\p{Z}]",
 						classes:    []*unicode.RangeTable{rangeTable("Z")},
 						ignoreCase: false,
 						inverted:   false,
 					},
 					&charClassMatcher{
-						pos:        position{line: 68, col: 29, offset: 1906},
+						pos:        position{line: 68, col: 29, offset: 1907},
 						val:        "[\\p{C}]",
 						classes:    []*unicode.RangeTable{rangeTable("C")},
 						ignoreCase: false,
@@ -738,11 +738,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 70, col: 1, offset: 1929},
+			pos:  position{line: 70, col: 1, offset: 1930},
 			expr: &notExpr{
-				pos: position{line: 70, col: 8, offset: 1938},
+				pos: position{line: 70, col: 8, offset: 1939},
 				expr: &anyMatcher{
-					line: 70, col: 9, offset: 1939,
+					line: 70, col: 9, offset: 1940,
 				},
 			},
 		},
