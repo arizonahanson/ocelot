@@ -10,7 +10,7 @@ func (value List) String() string {
 		if i > 0 {
 			result += " "
 		}
-		result += fmt.Sprintf("%s", item)
+		result += fmt.Sprintf("%v", item)
 	}
 	return result + ")"
 }
