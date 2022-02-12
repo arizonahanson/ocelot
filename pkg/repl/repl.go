@@ -25,11 +25,12 @@ func Print(ast core.Any) {
 }
 
 func Repl(prompt string) {
+	env := core.BaseEnv()
 	executor := func(in string) {
 		if in == "" {
 			return
 		}
-		out, err := ocelot.Eval(in)
+		out, err := ocelot.Eval(in, &env)
 		if err != nil {
 			fmt.Println(err)
 			return

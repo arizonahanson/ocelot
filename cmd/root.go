@@ -27,6 +27,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/starlight/ocelot/pkg/core"
 	"github.com/starlight/ocelot/pkg/ocelot"
 	"github.com/starlight/ocelot/pkg/repl"
 )
@@ -47,7 +48,8 @@ var rootCmd = &cobra.Command{
 		if len(args) == 0 {
 			repl.Repl(">>> ")
 		} else {
-			out, err := ocelot.Eval(strings.Join(args, " "))
+			env := core.BaseEnv()
+			out, err := ocelot.Eval(strings.Join(args, " "), &env)
 			cobra.CheckErr(err)
 			repl.Print(out)
 		}
