@@ -27,6 +27,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/starlight/ocelot/pkg/ocelot"
 	"github.com/starlight/ocelot/pkg/repl"
 )
 
@@ -40,10 +41,16 @@ var rootCmd = &cobra.Command{
 	Use:     "ocelot",
 	Short:   "Open command-line trading",
 	Long:    `An open command-line trading system written in Go.`,
-	Args:    cobra.MaximumNArgs(0),
+	Args:    cobra.ArbitraryArgs,
 	Version: version,
 	Run: func(cmd *cobra.Command, args []string) {
-		repl.Repl(">>> ")
+		if len(args) == 0 {
+			repl.Repl(">>> ")
+		} else {
+			out, err := ocelot.Eval(strings.Join(args, " "))
+			cobra.CheckErr(err)
+			repl.Print(out)
+		}
 	},
 }
 

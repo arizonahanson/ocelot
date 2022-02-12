@@ -13,7 +13,6 @@ func completer(d goprompt.Document) []goprompt.Suggest {
 }
 
 func Print(ast core.Any) {
-	fmt.Print("↪ ")
 	switch ast.(type) {
 	default:
 		fmt.Println(ast)
@@ -26,17 +25,17 @@ func Print(ast core.Any) {
 }
 
 func Repl(prompt string) {
-	env := core.GetEnv(make(map[string]interface{}))
 	executor := func(in string) {
 		if in == "" {
 			return
 		}
-		out, err := ocelot.Eval(in, env)
+		out, err := ocelot.Eval(in)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		// print
+		fmt.Print("↪ ")
 		Print(out)
 	}
 	// prompt
