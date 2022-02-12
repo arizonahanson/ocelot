@@ -13,6 +13,9 @@ func completer(d goprompt.Document) []goprompt.Suggest {
 }
 
 func executor(in string) {
+	if in == "" {
+		return
+	}
 	out, err := ocelot.Eval(in)
 	if err != nil {
 		fmt.Println(err)
