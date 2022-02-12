@@ -1,8 +1,6 @@
 package ocelot
 
 import (
-	"fmt"
-
 	"github.com/starlight/ocelot/internal/parser"
 	"github.com/starlight/ocelot/pkg/core"
 )
@@ -12,12 +10,12 @@ func Eval(in string) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	env := core.GetEnv(make(map[string]interface{}))
+	env := core.BaseEnv()
 	any, err := eval_ast(ast, env)
 	return any, err
 }
 
-func eval_ast(ast core.Any, env core.Environment) (core.Any, error) {
+func eval_ast(ast core.Any, env core.Env) (core.Any, error) {
 	switch ast.(type) {
 	default:
 		return ast, nil
@@ -30,7 +28,11 @@ func eval_ast(ast core.Any, env core.Environment) (core.Any, error) {
 	}
 }
 
-func onVector(ast core.Vector, env core.Environment) (core.Vector, error) {
+func onSymbol(ast core.Symbol, env core.Env) (core.Any, error) {
+	return env.Get(string(ast))
+}
+
+func onVector(ast core.Vector, env core.Env) (core.Vector, error) {
 	res := []core.Any{}
 	for _, item := range ast {
 		any, err := eval_ast(item, env)
@@ -42,7 +44,7 @@ func onVector(ast core.Vector, env core.Environment) (core.Vector, error) {
 	return core.Vector(res), nil
 }
 
-func onList(ast core.List, env core.Environment) (core.Any, error) {
+func onList(ast core.List, env core.Env) (core.Any, error) {
 	res := []core.Any{}
 	for _, item := range ast {
 		any, err := eval_ast(item, env)
@@ -64,15 +66,7 @@ func onList(ast core.List, env core.Environment) (core.Any, error) {
 	return core.List(res), nil
 }
 
-func apply(fn core.Function, args []core.Any, env core.Environment) (core.Any, error) {
+func apply(fn core.Function, args []core.Any, env core.Env) (core.Any, error) {
 	// TODO env?
 	return fn(args...)
-}
-
-func onSymbol(ast core.Symbol, env core.Environment) (core.Any, error) {
-	val := env[ast]
-	if val == nil {
-		return nil, fmt.Errorf("not found: %s", ast)
-	}
-	return val, nil
 }
