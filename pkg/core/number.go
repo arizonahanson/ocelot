@@ -21,3 +21,9 @@ func (value Number) toDecimal() decimal.Decimal {
 func (value Number) String() string {
 	return value.toDecimal().String()
 }
+
+func (value Number) Add(arg Number) Number {
+	return Number(value.toDecimal().Add(arg.toDecimal()))
+}
+
+var Zero Number = Number(decimal.Zero)

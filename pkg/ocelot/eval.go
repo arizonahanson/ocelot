@@ -7,7 +7,7 @@ import (
 	"github.com/starlight/ocelot/pkg/core"
 )
 
-func Eval(in string, env map[string]interface{}) (core.Any, error) {
+func Eval(in string, env core.Environment) (core.Any, error) {
 	ast, err := parser.Parse("Eval", []byte(in))
 	if err != nil {
 		return nil, err
@@ -16,12 +16,12 @@ func Eval(in string, env map[string]interface{}) (core.Any, error) {
 	return any, err
 }
 
-func eval_ast(ast core.Any, env map[string]interface{}) (core.Any, error) {
+func eval_ast(ast core.Any, env core.Environment) (core.Any, error) {
 	switch ast.(type) {
 	default:
 		return ast, nil
 	case core.Symbol:
-		val := env[string(ast.(core.Symbol))]
+		val := env[ast.(core.Symbol)]
 		if val == nil {
 			return nil, fmt.Errorf("not found: %s", ast)
 		}
