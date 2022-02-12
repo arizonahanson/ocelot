@@ -8,7 +8,7 @@ Module ←  expr:Expr EOF {
   return core.List(expr.([]core.Any)), nil
 }
 // expression list without parentheses
-Expr ←  _* first:Any rest:(_+ Any)* _* {
+Expr ←  _* first:Any? rest:(_+ Any)* _* {
   return join(first, rest, 1), nil
 }
 // parent `any` type
