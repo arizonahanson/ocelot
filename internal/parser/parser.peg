@@ -26,7 +26,7 @@ Vector ←  '[' expr:Expr ']' {
   return nil, errors.New("Vector not terminated")
 }
 // singletons
-atom ←  String / Nil / Bool / Number / Symbol
+atom ←  String / Symbol / Nil / Bool / Number
 // literal string
 String ←  '"' runeChr* '"' {
   return core.String(string(c.text)).Unquote()
@@ -55,9 +55,11 @@ Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
   return core.String(string(c.text)).Number()
 }
 // identifiers (like ϕa_2)
-Symbol ←  letter (letter / digit)* {
+Symbol ←  letter (letter / digit)* suffix? {
   return core.Symbol(string(c.text)), nil
 }
+// suffix
+suffix ← [!?]
 // integer part of Number
 digit ←  [0-9]
 // unicode letters, and underscore, in indentifiers
