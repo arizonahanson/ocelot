@@ -16,7 +16,7 @@ Any ←  List / atom
 // expression list
 List ←  '(' expr:Expr ')' {
   return expr, nil
-} / '(' expr !')' {
+} / '(' Expr !')' {
   return nil, errors.New("List not terminated")
 }
 // singletons

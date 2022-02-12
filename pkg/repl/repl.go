@@ -13,10 +13,16 @@ func completer(d goprompt.Document) []goprompt.Suggest {
 }
 
 func executor(in string) {
-	out := ocelot.Eval(in)
-	if out != core.String("") {
-		fmt.Println(out)
+	out, err := ocelot.Eval(in)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
+	ast := out.(core.List)
+	for _, node := range ast {
+		fmt.Printf("%s ", node)
+	}
+	fmt.Println("")
 }
 
 func Repl(prompt string) {

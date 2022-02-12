@@ -4,21 +4,21 @@ import "github.com/shopspring/decimal"
 
 type Number decimal.Decimal
 
-func numberFromString(value String) (*Number, error) {
+func numberFromString(value String) (Number, error) {
 	d, err := decimal.NewFromString(string(value))
 	if err != nil {
-		return nil, err
+		return Number(decimal.Zero), err
 	}
 	n := Number(d)
-	return &n, nil
+	return n, nil
 }
 
-func (value Number) toDecimal() *decimal.Decimal {
+func (value Number) toDecimal() decimal.Decimal {
 	d := decimal.Decimal(value)
-	return &d
+	return d
 }
 
-func (value Number) ToString() *String {
+func (value Number) ToString() String {
 	s := String(value.toDecimal().String())
-	return &s
+	return s
 }

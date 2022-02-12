@@ -171,7 +171,7 @@ var g = &grammar{
 								},
 								&ruleRefExpr{
 									pos:  position{line: 19, col: 9, offset: 378},
-									name: "expr",
+									name: "Expr",
 								},
 								&notExpr{
 									pos: position{line: 19, col: 14, offset: 383},
