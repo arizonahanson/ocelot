@@ -22,6 +22,7 @@ func executor(in string) {
 		return
 	}
 	ast := out.(core.List)
+	fmt.Print("↪ ")
 	for _, node := range ast {
 		fmt.Printf("%s ", node)
 	}
