@@ -5,19 +5,25 @@ import "github.com/starlight/ocelot/pkg/core"
 }
 // root of AST
 Module ←  expr:Expr EOF {
-  return expr, nil
+  return core.List(expr.([]core.Any)), nil
 }
 // expression list without parentheses
 Expr ←  _* first:Any rest:(_+ Any)* _* {
-  return core.List(join(first, rest, 1)), nil
+  return join(first, rest, 1), nil
 }
 // parent `any` type
-Any ←  List / atom
+Any ←  List / Vector / atom
 // expression list
 List ←  '(' expr:Expr ')' {
-  return expr, nil
+  return core.List(expr.([]core.Any)), nil
 } / '(' Expr !')' {
   return nil, errors.New("List not terminated")
+}
+// vector
+Vector ←  '[' expr:Expr ']' {
+  return core.Vector(expr.([]core.Any)), nil
+} / '[' Expr !']' {
+  return nil, errors.New("Vector not terminated")
 }
 // singletons
 atom ←  String / Nil / Bool / Number / Symbol
