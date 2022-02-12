@@ -13,6 +13,12 @@ func numberFromString(value String) (Number, error) {
 	return n, nil
 }
 
+func numberFromInt(value int64) Number {
+	d := decimal.NewFromInt(value)
+	n := Number(d)
+	return n
+}
+
 func (value Number) toDecimal() decimal.Decimal {
 	d := decimal.Decimal(value)
 	return d
@@ -24,6 +30,26 @@ func (value Number) String() string {
 
 func (value Number) Add(arg Number) Number {
 	return Number(value.toDecimal().Add(arg.toDecimal()))
+}
+
+func (value Number) Sub(arg Number) Number {
+	return Number(value.toDecimal().Sub(arg.toDecimal()))
+}
+
+func (value Number) Mul(arg Number) Number {
+	return Number(value.toDecimal().Mul(arg.toDecimal()))
+}
+
+func (value Number) Quot(arg Number, precision Number) Number {
+	p := precision.toDecimal().IntPart()
+	q, _ := value.toDecimal().QuoRem(arg.toDecimal(), int32(p))
+	return Number(q)
+}
+
+func (value Number) Rem(arg Number, precision Number) Number {
+	p := precision.toDecimal().IntPart()
+	_, r := value.toDecimal().QuoRem(arg.toDecimal(), int32(p))
+	return Number(r)
 }
 
 var Zero Number = Number(decimal.Zero)
