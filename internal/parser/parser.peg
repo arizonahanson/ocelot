@@ -26,7 +26,7 @@ Vector ←  '[' expr:Expr ']' {
   return nil, errors.New("Vector not terminated")
 }
 // singletons
-atom ←  String / Symbol / Nil / Bool / Number
+atom ←  String / Symbol / Number
 // literal string
 String ←  '"' runeChr* '"' {
   return core.String(string(c.text)).Unquote()
@@ -40,16 +40,6 @@ runeEsc ←  `\` ([abfnrtv"\\] /
            ('u' hexDigit hexDigit hexDigit hexDigit) /
            ('U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit))
 hexDigit ← [0-9a-f]i
-// literal nil
-Nil ←  "nil" {
-  return core.Nil{}, nil
-}
-// literal boolean
-Bool ←  "true" {
-  return core.Bool(true), nil
-} / "false" {
-  return core.Bool(false), nil
-}
 // literal real number like (-123.45e-67)
 Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
   return core.String(string(c.text)).Number()

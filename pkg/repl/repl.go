@@ -16,7 +16,11 @@ func executor(in string) {
 	if in == "" {
 		return
 	}
-	out, err := ocelot.Eval(in)
+	env := make(map[string]interface{})
+	env["true"] = core.Bool(true)
+	env["false"] = core.Bool(false)
+	env["nil"] = core.Nil{}
+	out, err := ocelot.Eval(in, env)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -24,7 +28,7 @@ func executor(in string) {
 	ast := out.(core.List)
 	fmt.Print("↪ ")
 	for _, node := range ast {
-		fmt.Printf("%s ", node)
+		fmt.Printf("%v ", node)
 	}
 	fmt.Println("")
 }
