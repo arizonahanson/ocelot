@@ -83,6 +83,46 @@ func letSpecial(ast core.List, env core.Env) (core.Any, error) {
 	return eval_ast(ast[2], newEnv)
 }
 
+func doSpecial(ast core.List, env core.Env) (core.Any, error) {
+	var result core.Any = core.Nil{}
+	for _, item := range ast[1:] {
+		val, err := eval_ast(item, env)
+		if err != nil {
+			return nil, err
+		}
+		result = val
+	}
+	return result, nil
+}
+
+func ifSpecial(ast core.List, env core.Env) (core.Any, error) {
+	if len(ast) < 3 {
+		return nil, fmt.Errorf("wrong number of parameters to 'if': %d", len(ast)-1)
+	}
+	cond, err := eval_ast(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	if isTruthy(cond) {
+		return eval_ast(ast[2], env)
+	}
+	if len(ast) == 4 {
+		return eval_ast(ast[3], env)
+	}
+	return core.Nil{}, nil
+}
+
+func isTruthy(any core.Any) bool {
+	switch any.(type) {
+	default:
+		return true
+	case core.Bool:
+		return bool(any.(core.Bool))
+	case core.Nil:
+		return false
+	}
+}
+
 func setPairs(pairs core.List, newEnv core.Env) error {
 	if len(pairs) < 2 {
 		return fmt.Errorf("missing parameter in let*")
@@ -112,13 +152,17 @@ func onList(ast core.List, env core.Env) (core.Any, error) {
 			break
 		case core.Symbol:
 			// check for special forms
-			switch ast[0].(core.Symbol) {
+			switch first.(core.Symbol) {
 			default:
 				break
 			case core.Symbol("def!"):
 				return defSpecial(ast, env)
 			case core.Symbol("let*"):
 				return letSpecial(ast, env)
+			case core.Symbol("do"):
+				return doSpecial(ast, env)
+			case core.Symbol("if"):
+				return ifSpecial(ast, env)
 			}
 		}
 	}

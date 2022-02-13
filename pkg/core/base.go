@@ -9,7 +9,7 @@ func BaseEnv() Env {
 	env := NewEnv(nil)
 	// boolean lit
 	env.Set("true", Bool(true))
-	env.Set("false", Bool(true))
+	env.Set("false", Bool(false))
 	// nil lit
 	env.Set("nil", Nil{})
 	// dynamic type
