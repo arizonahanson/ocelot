@@ -28,7 +28,7 @@ func BaseEnv() (*Env, error) {
 	}))
 	// addition
 	env.Set("add", Function(func(args []Any) (Any, error) {
-		result := Zero
+		result := numberFromInt(0)
 		for _, num := range args {
 			switch num.(type) {
 			default:
@@ -46,7 +46,7 @@ func BaseEnv() (*Env, error) {
 		for _, num := range args {
 			switch num.(type) {
 			default:
-				return Zero, fmt.Errorf("invalid type for 'mul': '%v'", num)
+				return numberFromInt(0), fmt.Errorf("invalid type for 'mul': '%v'", num)
 			case Number:
 				result = result.Mul(num.(Number))
 				break
@@ -56,11 +56,11 @@ func BaseEnv() (*Env, error) {
 	}))
 	// subtraction
 	env.Set("sub", Function(func(args []Any) (Any, error) {
-		result := Zero
+		result := numberFromInt(0)
 		for i, num := range args {
 			switch num.(type) {
 			default:
-				return Zero, fmt.Errorf("invalid type for 'sub': '%v'", num)
+				return numberFromInt(0), fmt.Errorf("invalid type for 'sub': '%v'", num)
 			case Number:
 				if i == 1 {
 					result = args[0].(Number)
@@ -74,12 +74,12 @@ func BaseEnv() (*Env, error) {
 	// quotient with precision
 	env.Set("quot", Function(func(args []Any) (Any, error) {
 		if len(args) != 3 {
-			return Zero, fmt.Errorf("quot requires 3 args, got %d", len(args))
+			return numberFromInt(0), fmt.Errorf("quot requires 3 args, got %d", len(args))
 		}
 		for _, num := range args {
 			switch num.(type) {
 			default:
-				return Zero, fmt.Errorf("invalid type for 'quot': '%v'", num)
+				return numberFromInt(0), fmt.Errorf("invalid type for 'quot': '%v'", num)
 			case Number:
 				break
 			}
@@ -108,12 +108,12 @@ func BaseEnv() (*Env, error) {
 	// remainder with precision
 	env.Set("rem", Function(func(args []Any) (Any, error) {
 		if len(args) != 3 {
-			return Zero, fmt.Errorf("rem requires 3 args, got %d", len(args))
+			return numberFromInt(0), fmt.Errorf("rem requires 3 args, got %d", len(args))
 		}
 		for _, num := range args {
 			switch num.(type) {
 			default:
-				return Zero, fmt.Errorf("invalid type for 'rem': '%v'", num)
+				return numberFromInt(0), fmt.Errorf("invalid type for 'rem': '%v'", num)
 			case Number:
 				break
 			}
@@ -127,7 +127,7 @@ func BaseEnv() (*Env, error) {
 		for _, num := range args {
 			switch num.(type) {
 			default:
-				return Zero, fmt.Errorf("invalid type for 'round': '%v'", num)
+				return numberFromInt(0), fmt.Errorf("invalid type for 'round': '%v'", num)
 			case Number:
 				break
 			}
@@ -150,7 +150,24 @@ func BaseEnv() (*Env, error) {
 		}
 		return Bool(true), nil
 	}))
+	env.Set("not", Function(func(args []Any) (Any, error) {
+		if len(args) > 1 {
+			return nil, fmt.Errorf("'not' expects one arg, got %d", len(args))
+		}
+		return Bool(!IsTruthy(args[0])), nil
+	}))
 	return env, nil
+}
+
+func IsTruthy(any Any) bool {
+	switch any.(type) {
+	default:
+		return true
+	case Bool:
+		return bool(any.(Bool))
+	case Nil:
+		return false
+	}
 }
 
 func isEqual(a Any, b Any) Bool {

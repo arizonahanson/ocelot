@@ -62,5 +62,3 @@ func (value Number) Round(precision Number) Number {
 	r := value.toDecimal().Round(int32(p))
 	return Number(r)
 }
-
-var Zero Number = Number(decimal.Zero)

@@ -106,24 +106,13 @@ func ifSpecial(ast core.List, env core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	if isTruthy(cond) {
+	if core.IsTruthy(cond) {
 		return eval_ast(ast[2], env)
 	}
 	if len(ast) == 4 {
 		return eval_ast(ast[3], env)
 	}
 	return core.Nil{}, nil
-}
-
-func isTruthy(any core.Any) bool {
-	switch any.(type) {
-	default:
-		return true
-	case core.Bool:
-		return bool(any.(core.Bool))
-	case core.Nil:
-		return false
-	}
 }
 
 func setPairs(pairs core.List, newEnv core.Env) error {
