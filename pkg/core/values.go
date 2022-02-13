@@ -16,14 +16,19 @@ func (value Nil) String() string {
 type List []Any
 
 func (value List) String() string {
-	result := "("
+	var result string
 	for i, item := range value {
-		if i > 0 {
+		if i != 0 {
 			result += " "
 		}
-		result += fmt.Sprintf("%v", item)
+		switch item.(type) {
+		default:
+			result += fmt.Sprintf("%v", item)
+		case List:
+			result += fmt.Sprintf("(%v)", item)
+		}
 	}
-	return result + ")"
+	return result
 }
 
 type Symbol string
@@ -54,5 +59,21 @@ func (value String) Unquote() (String, error) {
 }
 
 type Vector []Any
+
+func (value Vector) String() string {
+	var result string
+	for i, item := range value {
+		if i != 0 {
+			result += " "
+		}
+		switch item.(type) {
+		default:
+			result += fmt.Sprintf("%v", item)
+		case List:
+			result += fmt.Sprintf("(%v)", item)
+		}
+	}
+	return "[" + result + "]"
+}
 
 type Function func(args []Any) (Any, error)

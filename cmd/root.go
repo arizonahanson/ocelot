@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -46,13 +47,13 @@ var rootCmd = &cobra.Command{
 	Version: version,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			repl.Repl(">>> ")
+			repl.Repl("❱❱ ")
 		} else {
 			env, err := core.BaseEnv()
 			cobra.CheckErr(err)
 			out, err := ocelot.Eval(strings.Join(args, " "), env)
 			cobra.CheckErr(err)
-			repl.Print(out)
+			fmt.Println(out)
 		}
 	},
 }

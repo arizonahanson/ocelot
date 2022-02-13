@@ -12,18 +12,6 @@ func completer(d goprompt.Document) []goprompt.Suggest {
 	return []goprompt.Suggest{}
 }
 
-func Print(ast core.Any) {
-	switch ast.(type) {
-	default:
-		fmt.Println(ast)
-	case core.List:
-		for _, node := range ast.(core.List) {
-			fmt.Printf("%v ", node)
-		}
-		fmt.Println("")
-	}
-}
-
 func Repl(prompt string) error {
 	env, err := core.BaseEnv()
 	if err != nil {
@@ -38,9 +26,7 @@ func Repl(prompt string) error {
 			fmt.Println(err)
 			return
 		}
-		// print
-		fmt.Print("↪ ")
-		Print(out)
+		fmt.Println(out)
 	}
 	// prompt
 	p := goprompt.New(

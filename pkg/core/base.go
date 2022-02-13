@@ -135,10 +135,7 @@ func BaseEnv() (*Env, error) {
 		return (args[0].(Number)).Round(args[1].(Number)), nil
 	}))
 	env.Set("prn", Function(func(args []Any) (Any, error) {
-		for _, arg := range args {
-			fmt.Printf("%v ", arg)
-		}
-		fmt.Println("")
+		fmt.Println(List(args))
 		return Nil{}, nil
 	}))
 	env.Set("equal?", Function(func(args []Any) (Any, error) {
