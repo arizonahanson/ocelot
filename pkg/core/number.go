@@ -46,9 +46,20 @@ func (value Number) Quot(arg Number, precision Number) Number {
 	return Number(q)
 }
 
+func (value Number) Quot2(arg Number) Number {
+	q := value.toDecimal().Div(arg.toDecimal())
+	return Number(q)
+}
+
 func (value Number) Rem(arg Number, precision Number) Number {
 	p := precision.toDecimal().IntPart()
 	_, r := value.toDecimal().QuoRem(arg.toDecimal(), int32(p))
+	return Number(r)
+}
+
+func (value Number) Round(precision Number) Number {
+	p := precision.toDecimal().IntPart()
+	r := value.toDecimal().Round(int32(p))
 	return Number(r)
 }
 

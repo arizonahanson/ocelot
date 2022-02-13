@@ -83,6 +83,25 @@ func BaseEnv() Env {
 		}
 		return (args[0].(Number)).Quot((args[1].(Number)), (args[2].(Number))), nil
 	}))
+	// quotient with default precision
+	env.Set("quot*", Function(func(args ...Any) (Any, error) {
+		if len(args) == 0 {
+			return nil, fmt.Errorf("wrong number of args for 'quot*': 0")
+		}
+		result := numberFromInt(1)
+		for i, num := range args {
+			switch num.(type) {
+			default:
+				return nil, fmt.Errorf("invalid type for 'quot*': '%v'", num)
+			case Number:
+				if i == 1 {
+					result = args[0].(Number)
+				}
+				result = result.Quot2(num.(Number))
+			}
+		}
+		return result, nil
+	}))
 	// remainder with precision
 	env.Set("rem", Function(func(args ...Any) (Any, error) {
 		if len(args) != 3 {
@@ -96,7 +115,21 @@ func BaseEnv() Env {
 				break
 			}
 		}
-		return (args[0].(Number)).Rem((args[1].(Number)), (args[2].(Number))), nil
+		return (args[0].(Number)).Rem(args[1].(Number), args[2].(Number)), nil
+	}))
+	env.Set("round", Function(func(args ...Any) (Any, error) {
+		if len(args) != 2 {
+			return nil, fmt.Errorf("round requires 2 args, got %d", len(args))
+		}
+		for _, num := range args {
+			switch num.(type) {
+			default:
+				return Zero, fmt.Errorf("invalid type for 'round': '%v'", num)
+			case Number:
+				break
+			}
+		}
+		return (args[0].(Number)).Round(args[1].(Number)), nil
 	}))
 	return env
 }
