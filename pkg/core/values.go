@@ -55,4 +55,4 @@ func (value String) Unquote() (String, error) {
 
 type Vector []Any
 
-type Function func(args ...Any) (Any, error)
+type Function func(args []Any) (Any, error)

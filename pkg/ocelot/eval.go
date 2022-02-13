@@ -160,7 +160,7 @@ func fnStar(ast core.List, env core.Env) (core.Any, error) {
 	case core.List:
 		binds := ast[1].(core.List)
 		body := ast[2]
-		fn := func(args ...core.Any) (core.Any, error) {
+		fn := func(args []core.Any) (core.Any, error) {
 			newEnv, err := core.NewEnv(&env, binds, args)
 			if err != nil {
 				return nil, err
@@ -220,5 +220,5 @@ func onList(ast core.List, env core.Env) (core.Any, error) {
 }
 
 func apply(fn core.Function, args []core.Any, env core.Env) (core.Any, error) {
-	return fn(args...)
+	return fn(args)
 }
