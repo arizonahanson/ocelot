@@ -12,18 +12,14 @@ func Eval(in string, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	var e core.Env
 	if env == nil {
 		base, err := core.BaseEnv()
 		if err != nil {
 			return nil, err
 		}
-		e = *base
-	} else {
-		e = *env
+		env = base
 	}
-	any, err := eval_ast(ast, e)
-	return any, err
+	return eval_ast(ast, *env)
 }
 
 func eval_ast(ast core.Any, env core.Env) (core.Any, error) {
