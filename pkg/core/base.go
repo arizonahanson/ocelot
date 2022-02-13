@@ -5,8 +5,11 @@ import (
 	"reflect"
 )
 
-func BaseEnv() Env {
-	env := NewEnv(nil)
+func BaseEnv() (*Env, error) {
+	env, err := NewEnv(nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
 	// boolean lit
 	env.Set("true", Bool(true))
 	env.Set("false", Bool(false))
@@ -131,5 +134,5 @@ func BaseEnv() Env {
 		}
 		return (args[0].(Number)).Round(args[1].(Number)), nil
 	}))
-	return env
+	return env, nil
 }

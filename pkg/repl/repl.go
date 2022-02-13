@@ -24,13 +24,16 @@ func Print(ast core.Any) {
 	}
 }
 
-func Repl(prompt string) {
-	env := core.BaseEnv()
+func Repl(prompt string) error {
+	env, err := core.BaseEnv()
+	if err != nil {
+		return err
+	}
 	executor := func(in string) {
 		if in == "" {
 			return
 		}
-		out, err := ocelot.Eval(in, &env)
+		out, err := ocelot.Eval(in, env)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -46,4 +49,5 @@ func Repl(prompt string) {
 		goprompt.OptionPrefix(prompt),
 	)
 	p.Run()
+	return nil
 }

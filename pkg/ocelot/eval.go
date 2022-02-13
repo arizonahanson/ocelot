@@ -14,7 +14,11 @@ func Eval(in string, env *core.Env) (core.Any, error) {
 	}
 	var e core.Env
 	if env == nil {
-		e = core.BaseEnv()
+		base, err := core.BaseEnv()
+		if err != nil {
+			return nil, err
+		}
+		e = *base
 	} else {
 		e = *env
 	}
@@ -72,15 +76,18 @@ func letSpecial(ast core.List, env core.Env) (core.Any, error) {
 	if len(ast) != 3 {
 		return nil, fmt.Errorf("'let*' received wrong number of args: %d", len(ast)-1)
 	}
-	newEnv := core.NewEnv(&env)
+	newEnv, err := core.NewEnv(&env, nil, nil)
+	if err != nil {
+		return nil, err
+	}
 	switch ast[1].(type) {
 	default:
 		return nil, fmt.Errorf("first parameter to let* must be a list: %v", ast[1])
 	case core.List:
 		pairs := ast[1].(core.List)
-		setPairs(pairs, newEnv)
+		setPairs(pairs, *newEnv)
 	}
-	return eval_ast(ast[2], newEnv)
+	return eval_ast(ast[2], *newEnv)
 }
 
 func doSpecial(ast core.List, env core.Env) (core.Any, error) {
@@ -143,6 +150,27 @@ func setPairs(pairs core.List, newEnv core.Env) error {
 	return nil
 }
 
+func fnStar(ast core.List, env core.Env) (core.Any, error) {
+	if len(ast) < 3 {
+		return nil, fmt.Errorf("wrong number of arguments to 'fn*', got: %d", len(ast)-1)
+	}
+	switch ast[1].(type) {
+	default:
+		return nil, fmt.Errorf("wrong type for parameter list: %v", ast[1])
+	case core.List:
+		binds := ast[1].(core.List)
+		body := ast[2]
+		fn := func(args ...core.Any) (core.Any, error) {
+			newEnv, err := core.NewEnv(&env, binds, args)
+			if err != nil {
+				return nil, err
+			}
+			return eval_ast(body, *newEnv)
+		}
+		return core.Function(fn), nil
+	}
+}
+
 func onList(ast core.List, env core.Env) (core.Any, error) {
 	res := []core.Any{}
 	if len(ast) > 0 {
@@ -163,6 +191,8 @@ func onList(ast core.List, env core.Env) (core.Any, error) {
 				return doSpecial(ast, env)
 			case core.Symbol("if"):
 				return ifSpecial(ast, env)
+			case core.Symbol("fn*"):
+				return fnStar(ast, env)
 			}
 		}
 	}

@@ -48,8 +48,9 @@ var rootCmd = &cobra.Command{
 		if len(args) == 0 {
 			repl.Repl(">>> ")
 		} else {
-			env := core.BaseEnv()
-			out, err := ocelot.Eval(strings.Join(args, " "), &env)
+			env, err := core.BaseEnv()
+			cobra.CheckErr(err)
+			out, err := ocelot.Eval(strings.Join(args, " "), env)
 			cobra.CheckErr(err)
 			repl.Print(out)
 		}
