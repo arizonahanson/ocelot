@@ -51,6 +51,58 @@ func onVector(ast core.Vector, env core.Env) (core.Vector, error) {
 	return core.Vector(res), nil
 }
 
+func defSpecial(ast core.List, env core.Env) (core.Any, error) {
+	if len(ast) != 3 {
+		return nil, fmt.Errorf("'def!' received wrong number of args: %d", len(ast)-1)
+	}
+	switch ast[1].(type) {
+	default:
+		return nil, fmt.Errorf("first parameter to def! must be a symbol: %s", ast[1])
+	case core.Symbol:
+		val, err := eval_ast(ast[2], env)
+		if err != nil {
+			return nil, err
+		}
+		env.Set(ast[1].(core.Symbol), val)
+		return val, nil
+	}
+}
+
+func letSpecial(ast core.List, env core.Env) (core.Any, error) {
+	if len(ast) != 3 {
+		return nil, fmt.Errorf("'let*' received wrong number of args: %d", len(ast)-1)
+	}
+	newEnv := core.NewEnv(&env)
+	switch ast[1].(type) {
+	default:
+		return nil, fmt.Errorf("first parameter to let* must be a list: %v", ast[1])
+	case core.List:
+		pairs := ast[1].(core.List)
+		setPairs(pairs, newEnv)
+	}
+	return eval_ast(ast[2], newEnv)
+}
+
+func setPairs(pairs core.List, newEnv core.Env) error {
+	if len(pairs) < 2 {
+		return fmt.Errorf("missing parameter in let*")
+	}
+	switch pairs[0].(type) {
+	default:
+		return fmt.Errorf("non-symbol parameter in let*: %v", pairs[0])
+	case core.Symbol:
+		val, err := eval_ast(pairs[1], newEnv)
+		if err != nil {
+			return err
+		}
+		newEnv.Set(pairs[0].(core.Symbol), val)
+		if len(pairs) > 2 {
+			setPairs(pairs[2:], newEnv)
+		}
+	}
+	return nil
+}
+
 func onList(ast core.List, env core.Env) (core.Any, error) {
 	res := []core.Any{}
 	if len(ast) > 0 {
@@ -64,20 +116,9 @@ func onList(ast core.List, env core.Env) (core.Any, error) {
 			default:
 				break
 			case core.Symbol("def!"):
-				if len(ast) != 3 {
-					return nil, fmt.Errorf("'def!' received wrong number of args: %d", len(ast)-1)
-				}
-				switch ast[1].(type) {
-				default:
-					return nil, fmt.Errorf("first parameter to def! must be a symbol: %s", ast[1])
-				case core.Symbol:
-					val, err := eval_ast(ast[2], env)
-					if err != nil {
-						return nil, err
-					}
-					env.Set(ast[1].(core.Symbol), val)
-					return val, nil
-				}
+				return defSpecial(ast, env)
+			case core.Symbol("let*"):
+				return letSpecial(ast, env)
 			}
 		}
 	}
@@ -105,6 +146,5 @@ func onList(ast core.List, env core.Env) (core.Any, error) {
 }
 
 func apply(fn core.Function, args []core.Any, env core.Env) (core.Any, error) {
-	// TODO env?
 	return fn(args...)
 }
