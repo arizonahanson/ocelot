@@ -138,7 +138,7 @@ func BaseEnv() (*Env, error) {
 		fmt.Println(List(args))
 		return Nil{}, nil
 	}))
-	env.Set("equal?", Function(func(args []Any) (Any, error) {
+	env.Set("eq?", Function(func(args []Any) (Any, error) {
 		if len(args) < 2 {
 			return nil, fmt.Errorf("'equal?' expects at least 2 args, got %d", len(args))
 		}
@@ -156,7 +156,52 @@ func BaseEnv() (*Env, error) {
 		}
 		return Bool(!IsTruthy(args[0])), nil
 	}))
+	env.Set("lt?", Function(func(args []Any) (Any, error) {
+		if len(args) != 2 {
+			return nil, fmt.Errorf("'lt?' expects two args, got %d", len(args))
+		}
+		if !isNumber(args[0]) || !isNumber(args[1]) {
+			return nil, fmt.Errorf("'lt?' only works with numbers: %s, %s", args[0], args[1])
+		}
+		return Bool(args[0].(Number).toDecimal().LessThan(args[1].(Number).toDecimal())), nil
+	}))
+	env.Set("lteq?", Function(func(args []Any) (Any, error) {
+		if len(args) != 2 {
+			return nil, fmt.Errorf("'lteq?' expects two args, got %d", len(args))
+		}
+		if !isNumber(args[0]) || !isNumber(args[1]) {
+			return nil, fmt.Errorf("'lteq?' only works with numbers: %s, %s", args[0], args[1])
+		}
+		return Bool(args[0].(Number).toDecimal().LessThanOrEqual(args[1].(Number).toDecimal())), nil
+	}))
+	env.Set("gt?", Function(func(args []Any) (Any, error) {
+		if len(args) != 2 {
+			return nil, fmt.Errorf("'gt?' expects two args, got %d", len(args))
+		}
+		if !isNumber(args[0]) || !isNumber(args[1]) {
+			return nil, fmt.Errorf("'gt?' only works with numbers: %s, %s", args[0], args[1])
+		}
+		return Bool(args[0].(Number).toDecimal().GreaterThan(args[1].(Number).toDecimal())), nil
+	}))
+	env.Set("gteq?", Function(func(args []Any) (Any, error) {
+		if len(args) != 2 {
+			return nil, fmt.Errorf("'gteq?' expects two args, got %d", len(args))
+		}
+		if !isNumber(args[0]) || !isNumber(args[1]) {
+			return nil, fmt.Errorf("'gteq?' only works with numbers: %s, %s", args[0], args[1])
+		}
+		return Bool(args[0].(Number).toDecimal().GreaterThanOrEqual(args[1].(Number).toDecimal())), nil
+	}))
 	return env, nil
+}
+
+func isNumber(any Any) bool {
+	switch any.(type) {
+	default:
+		return false
+	case Number:
+		return true
+	}
 }
 
 func IsTruthy(any Any) bool {
