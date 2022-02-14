@@ -184,15 +184,63 @@ func BaseEnv() (*Env, error) {
 		return Bool(args[0].(Number).toDecimal().GreaterThan(args[1].(Number).toDecimal())), nil
 	}))
 	env.Set("gteq?", Function(func(args []Any) (Any, error) {
-		if len(args) != 2 {
-			return nil, fmt.Errorf("'gteq?' expects two args, got %d", len(args))
+		err := expectNArgs("gteq?", 2, args)
+		if err != nil {
+			return nil, err
 		}
 		if !isNumber(args[0]) || !isNumber(args[1]) {
 			return nil, fmt.Errorf("'gteq?' only works with numbers: %s, %s", args[0], args[1])
 		}
 		return Bool(args[0].(Number).toDecimal().GreaterThanOrEqual(args[1].(Number).toDecimal())), nil
 	}))
+	env.Set("list", Function(func(args []Any) (Any, error) {
+		return List(args), nil
+	}))
+	env.Set("list?", Function(func(args []Any) (Any, error) {
+		err := expectNArgs("list?", 1, args)
+		if err != nil {
+			return nil, err
+		}
+		switch args[0].(type) {
+		default:
+			return Bool(false), nil
+		case List:
+			return Bool(true), nil
+		}
+	}))
+	env.Set("empty?", Function(func(args []Any) (Any, error) {
+		err := expectNArgs("empty?", 1, args)
+		if err != nil {
+			return nil, err
+		}
+		switch args[0].(type) {
+		default:
+			return nil, fmt.Errorf("'empty?' works on lists: %v", args[0])
+		case List:
+			return Bool(len(args[0].(List)) == 0), nil
+		}
+	}))
+	env.Set("count", Function(func(args []Any) (Any, error) {
+		err := expectNArgs("count", 1, args)
+		if err != nil {
+			return nil, err
+		}
+		switch args[0].(type) {
+		default:
+			return nil, fmt.Errorf("'count' works on lists: %v", args[0])
+		case List:
+			return numberFromInt(int64(len(args[0].(List)))), nil
+		}
+	}))
+
 	return env, nil
+}
+
+func expectNArgs(name string, num int, args []Any) error {
+	if len(args) != num {
+		return fmt.Errorf("'%s' expects %d arg(s), got %d", name, num, len(args))
+	}
+	return nil
 }
 
 func isNumber(any Any) bool {
