@@ -19,46 +19,29 @@ func numberFromInt(value int64) Number {
 	return n
 }
 
-func (value Number) toDecimal() decimal.Decimal {
+func (value Number) Decimal() decimal.Decimal {
 	d := decimal.Decimal(value)
 	return d
 }
 
 func (value Number) String() string {
-	return value.toDecimal().String()
-}
-
-func (value Number) Add(arg Number) Number {
-	return Number(value.toDecimal().Add(arg.toDecimal()))
-}
-
-func (value Number) Sub(arg Number) Number {
-	return Number(value.toDecimal().Sub(arg.toDecimal()))
-}
-
-func (value Number) Mul(arg Number) Number {
-	return Number(value.toDecimal().Mul(arg.toDecimal()))
+	return value.Decimal().String()
 }
 
 func (value Number) Quot(arg Number, precision Number) Number {
-	p := precision.toDecimal().IntPart()
-	q, _ := value.toDecimal().QuoRem(arg.toDecimal(), int32(p))
-	return Number(q)
-}
-
-func (value Number) Quot2(arg Number) Number {
-	q := value.toDecimal().Div(arg.toDecimal())
+	p := precision.Decimal().IntPart()
+	q, _ := value.Decimal().QuoRem(arg.Decimal(), int32(p))
 	return Number(q)
 }
 
 func (value Number) Rem(arg Number, precision Number) Number {
-	p := precision.toDecimal().IntPart()
-	_, r := value.toDecimal().QuoRem(arg.toDecimal(), int32(p))
+	p := precision.Decimal().IntPart()
+	_, r := value.Decimal().QuoRem(arg.Decimal(), int32(p))
 	return Number(r)
 }
 
 func (value Number) Round(precision Number) Number {
-	p := precision.toDecimal().IntPart()
-	r := value.toDecimal().Round(int32(p))
+	p := precision.Decimal().IntPart()
+	r := value.Decimal().Round(int32(p))
 	return Number(r)
 }

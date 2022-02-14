@@ -34,7 +34,7 @@ func BaseEnv() (*Env, error) {
 			default:
 				return result, fmt.Errorf("invalid type for 'add': '%v'", num)
 			case Number:
-				result = result.Add(num.(Number))
+				result = Number(result.Decimal().Add(num.(Number).Decimal()))
 				break
 			}
 		}
@@ -48,7 +48,7 @@ func BaseEnv() (*Env, error) {
 			default:
 				return numberFromInt(0), fmt.Errorf("invalid type for 'mul': '%v'", num)
 			case Number:
-				result = result.Mul(num.(Number))
+				result = Number(result.Decimal().Mul(num.(Number).Decimal()))
 				break
 			}
 		}
@@ -65,7 +65,7 @@ func BaseEnv() (*Env, error) {
 				if i == 1 {
 					result = args[0].(Number)
 				}
-				result = result.Sub(num.(Number))
+				result = Number(result.Decimal().Sub(num.(Number).Decimal()))
 				break
 			}
 		}
@@ -100,7 +100,7 @@ func BaseEnv() (*Env, error) {
 				if i == 1 {
 					result = args[0].(Number)
 				}
-				result = result.Quot2(num.(Number))
+				result = Number(result.Decimal().Div(num.(Number).Decimal()))
 			}
 		}
 		return result, nil
@@ -163,7 +163,7 @@ func BaseEnv() (*Env, error) {
 		if !isNumber(args[0]) || !isNumber(args[1]) {
 			return nil, fmt.Errorf("'lt?' only works with numbers: %s, %s", args[0], args[1])
 		}
-		return Bool(args[0].(Number).toDecimal().LessThan(args[1].(Number).toDecimal())), nil
+		return Bool(args[0].(Number).Decimal().LessThan(args[1].(Number).Decimal())), nil
 	}))
 	env.Set("lteq?", Function(func(args []Any) (Any, error) {
 		if len(args) != 2 {
@@ -172,7 +172,7 @@ func BaseEnv() (*Env, error) {
 		if !isNumber(args[0]) || !isNumber(args[1]) {
 			return nil, fmt.Errorf("'lteq?' only works with numbers: %s, %s", args[0], args[1])
 		}
-		return Bool(args[0].(Number).toDecimal().LessThanOrEqual(args[1].(Number).toDecimal())), nil
+		return Bool(args[0].(Number).Decimal().LessThanOrEqual(args[1].(Number).Decimal())), nil
 	}))
 	env.Set("gt?", Function(func(args []Any) (Any, error) {
 		if len(args) != 2 {
@@ -181,7 +181,7 @@ func BaseEnv() (*Env, error) {
 		if !isNumber(args[0]) || !isNumber(args[1]) {
 			return nil, fmt.Errorf("'gt?' only works with numbers: %s, %s", args[0], args[1])
 		}
-		return Bool(args[0].(Number).toDecimal().GreaterThan(args[1].(Number).toDecimal())), nil
+		return Bool(args[0].(Number).Decimal().GreaterThan(args[1].(Number).Decimal())), nil
 	}))
 	env.Set("gteq?", Function(func(args []Any) (Any, error) {
 		err := expectNArgs("gteq?", 2, args)
@@ -191,7 +191,7 @@ func BaseEnv() (*Env, error) {
 		if !isNumber(args[0]) || !isNumber(args[1]) {
 			return nil, fmt.Errorf("'gteq?' only works with numbers: %s, %s", args[0], args[1])
 		}
-		return Bool(args[0].(Number).toDecimal().GreaterThanOrEqual(args[1].(Number).toDecimal())), nil
+		return Bool(args[0].(Number).Decimal().GreaterThanOrEqual(args[1].(Number).Decimal())), nil
 	}))
 	env.Set("list", Function(func(args []Any) (Any, error) {
 		return List(args), nil
@@ -291,6 +291,6 @@ func isEqual(a Any, b Any) Bool {
 		}
 		return Bool(res)
 	case Number:
-		return Bool(a.(Number).toDecimal().Equals(b.(Number).toDecimal()))
+		return Bool(a.(Number).Decimal().Equals(b.(Number).Decimal()))
 	}
 }

@@ -197,13 +197,9 @@ func onList(ast core.List, env core.Env) (core.Any, error) {
 			return core.List(res), nil
 		case core.Function:
 			fn := first.(core.Function)
-			return apply(fn, res[1:], env)
+			return fn(res[1:])
 		}
 	}
 	// empty list
 	return core.List(res), nil
-}
-
-func apply(fn core.Function, args []core.Any, env core.Env) (core.Any, error) {
-	return fn(args)
 }
