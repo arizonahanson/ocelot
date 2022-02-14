@@ -30,7 +30,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/starlight/ocelot/pkg/core"
 	"github.com/starlight/ocelot/pkg/ocelot"
-	"github.com/starlight/ocelot/pkg/repl"
 )
 
 var (
@@ -47,7 +46,7 @@ var rootCmd = &cobra.Command{
 	Version: version,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			repl.Repl("❱❱ ")
+			ocelot.Repl("❱❱ ")
 		} else {
 			env, err := core.BaseEnv()
 			cobra.CheckErr(err)

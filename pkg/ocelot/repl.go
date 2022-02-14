@@ -1,11 +1,10 @@
-package repl
+package ocelot
 
 import (
 	"fmt"
 
 	goprompt "github.com/c-bata/go-prompt"
 	"github.com/starlight/ocelot/pkg/core"
-	"github.com/starlight/ocelot/pkg/ocelot"
 )
 
 func completer(d goprompt.Document) []goprompt.Suggest {
@@ -21,7 +20,7 @@ func Repl(prompt string) error {
 		if in == "" {
 			return
 		}
-		out, err := ocelot.Eval(in, env)
+		out, err := Eval(in, env)
 		if err != nil {
 			fmt.Println(err)
 			return
