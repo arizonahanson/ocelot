@@ -28,7 +28,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/starlight/ocelot/pkg/core"
+	"github.com/starlight/ocelot/pkg/base"
 	"github.com/starlight/ocelot/pkg/ocelot"
 )
 
@@ -48,7 +48,7 @@ var rootCmd = &cobra.Command{
 		if len(args) == 0 {
 			ocelot.Repl("❱❱ ")
 		} else {
-			env, err := core.BaseEnv()
+			env, err := base.BaseEnv()
 			cobra.CheckErr(err)
 			out, err := ocelot.Eval(strings.Join(args, " "), env)
 			cobra.CheckErr(err)
