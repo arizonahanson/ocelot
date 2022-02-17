@@ -23,8 +23,6 @@ type Bool bool
 
 type Number decimal.Decimal
 
-type Function func(args []Any) (Any, error)
-
 // parse quoted, escaped string
 func (val String) Unquote() (String, error) {
 	str, err := strconv.Unquote(string(val))

@@ -19,6 +19,8 @@ func EvalAst(ast core.Any, env Env) (core.Any, error) {
 	}
 }
 
+type Function func(args []core.Any) (core.Any, error)
+
 func onList(ast core.List, env Env) (core.Any, error) {
 	res := []core.Any{}
 	if len(ast) > 0 {
@@ -58,8 +60,8 @@ func onList(ast core.List, env Env) (core.Any, error) {
 		switch first.(type) {
 		default:
 			return core.List(res), nil
-		case core.Function:
-			fn := first.(core.Function)
+		case Function:
+			fn := first.(Function)
 			return fn(res[1:])
 		}
 	}
@@ -180,6 +182,6 @@ func fnStar(ast core.List, env Env) (core.Any, error) {
 			}
 			return EvalAst(body, *newEnv)
 		}
-		return core.Function(fn), nil
+		return Function(fn), nil
 	}
 }
