@@ -12,14 +12,14 @@ func EvalAst(ast core.Any, env Env) (core.Any, error) {
 	case core.Symbol:
 		return env.Get(ast.(core.Symbol))
 	case core.List:
-		eval := Function(evalList).trampoline()
+		eval := Function(evalList).Trampoline()
 		return eval(ast.(core.List), env)
 	case core.Vector:
 		return evalVector(ast.(core.Vector), env)
 	}
 }
 
-func evalList(ast []core.Any, env Env) (core.Any, error) {
+func evalList(ast core.List, env Env) (core.Any, error) {
 	res := []core.Any{}
 	for i, item := range ast {
 		if i == 0 {
@@ -47,7 +47,7 @@ func evalList(ast []core.Any, env Env) (core.Any, error) {
 				case Function:
 					// call function (unevaluated ast) & return
 					fn := val.(Function)
-					return fn.thunk(ast, env), nil
+					return fn.ThunkCall(ast, env), nil
 				}
 			}
 		} else {
