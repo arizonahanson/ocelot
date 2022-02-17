@@ -53,3 +53,23 @@ func (env Env) Get(key core.Symbol) (core.Any, error) {
 	}
 	return value, nil
 }
+
+func (env Env) SetPairs(pairs core.List) error {
+	if len(pairs) < 2 {
+		return fmt.Errorf("missing parameter in let*")
+	}
+	switch pairs[0].(type) {
+	default:
+		return fmt.Errorf("non-symbol parameter in let*: %v", pairs[0])
+	case core.Symbol:
+		val, err := EvalAst(pairs[1], env)
+		if err != nil {
+			return err
+		}
+		env.Set(pairs[0].(core.Symbol), val)
+		if len(pairs) > 2 {
+			env.SetPairs(pairs[2:])
+		}
+	}
+	return nil
+}
