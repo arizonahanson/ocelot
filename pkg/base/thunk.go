@@ -2,15 +2,17 @@ package base
 
 import "github.com/starlight/ocelot/pkg/core"
 
+type Function func(args []core.Any, env Env) (core.Any, error)
+
 type Thunk func() (core.Any, error)
 
-func thunk(fn Function, args []core.Any, env Env) Thunk {
+func (fn Function) thunk(args []core.Any, env Env) Thunk {
 	return func() (core.Any, error) {
 		return fn(args, env)
 	}
 }
 
-func trampoline(fn Function) Function {
+func (fn Function) trampoline() Function {
 	return func(args []core.Any, env Env) (core.Any, error) {
 		res, err := fn(args, env)
 		if err != nil {

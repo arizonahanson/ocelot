@@ -12,15 +12,14 @@ func EvalAst(ast core.Any, env Env) (core.Any, error) {
 	case core.Symbol:
 		return env.Get(ast.(core.Symbol))
 	case core.List:
-		return onList(ast.(core.List), env)
+		eval := Function(evalList).trampoline()
+		return eval(ast.(core.List), env)
 	case core.Vector:
-		return onVector(ast.(core.Vector), env)
+		return evalVector(ast.(core.Vector), env)
 	}
 }
 
-type Function func(args []core.Any, env Env) (core.Any, error)
-
-func onList(ast core.List, env Env) (core.Any, error) {
+func evalList(ast []core.Any, env Env) (core.Any, error) {
 	res := []core.Any{}
 	for i, item := range ast {
 		if i == 0 {
@@ -46,9 +45,9 @@ func onList(ast core.List, env Env) (core.Any, error) {
 					res = append(res, val)
 					break
 				case Function:
-					// call function (unevaluated params) & return
+					// call function (unevaluated ast) & return
 					fn := val.(Function)
-					return fn(ast[1:], env)
+					return fn.thunk(ast, env), nil
 				}
 			}
 		} else {
@@ -64,7 +63,7 @@ func onList(ast core.List, env Env) (core.Any, error) {
 	return core.List(res), nil
 }
 
-func onVector(ast core.Vector, env Env) (core.Vector, error) {
+func evalVector(ast core.Vector, env Env) (core.Vector, error) {
 	res := []core.Any{}
 	for _, item := range ast {
 		any, err := EvalAst(item, env)
