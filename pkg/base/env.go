@@ -62,7 +62,7 @@ func (env Env) SetPairs(pairs core.List) error {
 	default:
 		return fmt.Errorf("non-symbol parameter in let*: %v", pairs[0])
 	case core.Symbol:
-		val, err := EvalAst(pairs[1], env)
+		val, err := Eval(pairs[1], env)
 		if err != nil {
 			return err
 		}

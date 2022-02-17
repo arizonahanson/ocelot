@@ -9,3 +9,5 @@ var Base = map[string]core.Any{
 	"true":  core.Bool(true),
 	"false": core.Bool(false),
 }
+
+type Function func(args core.List, env Env) (core.Any, error)

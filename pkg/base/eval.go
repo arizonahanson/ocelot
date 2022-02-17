@@ -4,7 +4,18 @@ import (
 	"github.com/starlight/ocelot/pkg/core"
 )
 
-func EvalAst(ast core.Any, env Env) (core.Any, error) {
+// trampoline eval for non tail-calls
+func Eval(ast core.Any, env Env) (core.Any, error) {
+	return EvalType(evalAny).Trampoline(ast, env)
+}
+
+// thunked eval for tail-calls
+func EvalTail(ast core.Any, env Env) core.Any {
+	return EvalType(evalAny).Thunk(ast, env)
+}
+
+// eval impl
+func evalAny(ast core.Any, env Env) (core.Any, error) {
 	switch ast.(type) {
 	default:
 		// String, Number
@@ -12,8 +23,7 @@ func EvalAst(ast core.Any, env Env) (core.Any, error) {
 	case core.Symbol:
 		return env.Get(ast.(core.Symbol))
 	case core.List:
-		eval := Function(evalList).Trampoline()
-		return eval(ast.(core.List), env)
+		return evalList(ast.(core.List), env)
 	case core.Vector:
 		return evalVector(ast.(core.Vector), env)
 	}
@@ -26,12 +36,7 @@ func evalList(ast core.List, env Env) (core.Any, error) {
 			// check for function symbols.
 			switch item.(type) {
 			default:
-				// first isn't symbol, eval
-				any, err := EvalAst(item, env)
-				if err != nil {
-					return nil, err
-				}
-				res = append(res, any)
+				// first isn't symbol
 				break
 			case core.Symbol:
 				// first is a symbol, get
@@ -43,21 +48,20 @@ func evalList(ast core.List, env Env) (core.Any, error) {
 				default:
 					// not a function, append
 					res = append(res, val)
-					break
+					continue
 				case Function:
 					// call function (unevaluated ast) & return
 					fn := val.(Function)
-					return fn.ThunkCall(ast, env), nil
+					return fn(ast, env)
 				}
 			}
-		} else {
-			// default list resolution for rest
-			any, err := EvalAst(item, env)
-			if err != nil {
-				return nil, err
-			}
-			res = append(res, any)
 		}
+		// default list resolution for rest
+		any, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, any)
 	}
 	// empty list
 	return core.List(res), nil
@@ -66,7 +70,7 @@ func evalList(ast core.List, env Env) (core.Any, error) {
 func evalVector(ast core.Vector, env Env) (core.Vector, error) {
 	res := []core.Any{}
 	for _, item := range ast {
-		any, err := EvalAst(item, env)
+		any, err := Eval(item, env)
 		if err != nil {
 			return nil, err
 		}

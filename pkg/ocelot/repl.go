@@ -13,7 +13,7 @@ func completer(d goprompt.Document) []goprompt.Suggest {
 	return []goprompt.Suggest{}
 }
 
-func Eval(in string, env *base.Env) (core.Any, error) {
+func EvalStr(in string, env *base.Env) (core.Any, error) {
 	ast, err := parser.Parse("Eval", []byte(in))
 	if err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func Eval(in string, env *base.Env) (core.Any, error) {
 		}
 		env = base
 	}
-	return base.EvalAst(ast, *env)
+	return base.Eval(ast, *env)
 }
 
 func Repl(prompt string) error {
@@ -37,7 +37,7 @@ func Repl(prompt string) error {
 		if in == "" {
 			return
 		}
-		out, err := Eval(in, env)
+		out, err := EvalStr(in, env)
 		if err != nil {
 			fmt.Println(err)
 			return

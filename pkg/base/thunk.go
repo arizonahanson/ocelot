@@ -2,34 +2,32 @@ package base
 
 import "github.com/starlight/ocelot/pkg/core"
 
-type Function func(args core.List, env Env) (core.Any, error)
+type ThunkType func() (core.Any, error)
 
-type Thunk func() (core.Any, error)
+type EvalType func(ast core.Any, env Env) (core.Any, error)
 
-func (fn Function) ThunkCall(args core.List, env Env) Thunk {
+func (eval EvalType) Thunk(ast core.Any, env Env) ThunkType {
 	return func() (core.Any, error) {
-		return fn(args, env)
+		return eval(ast, env)
 	}
 }
 
-func (fn Function) Trampoline() Function {
-	return func(args core.List, env Env) (core.Any, error) {
-		res, err := fn(args, env)
-		if err != nil {
-			return nil, err
-		}
-		for {
-			switch res.(type) {
-			default:
-				return res, nil
-			case Thunk:
-				fn2 := res.(Thunk)
-				res2, err := fn2()
-				if err != nil {
-					return nil, err
-				}
-				res = res2
+func (eval EvalType) Trampoline(ast core.Any, env Env) (core.Any, error) {
+	value, err := eval(ast, env)
+	if err != nil {
+		return nil, err
+	}
+	for {
+		switch value.(type) {
+		default:
+			return value, nil
+		case ThunkType:
+			thunk := value.(ThunkType)
+			next, err := thunk()
+			if err != nil {
+				return nil, err
 			}
+			value = next
 		}
 	}
 }
