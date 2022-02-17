@@ -19,35 +19,6 @@ func EvalAst(ast core.Any, env Env) (core.Any, error) {
 }
 
 type Function func(args []core.Any, env Env) (core.Any, error)
-type Thunk func() (core.Any, error)
-
-func thunk(fn Function, args []core.Any, env Env) Thunk {
-	return func() (core.Any, error) {
-		return fn(args, env)
-	}
-}
-
-func trampoline(fn Function) Function {
-	return func(args []core.Any, env Env) (core.Any, error) {
-		res, err := fn(args, env)
-		if err != nil {
-			return nil, err
-		}
-		for {
-			switch res.(type) {
-			default:
-				return res, nil
-			case Thunk:
-				fn2 := res.(Thunk)
-				res2, err := fn2()
-				if err != nil {
-					return nil, err
-				}
-				res = res2
-			}
-		}
-	}
-}
 
 func onList(ast core.List, env Env) (core.Any, error) {
 	res := []core.Any{}
@@ -76,7 +47,7 @@ func onList(ast core.List, env Env) (core.Any, error) {
 					break
 				case Function:
 					// call function (unevaluated params) & return
-					fn := trampoline(val.(Function))
+					fn := val.(Function)
 					return fn(ast[1:], env)
 				}
 			}
