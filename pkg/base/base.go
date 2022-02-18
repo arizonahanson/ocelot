@@ -18,6 +18,8 @@ var Base = map[string]core.Any{
 	"type":   Function(Type),
 	"def!":   Function(Def_E),
 	"let*":   Function(Let_S),
+	"and":    Function(And),
+	"or":     Function(Or),
 }
 
 type Function func(ast core.List, env Env) (core.Any, error)
@@ -27,6 +29,44 @@ func exactLen(ast core.List, num int) error {
 		return fmt.Errorf("'%v' wanted %d arg(s), got %d", ast[0], num-1, len(ast)-1)
 	}
 	return nil
+}
+
+func Or(ast core.List, env Env) (core.Any, error) {
+	if len(ast) == 1 {
+		return core.Bool(false), nil
+	}
+	if len(ast) == 2 {
+		return EvalTail(ast[1], env), nil
+	}
+	for _, item := range ast[1 : len(ast)-1] {
+		arg, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		if (arg != core.Bool(false) && arg != core.Nil{}) {
+			return arg, nil
+		}
+	}
+	return EvalTail(ast[len(ast)-1], env), nil
+}
+
+func And(ast core.List, env Env) (core.Any, error) {
+	if len(ast) == 1 {
+		return core.Bool(true), nil
+	}
+	if len(ast) == 2 {
+		return EvalTail(ast[1], env), nil
+	}
+	for _, item := range ast[1 : len(ast)-1] {
+		arg, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		if (arg == core.Bool(false) || arg == core.Nil{}) {
+			return arg, nil
+		}
+	}
+	return EvalTail(ast[len(ast)-1], env), nil
 }
 
 func Bool(ast core.List, env Env) (core.Any, error) {
