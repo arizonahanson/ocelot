@@ -2,11 +2,13 @@ package ocelot
 
 import (
 	"fmt"
+	"os"
 
 	goprompt "github.com/c-bata/go-prompt"
 	"github.com/starlight/ocelot/internal/parser"
 	"github.com/starlight/ocelot/pkg/base"
 	"github.com/starlight/ocelot/pkg/core"
+	"golang.org/x/term"
 )
 
 func completer(d goprompt.Document) []goprompt.Suggest {
@@ -44,6 +46,8 @@ func Repl(prompt string) error {
 		}
 		fmt.Println(out)
 	}
+	saveTermState()
+	defer restoreTermState()
 	// prompt
 	p := goprompt.New(
 		executor,
@@ -52,4 +56,20 @@ func Repl(prompt string) error {
 	)
 	p.Run()
 	return nil
+}
+
+var termState *term.State
+
+func saveTermState() {
+	oldState, err := term.GetState(int(os.Stdin.Fd()))
+	if err != nil {
+		return
+	}
+	termState = oldState
+}
+
+func restoreTermState() {
+	if termState != nil {
+		term.Restore(int(os.Stdin.Fd()), termState)
+	}
 }

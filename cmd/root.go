@@ -30,7 +30,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/starlight/ocelot/pkg/base"
 	"github.com/starlight/ocelot/pkg/ocelot"
-	"golang.org/x/term"
 )
 
 var (
@@ -46,10 +45,9 @@ var rootCmd = &cobra.Command{
 	Args:    cobra.ArbitraryArgs,
 	Version: version,
 	Run: func(cmd *cobra.Command, args []string) {
-		saveTermState()
-		defer restoreTermState()
 		if len(args) == 0 {
-			ocelot.Repl("❱❱ ")
+			err := ocelot.Repl("❱❱ ")
+			cobra.CheckErr(err)
 		} else {
 			env, err := base.BaseEnv()
 			cobra.CheckErr(err)
@@ -112,20 +110,4 @@ func initConfig() {
 
 func Quit() {
 	os.Exit(0)
-}
-
-var termState *term.State
-
-func saveTermState() {
-	oldState, err := term.GetState(int(os.Stdin.Fd()))
-	if err != nil {
-		return
-	}
-	termState = oldState
-}
-
-func restoreTermState() {
-	if termState != nil {
-		term.Restore(int(os.Stdin.Fd()), termState)
-	}
 }
