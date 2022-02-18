@@ -55,12 +55,12 @@ func (env Env) Get(key core.Symbol) (core.Any, error) {
 }
 
 func (env Env) SetPairs(pairs core.List) error {
-	if len(pairs) < 2 {
-		return fmt.Errorf("missing parameter in let*")
+	if len(pairs)%2 != 0 || len(pairs) == 0 {
+		return fmt.Errorf("missing arg in let*")
 	}
 	switch pairs[0].(type) {
 	default:
-		return fmt.Errorf("non-symbol parameter in let*: %v", pairs[0])
+		return fmt.Errorf("non-symbol arg in let*: %v", pairs[0])
 	case core.Symbol:
 		val, err := Eval(pairs[1], env)
 		if err != nil {

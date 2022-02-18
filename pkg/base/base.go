@@ -30,7 +30,10 @@ func Let_S(ast core.List, env Env) (core.Any, error) {
 		if err != nil {
 			return nil, err
 		}
-		newEnv.SetPairs(ast[1].(core.List))
+		err = newEnv.SetPairs(ast[1].(core.List))
+		if err != nil {
+			return nil, err
+		}
 		return EvalTail(ast[2], *newEnv), nil
 	}
 }

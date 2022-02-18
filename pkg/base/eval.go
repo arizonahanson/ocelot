@@ -10,7 +10,7 @@ func Eval(ast core.Any, env Env) (core.Any, error) {
 }
 
 // thunked eval for tail-calls
-func EvalTail(ast core.Any, env Env) core.Any {
+func EvalTail(ast core.Any, env Env) ThunkType {
 	return EvalType(evalAny).Thunk(ast, env)
 }
 
