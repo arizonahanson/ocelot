@@ -9,6 +9,7 @@ import (
 
 var Base = map[string]core.Any{
 	"nil":   core.Nil{},
+	"nil?":  Function(Nil_Q),
 	"true":  core.Bool(true),
 	"false": core.Bool(false),
 	"type":  Function(Type),
@@ -18,9 +19,29 @@ var Base = map[string]core.Any{
 
 type Function func(ast core.List, env Env) (core.Any, error)
 
+func exactLen(ast core.List, num int) error {
+	if len(ast) != num {
+		return fmt.Errorf("'%v' wanted %d arg(s), got %d", ast[0], num-1, len(ast)-1)
+	}
+	return nil
+}
+
+func Nil_Q(ast core.List, env Env) (core.Any, error) {
+	err := exactLen(ast, 2)
+	if err != nil {
+		return nil, err
+	}
+	arg1, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	return core.Bool(arg1 == core.Nil{}), nil
+}
+
 func Let_S(ast core.List, env Env) (core.Any, error) {
-	if len(ast) != 3 {
-		return nil, fmt.Errorf("'%v' wanted 2 args, got %d", ast[0], len(ast)-1)
+	err := exactLen(ast, 3)
+	if err != nil {
+		return nil, err
 	}
 	switch ast[1].(type) {
 	default:
@@ -39,8 +60,9 @@ func Let_S(ast core.List, env Env) (core.Any, error) {
 }
 
 func Def_E(ast core.List, env Env) (core.Any, error) {
-	if len(ast) != 3 {
-		return nil, fmt.Errorf("'%v' wanted 2 args, got %d", ast[0], len(ast)-1)
+	err := exactLen(ast, 3)
+	if err != nil {
+		return nil, err
 	}
 	switch ast[1].(type) {
 	default:
@@ -57,8 +79,9 @@ func Def_E(ast core.List, env Env) (core.Any, error) {
 
 // use reflection to get value type as String
 func Type(ast core.List, env Env) (core.Any, error) {
-	if len(ast) != 2 {
-		return nil, fmt.Errorf("'%v' wanted 1 arg, got %d", ast[0], len(ast)-1)
+	err := exactLen(ast, 2)
+	if err != nil {
+		return nil, err
 	}
 	arg1, err := Eval(ast[1], env)
 	if err != nil {
