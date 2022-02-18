@@ -2,19 +2,22 @@ package base
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/starlight/ocelot/pkg/core"
 )
 
 var Base = map[string]core.Any{
-	"nil":   core.Nil{},
-	"nil?":  Function(Nil_Q),
-	"true":  core.Bool(true),
-	"false": core.Bool(false),
-	"type":  Function(Type),
-	"def!":  Function(Def_E),
-	"let*":  Function(Let_S),
+	"nil":    core.Nil{},
+	"true":   core.Bool(true),
+	"false":  core.Bool(false),
+	"nil?":   Function(Nil_Q),
+	"true?":  Function(True_Q),
+	"false?": Function(False_Q),
+	"bool":   Function(Bool),
+	"not":    Function(Not),
+	"type":   Function(Type),
+	"def!":   Function(Def_E),
+	"let*":   Function(Let_S),
 }
 
 type Function func(ast core.List, env Env) (core.Any, error)
@@ -24,6 +27,54 @@ func exactLen(ast core.List, num int) error {
 		return fmt.Errorf("'%v' wanted %d arg(s), got %d", ast[0], num-1, len(ast)-1)
 	}
 	return nil
+}
+
+func Bool(ast core.List, env Env) (core.Any, error) {
+	err := exactLen(ast, 2)
+	if err != nil {
+		return nil, err
+	}
+	arg1, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	return core.Bool(arg1 != core.Bool(false) && arg1 != core.Nil{}), nil
+}
+
+func Not(ast core.List, env Env) (core.Any, error) {
+	err := exactLen(ast, 2)
+	if err != nil {
+		return nil, err
+	}
+	arg1, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	return core.Bool(arg1 == core.Bool(false) || arg1 == core.Nil{}), nil
+}
+
+func False_Q(ast core.List, env Env) (core.Any, error) {
+	err := exactLen(ast, 2)
+	if err != nil {
+		return nil, err
+	}
+	arg1, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	return core.Bool(arg1 == core.Bool(false)), nil
+}
+
+func True_Q(ast core.List, env Env) (core.Any, error) {
+	err := exactLen(ast, 2)
+	if err != nil {
+		return nil, err
+	}
+	arg1, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	return core.Bool(arg1 == core.Bool(true)), nil
 }
 
 func Nil_Q(ast core.List, env Env) (core.Any, error) {
@@ -87,5 +138,5 @@ func Type(ast core.List, env Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return core.String(fmt.Sprintf("%v", reflect.TypeOf(arg1))), nil
+	return core.String(fmt.Sprintf("%T", arg1)), nil
 }
