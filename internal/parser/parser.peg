@@ -12,7 +12,7 @@ Expr ←  _* first:Any? rest:(_+ Any)* _* {
   return join(first, rest, 1), nil
 }
 // parent `any` type
-Any ←  List / Vector / atom
+Any ←  List / Vector / Map / atom
 // expression list
 List ←  '(' expr:Expr ')' {
   return core.List(expr.([]core.Any)), nil
@@ -25,8 +25,17 @@ Vector ←  '[' expr:Expr ']' {
 } / '[' Expr !']' {
   return nil, errors.New("Vector not terminated")
 }
+// map
+Map ←  '{' _* first:(Key _+ Any)? rest:(_+ Key _+ Any)* _* '}' {
+  return core.Map(merge(first, rest, 0, 2)), nil
+} / '{' _* (Key _+ Any) (_+ Key _+ Any)* _* !'}' {
+  return nil, errors.New("Map not terminated")
+}
+Key ←  ':' letter (letter / digit)* {
+  return core.Key(string(c.text)), nil
+}
 // singletons
-atom ←  String / Symbol / Number
+atom ←  String / Symbol / Key / Number
 // literal string
 String ←  '"' runeChr* '"' {
   return core.String(string(c.text)).Unquote()

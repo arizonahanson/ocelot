@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/shopspring/decimal"
 )
@@ -18,6 +19,10 @@ type Vector []Any
 type Symbol string
 
 type String string
+
+type Key string
+
+type Map map[Key]Any
 
 type Bool bool
 
@@ -75,6 +80,22 @@ func (val Vector) String() string {
 		}
 	}
 	return "[" + str + "]"
+}
+
+func (val Map) String() string {
+	res := []string{}
+	for key, value := range val {
+		res = append(res, fmt.Sprintf("%v", key))
+		switch value.(type) {
+		default:
+			res = append(res, fmt.Sprintf("%v", value))
+			break
+		case List:
+			res = append(res, fmt.Sprintf("(%v)", value))
+			break
+		}
+	}
+	return "{" + strings.Join(res, " ") + "}"
 }
 
 func (val Number) String() string {
