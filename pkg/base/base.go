@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/shopspring/decimal"
 	"github.com/starlight/ocelot/pkg/core"
 )
 
@@ -23,19 +24,15 @@ var Base = map[string]core.Any{
 	"let*":   Function(let_S),
 	"and":    Function(and),
 	"or":     Function(or),
+	"add":    Function(add),
+	"sub":    Function(sub),
+	"mul":    Function(mul),
+	"quot":   Function(quot),
+	"rem":    Function(rem),
+	"quot*":  Function(quot_S),
 }
 
 type Function func(ast core.List, env Env) (core.Any, error)
-
-func (fn Function) String() string {
-	strs := strings.Split(runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name(), ".")
-	str := strs[len(strs)-1]
-	str = strings.ReplaceAll(str, "_", "")
-	str = strings.ReplaceAll(str, "E", "!")
-	str = strings.ReplaceAll(str, "Q", "?")
-	str = strings.ReplaceAll(str, "S", "*")
-	return "&" + str
-}
 
 func exactLen(ast core.List, num int) error {
 	if len(ast) != num {
@@ -44,12 +41,135 @@ func exactLen(ast core.List, num int) error {
 	return nil
 }
 
+func add(ast core.List, env Env) (core.Any, error) {
+	res := decimal.Zero
+	for _, item := range ast[1:] {
+		arg, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		switch arg.(type) {
+		default:
+			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+		case core.Number:
+			res = res.Add(arg.(core.Number).Decimal())
+		}
+	}
+	return core.Number(res), nil
+}
+
+func sub(ast core.List, env Env) (core.Any, error) {
+	res := decimal.Zero
+	for i, item := range ast[1:] {
+		arg, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		switch arg.(type) {
+		default:
+			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+		case core.Number:
+			num := arg.(core.Number).Decimal()
+			if i == 0 && len(ast) > 2 {
+				res = num
+			} else {
+				res = res.Sub(num)
+			}
+		}
+	}
+	return core.Number(res), nil
+}
+
+func mul(ast core.List, env Env) (core.Any, error) {
+	res := decimal.NewFromInt32(1)
+	for _, item := range ast[1:] {
+		arg, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		switch arg.(type) {
+		default:
+			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+		case core.Number:
+			res = res.Mul(arg.(core.Number).Decimal())
+		}
+	}
+	return core.Number(res), nil
+}
+
+func quot(ast core.List, env Env) (core.Any, error) {
+	err := exactLen(ast, 4)
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range ast[1:] {
+		arg, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		switch arg.(type) {
+		default:
+			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+		case core.Number:
+			continue
+		}
+	}
+	arg1 := ast[1].(core.Number).Decimal()
+	arg2 := ast[2].(core.Number).Decimal()
+	prec := ast[3].(core.Number).Decimal().IntPart()
+	q, _ := arg1.QuoRem(arg2, int32(prec))
+	return core.Number(q), nil
+}
+
+func rem(ast core.List, env Env) (core.Any, error) {
+	err := exactLen(ast, 4)
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range ast[1:] {
+		arg, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		switch arg.(type) {
+		default:
+			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+		case core.Number:
+			continue
+		}
+	}
+	arg1 := ast[1].(core.Number).Decimal()
+	arg2 := ast[2].(core.Number).Decimal()
+	prec := ast[3].(core.Number).Decimal().IntPart()
+	_, r := arg1.QuoRem(arg2, int32(prec))
+	return core.Number(r), nil
+}
+
+func quot_S(ast core.List, env Env) (core.Any, error) {
+	res := decimal.NewFromInt32(1)
+	for i, item := range ast[1:] {
+		arg, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		switch arg.(type) {
+		default:
+			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+		case core.Number:
+			num := arg.(core.Number).Decimal()
+			if i == 0 && len(ast) > 2 {
+				res = num
+			} else {
+				res = res.Div(num)
+			}
+		}
+	}
+	return core.Number(res), nil
+}
+
 func or(ast core.List, env Env) (core.Any, error) {
 	if len(ast) == 1 {
 		return core.Bool(false), nil
-	}
-	if len(ast) == 2 {
-		return EvalTail(ast[1], env), nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
 		arg, err := Eval(item, env)
@@ -66,9 +186,6 @@ func or(ast core.List, env Env) (core.Any, error) {
 func and(ast core.List, env Env) (core.Any, error) {
 	if len(ast) == 1 {
 		return core.Bool(true), nil
-	}
-	if len(ast) == 2 {
-		return EvalTail(ast[1], env), nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
 		arg, err := Eval(item, env)
@@ -192,4 +309,14 @@ func type_(ast core.List, env Env) (core.Any, error) {
 		return nil, err
 	}
 	return core.String(fmt.Sprintf("%T", arg1)), nil
+}
+
+func (fn Function) String() string {
+	strs := strings.Split(runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name(), ".")
+	str := strs[len(strs)-1]
+	str = strings.ReplaceAll(str, "_", "")
+	str = strings.ReplaceAll(str, "E", "!")
+	str = strings.ReplaceAll(str, "Q", "?")
+	str = strings.ReplaceAll(str, "S", "*")
+	return "&" + str
 }
