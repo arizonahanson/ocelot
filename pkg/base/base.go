@@ -2,6 +2,9 @@ package base
 
 import (
 	"fmt"
+	"reflect"
+	"runtime"
+	"strings"
 
 	"github.com/starlight/ocelot/pkg/core"
 )
@@ -10,19 +13,29 @@ var Base = map[string]core.Any{
 	"nil":    core.Nil{},
 	"true":   core.Bool(true),
 	"false":  core.Bool(false),
-	"nil?":   Function(Nil_Q),
-	"true?":  Function(True_Q),
-	"false?": Function(False_Q),
-	"bool":   Function(Bool),
-	"not":    Function(Not),
-	"type":   Function(Type),
-	"def!":   Function(Def_E),
-	"let*":   Function(Let_S),
-	"and":    Function(And),
-	"or":     Function(Or),
+	"nil?":   Function(nil_Q),
+	"true?":  Function(true_Q),
+	"false?": Function(false_Q),
+	"bool":   Function(bool),
+	"not":    Function(not),
+	"type":   Function(type_),
+	"def!":   Function(def_E),
+	"let*":   Function(let_S),
+	"and":    Function(and),
+	"or":     Function(or),
 }
 
 type Function func(ast core.List, env Env) (core.Any, error)
+
+func (fn Function) String() string {
+	strs := strings.Split(runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name(), ".")
+	str := strs[len(strs)-1]
+	str = strings.ReplaceAll(str, "_", "")
+	str = strings.ReplaceAll(str, "E", "!")
+	str = strings.ReplaceAll(str, "Q", "?")
+	str = strings.ReplaceAll(str, "S", "*")
+	return "&" + str
+}
 
 func exactLen(ast core.List, num int) error {
 	if len(ast) != num {
@@ -31,7 +44,7 @@ func exactLen(ast core.List, num int) error {
 	return nil
 }
 
-func Or(ast core.List, env Env) (core.Any, error) {
+func or(ast core.List, env Env) (core.Any, error) {
 	if len(ast) == 1 {
 		return core.Bool(false), nil
 	}
@@ -50,7 +63,7 @@ func Or(ast core.List, env Env) (core.Any, error) {
 	return EvalTail(ast[len(ast)-1], env), nil
 }
 
-func And(ast core.List, env Env) (core.Any, error) {
+func and(ast core.List, env Env) (core.Any, error) {
 	if len(ast) == 1 {
 		return core.Bool(true), nil
 	}
@@ -69,7 +82,7 @@ func And(ast core.List, env Env) (core.Any, error) {
 	return EvalTail(ast[len(ast)-1], env), nil
 }
 
-func Bool(ast core.List, env Env) (core.Any, error) {
+func bool(ast core.List, env Env) (core.Any, error) {
 	err := exactLen(ast, 2)
 	if err != nil {
 		return nil, err
@@ -81,7 +94,7 @@ func Bool(ast core.List, env Env) (core.Any, error) {
 	return core.Bool(arg1 != core.Bool(false) && arg1 != core.Nil{}), nil
 }
 
-func Not(ast core.List, env Env) (core.Any, error) {
+func not(ast core.List, env Env) (core.Any, error) {
 	err := exactLen(ast, 2)
 	if err != nil {
 		return nil, err
@@ -93,7 +106,7 @@ func Not(ast core.List, env Env) (core.Any, error) {
 	return core.Bool(arg1 == core.Bool(false) || arg1 == core.Nil{}), nil
 }
 
-func False_Q(ast core.List, env Env) (core.Any, error) {
+func false_Q(ast core.List, env Env) (core.Any, error) {
 	err := exactLen(ast, 2)
 	if err != nil {
 		return nil, err
@@ -105,7 +118,7 @@ func False_Q(ast core.List, env Env) (core.Any, error) {
 	return core.Bool(arg1 == core.Bool(false)), nil
 }
 
-func True_Q(ast core.List, env Env) (core.Any, error) {
+func true_Q(ast core.List, env Env) (core.Any, error) {
 	err := exactLen(ast, 2)
 	if err != nil {
 		return nil, err
@@ -117,7 +130,7 @@ func True_Q(ast core.List, env Env) (core.Any, error) {
 	return core.Bool(arg1 == core.Bool(true)), nil
 }
 
-func Nil_Q(ast core.List, env Env) (core.Any, error) {
+func nil_Q(ast core.List, env Env) (core.Any, error) {
 	err := exactLen(ast, 2)
 	if err != nil {
 		return nil, err
@@ -129,7 +142,7 @@ func Nil_Q(ast core.List, env Env) (core.Any, error) {
 	return core.Bool(arg1 == core.Nil{}), nil
 }
 
-func Let_S(ast core.List, env Env) (core.Any, error) {
+func let_S(ast core.List, env Env) (core.Any, error) {
 	err := exactLen(ast, 3)
 	if err != nil {
 		return nil, err
@@ -150,7 +163,7 @@ func Let_S(ast core.List, env Env) (core.Any, error) {
 	}
 }
 
-func Def_E(ast core.List, env Env) (core.Any, error) {
+func def_E(ast core.List, env Env) (core.Any, error) {
 	err := exactLen(ast, 3)
 	if err != nil {
 		return nil, err
@@ -169,7 +182,7 @@ func Def_E(ast core.List, env Env) (core.Any, error) {
 }
 
 // use reflection to get value type as String
-func Type(ast core.List, env Env) (core.Any, error) {
+func type_(ast core.List, env Env) (core.Any, error) {
 	err := exactLen(ast, 2)
 	if err != nil {
 		return nil, err
