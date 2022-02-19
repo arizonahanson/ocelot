@@ -2,6 +2,8 @@ package core
 
 import (
 	"fmt"
+	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -27,6 +29,8 @@ type Map map[Key]Any
 type Bool bool
 
 type Number decimal.Decimal
+
+type Function func(ast List, env Env) (Any, error)
 
 // parse quoted, escaped string
 func (val String) Unquote() (String, error) {
@@ -108,4 +112,14 @@ func (val Number) Decimal() decimal.Decimal {
 
 func (val Nil) String() string {
 	return "nil"
+}
+
+func (fn Function) String() string {
+	strs := strings.Split(runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name(), ".")
+	str := strs[len(strs)-1]
+	str = strings.ReplaceAll(str, "_", "")
+	str = strings.ReplaceAll(str, "E", "!")
+	str = strings.ReplaceAll(str, "Q", "?")
+	str = strings.ReplaceAll(str, "S", "*")
+	return "&" + str
 }

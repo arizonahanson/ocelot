@@ -5,17 +5,17 @@ import (
 )
 
 // trampoline eval for non tail-calls
-func Eval(ast core.Any, env Env) (core.Any, error) {
+func Eval(ast core.Any, env core.Env) (core.Any, error) {
 	return EvalType(evalAny).Trampoline(ast, env)
 }
 
 // thunked eval for tail-calls
-func EvalTail(ast core.Any, env Env) ThunkType {
+func EvalTail(ast core.Any, env core.Env) ThunkType {
 	return EvalType(evalAny).Thunk(ast, env)
 }
 
 // eval impl
-func evalAny(ast core.Any, env Env) (core.Any, error) {
+func evalAny(ast core.Any, env core.Env) (core.Any, error) {
 	switch ast.(type) {
 	default:
 		// String, Number
@@ -29,7 +29,7 @@ func evalAny(ast core.Any, env Env) (core.Any, error) {
 	}
 }
 
-func evalList(ast core.List, env Env) (core.Any, error) {
+func evalList(ast core.List, env core.Env) (core.Any, error) {
 	res := []core.Any{}
 	for i, item := range ast {
 		if i == 0 {
@@ -49,9 +49,9 @@ func evalList(ast core.List, env Env) (core.Any, error) {
 					// not a function, append
 					res = append(res, val)
 					continue
-				case Function:
+				case core.Function:
 					// call function (unevaluated ast) & return
-					fn := val.(Function)
+					fn := val.(core.Function)
 					return fn(ast, env)
 				}
 			}
@@ -67,7 +67,7 @@ func evalList(ast core.List, env Env) (core.Any, error) {
 	return core.List(res), nil
 }
 
-func evalVector(ast core.Vector, env Env) (core.Vector, error) {
+func evalVector(ast core.Vector, env core.Env) (core.Vector, error) {
 	res := []core.Any{}
 	for _, item := range ast {
 		any, err := Eval(item, env)
@@ -77,4 +77,15 @@ func evalVector(ast core.Vector, env Env) (core.Vector, error) {
 		res = append(res, any)
 	}
 	return core.Vector(res), nil
+}
+
+func BaseEnv() (*core.Env, error) {
+	env, err := core.NewEnv(nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	for key, value := range Base {
+		env.Set(core.Symbol(key), value)
+	}
+	return env, nil
 }

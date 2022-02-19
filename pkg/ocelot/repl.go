@@ -15,7 +15,7 @@ func completer(d goprompt.Document) []goprompt.Suggest {
 	return []goprompt.Suggest{}
 }
 
-func EvalStr(in string, env *base.Env) (core.Any, error) {
+func EvalStr(in string, env *core.Env) (core.Any, error) {
 	ast, err := parser.Parse("Eval", []byte(in))
 	if err != nil {
 		return nil, err
