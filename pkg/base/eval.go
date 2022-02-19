@@ -111,8 +111,8 @@ func BaseEnv() (*core.Env, error) {
 	if err != nil {
 		return nil, err
 	}
-	for key, value := range Base {
-		env.Set(core.Symbol(key), value)
+	for sym, value := range Base {
+		env.Set(core.Symbol{Val: sym, Pos: nil}, value)
 	}
 	return env, nil
 }

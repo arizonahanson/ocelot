@@ -36,3 +36,7 @@ func merge(first, rest interface{}, keyIndex int, valueIndex int) map[core.Key]c
 	}
 	return result
 }
+
+func pos(p position) *core.Position {
+	return &core.Position{Line: p.line, Col: p.col, Offset: p.offset}
+}

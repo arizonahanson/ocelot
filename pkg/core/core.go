@@ -18,7 +18,14 @@ type List []Any
 
 type Vector []Any
 
-type Symbol string
+type Symbol struct {
+	Val string
+	Pos *Position
+}
+
+type Position struct {
+	Line, Col, Offset int
+}
 
 type String string
 
@@ -51,6 +58,10 @@ func (val String) Number() (Number, error) {
 		return Number(decimal.Zero), err
 	}
 	return Number(dec), nil
+}
+
+func (val Symbol) String() string {
+	return fmt.Sprintf("ocelot:%d:%d (%d): '%s'", val.Pos.Line, val.Pos.Col, val.Pos.Offset, val.Val)
 }
 
 func (val List) String() string {

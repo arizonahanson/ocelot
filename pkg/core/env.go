@@ -6,11 +6,11 @@ import (
 
 type Env struct {
 	outer *Env
-	data  map[Symbol]Any
+	data  map[string]Any
 }
 
 func NewEnv(outer *Env, binds List, exprs List) (*Env, error) {
-	data := make(map[Symbol]Any)
+	data := make(map[string]Any)
 	if len(binds) != len(exprs) {
 		return nil, fmt.Errorf("binds and exprs must be the same length: %d", len(binds))
 	}
@@ -22,22 +22,22 @@ func NewEnv(outer *Env, binds List, exprs List) (*Env, error) {
 			break
 		}
 		expr := exprs[i]
-		data[bind.(Symbol)] = expr
+		data[bind.(Symbol).Val] = expr
 	}
 	return &Env{outer, data}, nil
 }
 
-func (env Env) Set(key Symbol, value Any) {
-	env.data[key] = value
+func (env Env) Set(sym Symbol, value Any) {
+	env.data[sym.Val] = value
 }
 
-func (env Env) Get(key Symbol) (Any, error) {
-	value, ok := env.data[key]
+func (env Env) Get(sym Symbol) (Any, error) {
+	value, ok := env.data[sym.Val]
 	if !ok {
 		if env.outer != nil {
-			return env.outer.Get(key)
+			return env.outer.Get(sym)
 		}
-		return nil, fmt.Errorf("not found: %s", key)
+		return nil, fmt.Errorf("%v not found", sym)
 	}
 	return value, nil
 }

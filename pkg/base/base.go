@@ -33,7 +33,7 @@ var Base = map[string]core.Any{
 
 func exactLen(ast core.List, num int) error {
 	if len(ast) != num {
-		return fmt.Errorf("'%v' wanted %d arg(s), got %d", ast[0], num-1, len(ast)-1)
+		return fmt.Errorf("%v wanted %d arg(s), got %d", ast[0], num-1, len(ast)-1)
 	}
 	return nil
 }
@@ -139,7 +139,7 @@ func add(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%v called with non-number '%v'", ast[0], arg)
 		case core.Number:
 			break
 		}
@@ -157,7 +157,7 @@ func sub(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%v called with non-number '%v'", ast[0], arg)
 		case core.Number:
 			break
 		}
@@ -180,7 +180,7 @@ func mul(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%v called with non-number '%v'", ast[0], arg)
 		case core.Number:
 			break
 		}
@@ -201,7 +201,7 @@ func quot(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%v called with non-number '%v'", ast[0], arg)
 		case core.Number:
 			continue
 		}
@@ -225,7 +225,7 @@ func rem(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%v called with non-number '%v'", ast[0], arg)
 		case core.Number:
 			continue
 		}
@@ -246,7 +246,7 @@ func quot_S(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%v called with non-number '%v'", ast[0], arg)
 		case core.Number:
 			break
 		}
@@ -279,7 +279,7 @@ func def_E(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch ast[1].(type) {
 	default:
-		return nil, fmt.Errorf("'%v' first arg should be a Symbol, got '%v'", ast[0], ast[1])
+		return nil, fmt.Errorf("%v first arg should be a Symbol, got '%v'", ast[0], ast[1])
 	case core.Symbol:
 		break
 	}
@@ -298,7 +298,7 @@ func let_S(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch ast[1].(type) {
 	default:
-		return nil, fmt.Errorf("'%v' first arg should be a List, got '%v'", ast[0], ast[1])
+		return nil, fmt.Errorf("%v first arg should be a List, got '%v'", ast[0], ast[1])
 	case core.List:
 		break
 	}
@@ -308,12 +308,12 @@ func let_S(ast core.List, env core.Env) (core.Any, error) {
 	}
 	pairs := ast[1].(core.List)
 	if len(pairs)%2 != 0 || len(pairs) == 0 {
-		return nil, fmt.Errorf("'%v' first arg should be an even List, has length %d", ast[0], len(pairs))
+		return nil, fmt.Errorf("%v first arg should be an even List, has length %d", ast[0], len(pairs))
 	}
 	for {
 		switch pairs[0].(type) {
 		default:
-			return nil, fmt.Errorf("'%v' called with non-symbol '%v'", ast[0], pairs[0])
+			return nil, fmt.Errorf("%v called with non-symbol '%v'", ast[0], pairs[0])
 		case core.Symbol:
 			break
 		}

@@ -55,7 +55,7 @@ Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
 }
 // identifiers (like ϕa_2)
 Symbol ←  letter (letter / digit)* suffix? {
-  return core.Symbol(string(c.text)), nil
+  return core.Symbol{Val: string(c.text), Pos: pos(c.pos)}, nil
 }
 // suffix
 suffix ← [!?*]
