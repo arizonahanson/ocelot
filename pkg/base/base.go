@@ -31,6 +31,7 @@ var Base = map[string]core.Any{
 	"let*": core.Function(let_S),
 	"do":   core.Function(do),
 	"if":   core.Function(if_),
+	"fn*":  core.Function(fn_S),
 }
 
 func exactLen(ast core.List, num int) error {
@@ -368,4 +369,50 @@ func if_(ast core.List, env core.Env) (core.Any, error) {
 		return EvalTail(ast[3], env), nil
 	}
 	return core.Nil{}, nil
+}
+
+func fn_S(ast core.List, env core.Env) (core.Any, error) {
+	err := exactLen(ast, 3)
+	if err != nil {
+		return nil, err
+	}
+	switch ast[1].(type) {
+	default:
+		return nil, fmt.Errorf("%v called with non-list for first arg: '%v'", ast[0], ast[1])
+	case core.List:
+		break
+	}
+	binds := ast[1].(core.List)
+	for _, item := range binds {
+		switch item.(type) {
+		default:
+			return nil, fmt.Errorf("%v bind expression contained non-symbol: '%v'", ast[0], item)
+		case core.Symbol:
+			break
+		}
+	}
+	fn := func(args core.List, outer core.Env) (core.Any, error) {
+		exprs, err := apply(args[1:], outer)
+		if err != nil {
+			return nil, err
+		}
+		newEnv, err := core.NewEnv(&env, binds, core.List(exprs))
+		if err != nil {
+			return nil, err
+		}
+		return EvalTail(ast[2], *newEnv), nil
+	}
+	return core.Function(fn), nil
+}
+
+func apply(ast core.List, env core.Env) (core.List, error) {
+	exprs := []core.Any{}
+	for _, item := range ast {
+		val, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		exprs = append(exprs, val)
+	}
+	return core.List(exprs), nil
 }
