@@ -4,7 +4,9 @@ import (
 	"github.com/starlight/ocelot/pkg/core"
 )
 
-// trampoline eval for non tail-calls
+type Thunk func() (core.Any, error)
+
+// trampoline eval for making non-tail calls
 func Eval(ast core.Any, env core.Env) (core.Any, error) {
 	value, err := evalAny(ast, env)
 	if err != nil {
@@ -14,10 +16,10 @@ func Eval(ast core.Any, env core.Env) (core.Any, error) {
 		switch value.(type) {
 		default:
 			return value, nil
-		case ThunkType:
+		case Thunk:
 			break
 		}
-		thunk := value.(ThunkType)
+		thunk := value.(Thunk)
 		next, err := thunk()
 		if err != nil {
 			return nil, err
@@ -26,12 +28,17 @@ func Eval(ast core.Any, env core.Env) (core.Any, error) {
 	}
 }
 
-type ThunkType func() (core.Any, error)
-
 // thunked eval for tail-calls
-func EvalTail(ast core.Any, env core.Env) ThunkType {
+func EvalTail(ast core.Any, env core.Env) Thunk {
 	return func() (core.Any, error) {
 		return evalAny(ast, env)
+	}
+}
+
+// thunked function call
+func FnTail(fn core.Function, ast core.List, env core.Env) Thunk {
+	return func() (core.Any, error) {
+		return fn(ast, env)
 	}
 }
 
@@ -71,9 +78,8 @@ func evalList(ast core.List, env core.Env) (core.Any, error) {
 					res = append(res, val)
 					continue
 				case core.Function:
-					// call function (unevaluated ast) & return
-					fn := val.(core.Function)
-					return fn(ast, env)
+					// tail-call function (unevaluated ast)
+					return FnTail(val.(core.Function), ast, env), nil
 				}
 			}
 		}
