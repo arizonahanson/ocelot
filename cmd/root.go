@@ -51,7 +51,7 @@ var rootCmd = &cobra.Command{
 		} else {
 			env, err := base.BaseEnv()
 			cobra.CheckErr(err)
-			out, err := ocelot.EvalStr(strings.Join(args, " "), env)
+			out, err := ocelot.Eval(strings.Join(args, " "), env)
 			cobra.CheckErr(err)
 			fmt.Println(out)
 		}

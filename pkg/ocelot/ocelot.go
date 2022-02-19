@@ -11,12 +11,8 @@ import (
 	"golang.org/x/term"
 )
 
-func completer(d goprompt.Document) []goprompt.Suggest {
-	return []goprompt.Suggest{}
-}
-
-func EvalStr(in string, env *core.Env) (core.Any, error) {
-	ast, err := parser.Parse("Eval", []byte(in))
+func Eval(in string, env *core.Env) (core.Any, error) {
+	ast, err := parser.Parse("ocelot", []byte(in))
 	if err != nil {
 		return nil, err
 	}
@@ -39,13 +35,17 @@ func Repl(prompt string) error {
 		if in == "" {
 			return
 		}
-		out, err := EvalStr(in, env)
+		out, err := Eval(in, env)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		fmt.Println(out)
 	}
+	completer := func(d goprompt.Document) []goprompt.Suggest {
+		return []goprompt.Suggest{}
+	}
+	// fix ctrl-c stops working after exit
 	saveTermState()
 	defer restoreTermState()
 	// prompt
