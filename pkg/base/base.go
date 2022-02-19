@@ -29,11 +29,20 @@ var Base = map[string]core.Any{
 	"type": core.Function(type_),
 	"def!": core.Function(def_E),
 	"let*": core.Function(let_S),
+	"do":   core.Function(do),
+	"if":   core.Function(if_),
 }
 
 func exactLen(ast core.List, num int) error {
 	if len(ast) != num {
 		return fmt.Errorf("%v wanted %d arg(s), got %d", ast[0], num-1, len(ast)-1)
+	}
+	return nil
+}
+
+func rangeLen(ast core.List, min int, max int) error {
+	if len(ast) < min || len(ast) > max {
+		return fmt.Errorf("%v wanted %d-%d args, got %d", ast[0], min-1, max-1, len(ast)-1)
 	}
 	return nil
 }
@@ -328,4 +337,35 @@ func let_S(ast core.List, env core.Env) (core.Any, error) {
 		}
 	}
 	return EvalTail(ast[2], *newEnv), nil
+}
+
+func do(ast core.List, env core.Env) (core.Any, error) {
+	if len(ast) == 1 {
+		return core.Nil{}, nil
+	}
+	for _, item := range ast[1 : len(ast)-1] {
+		_, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return EvalTail(ast[len(ast)-1], env), nil
+}
+
+func if_(ast core.List, env core.Env) (core.Any, error) {
+	err := rangeLen(ast, 3, 4)
+	if err != nil {
+		return nil, err
+	}
+	cond, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	if (cond != core.Bool(false) && cond != core.Nil{}) {
+		return EvalTail(ast[2], env), nil
+	}
+	if len(ast) == 4 {
+		return EvalTail(ast[3], env), nil
+	}
+	return core.Nil{}, nil
 }
