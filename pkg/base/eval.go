@@ -54,6 +54,8 @@ func evalAny(ast core.Any, env core.Env) (core.Any, error) {
 		return evalList(ast.(core.List), env)
 	case core.Vector:
 		return evalVector(ast.(core.Vector), env)
+	case core.Map:
+		return evalMap(ast.(core.Map), env)
 	}
 }
 
@@ -104,6 +106,18 @@ func evalVector(ast core.Vector, env core.Env) (core.Vector, error) {
 		res = append(res, any)
 	}
 	return core.Vector(res), nil
+}
+
+func evalMap(ast core.Map, env core.Env) (core.Map, error) {
+	res := make(map[core.Key]core.Any)
+	for key, item := range ast {
+		val, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		res[key] = val
+	}
+	return core.Map(res), nil
 }
 
 func BaseEnv() (*core.Env, error) {

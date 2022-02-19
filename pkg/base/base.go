@@ -14,7 +14,7 @@ var Base = map[string]core.Any{
 	"nil?":   core.Function(nil_Q),
 	"true?":  core.Function(true_Q),
 	"false?": core.Function(false_Q),
-	"bool":   core.Function(bool),
+	"bool":   core.Function(bool_),
 	"not":    core.Function(not),
 	"and":    core.Function(and),
 	"or":     core.Function(or),
@@ -74,7 +74,7 @@ func false_Q(ast core.List, env core.Env) (core.Any, error) {
 	return core.Bool(arg1 == core.Bool(false)), nil
 }
 
-func bool(ast core.List, env core.Env) (core.Any, error) {
+func bool_(ast core.List, env core.Env) (core.Any, error) {
 	err := exactLen(ast, 2)
 	if err != nil {
 		return nil, err
