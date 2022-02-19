@@ -391,18 +391,23 @@ func fn_S(ast core.List, env core.Env) (core.Any, error) {
 			break
 		}
 	}
-	fn := func(args core.List, outer core.Env) (core.Any, error) {
+	body := ast[2]
+	lambda := func(args core.List, outer core.Env) (core.Any, error) {
+		err := exactLen(args, len(binds)+1)
+		if err != nil {
+			return nil, err
+		}
 		exprs, err := apply(args[1:], outer)
 		if err != nil {
 			return nil, err
 		}
-		newEnv, err := core.NewEnv(&env, binds, core.List(exprs))
+		newEnv, err := core.NewEnv(&env, binds, exprs)
 		if err != nil {
 			return nil, err
 		}
-		return EvalTail(ast[2], *newEnv), nil
+		return EvalTail(body, *newEnv), nil
 	}
-	return core.Function(fn), nil
+	return core.Function(lambda), nil
 }
 
 func apply(ast core.List, env core.Env) (core.List, error) {
