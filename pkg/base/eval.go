@@ -6,12 +6,33 @@ import (
 
 // trampoline eval for non tail-calls
 func Eval(ast core.Any, env core.Env) (core.Any, error) {
-	return EvalType(evalAny).Trampoline(ast, env)
+	value, err := evalAny(ast, env)
+	if err != nil {
+		return nil, err
+	}
+	for {
+		switch value.(type) {
+		default:
+			return value, nil
+		case ThunkType:
+			break
+		}
+		thunk := value.(ThunkType)
+		next, err := thunk()
+		if err != nil {
+			return nil, err
+		}
+		value = next
+	}
 }
+
+type ThunkType func() (core.Any, error)
 
 // thunked eval for tail-calls
 func EvalTail(ast core.Any, env core.Env) ThunkType {
-	return EvalType(evalAny).Thunk(ast, env)
+	return func() (core.Any, error) {
+		return evalAny(ast, env)
+	}
 }
 
 // eval impl
