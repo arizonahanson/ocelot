@@ -3,7 +3,6 @@ package base
 import (
 	"fmt"
 
-	"github.com/shopspring/decimal"
 	"github.com/starlight/ocelot/pkg/core"
 )
 
@@ -132,7 +131,7 @@ func or(ast core.List, env core.Env) (core.Any, error) {
 }
 
 func add(ast core.List, env core.Env) (core.Any, error) {
-	res := decimal.Zero
+	res := core.Zero.Decimal()
 	for _, item := range ast[1:] {
 		arg, err := Eval(item, env)
 		if err != nil {
@@ -150,7 +149,7 @@ func add(ast core.List, env core.Env) (core.Any, error) {
 }
 
 func sub(ast core.List, env core.Env) (core.Any, error) {
-	res := decimal.Zero
+	res := core.Zero.Decimal()
 	for i, item := range ast[1:] {
 		arg, err := Eval(item, env)
 		if err != nil {
@@ -173,7 +172,7 @@ func sub(ast core.List, env core.Env) (core.Any, error) {
 }
 
 func mul(ast core.List, env core.Env) (core.Any, error) {
-	res := decimal.NewFromInt32(1)
+	res := core.One.Decimal()
 	for _, item := range ast[1:] {
 		arg, err := Eval(item, env)
 		if err != nil {
@@ -239,7 +238,7 @@ func rem(ast core.List, env core.Env) (core.Any, error) {
 }
 
 func quot_S(ast core.List, env core.Env) (core.Any, error) {
-	res := decimal.NewFromInt32(1)
+	res := core.One.Decimal()
 	for i, item := range ast[1:] {
 		arg, err := Eval(item, env)
 		if err != nil {

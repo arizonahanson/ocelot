@@ -32,6 +32,9 @@ type Number decimal.Decimal
 
 type Function func(ast List, env Env) (Any, error)
 
+var Zero = Number(decimal.Zero)
+var One = Number(decimal.NewFromInt(1))
+
 // parse quoted, escaped string
 func (val String) Unquote() (String, error) {
 	str, err := strconv.Unquote(string(val))
