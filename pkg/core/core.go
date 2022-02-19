@@ -99,7 +99,11 @@ func (val Map) String() string {
 }
 
 func (val Number) String() string {
-	return decimal.Decimal(val).String()
+	return val.Decimal().String()
+}
+
+func (val Number) Decimal() decimal.Decimal {
+	return decimal.Decimal(val)
 }
 
 func (val Nil) String() string {
