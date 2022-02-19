@@ -22,12 +22,13 @@ func (eval EvalType) Trampoline(ast core.Any, env core.Env) (core.Any, error) {
 		default:
 			return value, nil
 		case ThunkType:
-			thunk := value.(ThunkType)
-			next, err := thunk()
-			if err != nil {
-				return nil, err
-			}
-			value = next
+			break
 		}
+		thunk := value.(ThunkType)
+		next, err := thunk()
+		if err != nil {
+			return nil, err
+		}
+		value = next
 	}
 }

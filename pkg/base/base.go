@@ -142,8 +142,9 @@ func add(ast core.List, env core.Env) (core.Any, error) {
 		default:
 			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
 		case core.Number:
-			res = res.Add(arg.(core.Number).Decimal())
+			break
 		}
+		res = res.Add(arg.(core.Number).Decimal())
 	}
 	return core.Number(res), nil
 }
@@ -159,12 +160,13 @@ func sub(ast core.List, env core.Env) (core.Any, error) {
 		default:
 			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
 		case core.Number:
-			num := arg.(core.Number).Decimal()
-			if i == 0 && len(ast) > 2 {
-				res = num
-			} else {
-				res = res.Sub(num)
-			}
+			break
+		}
+		num := arg.(core.Number).Decimal()
+		if i == 0 && len(ast) > 2 {
+			res = num
+		} else {
+			res = res.Sub(num)
 		}
 	}
 	return core.Number(res), nil
@@ -181,8 +183,9 @@ func mul(ast core.List, env core.Env) (core.Any, error) {
 		default:
 			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
 		case core.Number:
-			res = res.Mul(arg.(core.Number).Decimal())
+			break
 		}
+		res = res.Mul(arg.(core.Number).Decimal())
 	}
 	return core.Number(res), nil
 }
@@ -246,12 +249,13 @@ func quot_S(ast core.List, env core.Env) (core.Any, error) {
 		default:
 			return nil, fmt.Errorf("'%v' called with non-number '%v'", ast[0], arg)
 		case core.Number:
-			num := arg.(core.Number).Decimal()
-			if i == 0 && len(ast) > 2 {
-				res = num
-			} else {
-				res = res.Div(num)
-			}
+			break
+		}
+		num := arg.(core.Number).Decimal()
+		if i == 0 && len(ast) > 2 {
+			res = num
+		} else {
+			res = res.Div(num)
 		}
 	}
 	return core.Number(res), nil
@@ -278,13 +282,14 @@ func def_E(ast core.List, env core.Env) (core.Any, error) {
 	default:
 		return nil, fmt.Errorf("'%v' first arg should be a Symbol, got '%v'", ast[0], ast[1])
 	case core.Symbol:
-		val, err := Eval(ast[2], env)
-		if err != nil {
-			return nil, err
-		}
-		env.Set(ast[1].(core.Symbol), val)
-		return val, nil
+		break
 	}
+	val, err := Eval(ast[2], env)
+	if err != nil {
+		return nil, err
+	}
+	env.Set(ast[1].(core.Symbol), val)
+	return val, nil
 }
 
 func let_S(ast core.List, env core.Env) (core.Any, error) {
@@ -296,34 +301,32 @@ func let_S(ast core.List, env core.Env) (core.Any, error) {
 	default:
 		return nil, fmt.Errorf("'%v' first arg should be a List, got '%v'", ast[0], ast[1])
 	case core.List:
-		newEnv, err := core.NewEnv(&env, nil, nil)
-		if err != nil {
-			return nil, err
-		}
-		err = SetPairs(*newEnv, ast[1].(core.List))
-		if err != nil {
-			return nil, err
-		}
-		return EvalTail(ast[2], *newEnv), nil
+		break
 	}
-}
-
-func SetPairs(env core.Env, pairs core.List) error {
+	newEnv, err := core.NewEnv(&env, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	pairs := ast[1].(core.List)
 	if len(pairs)%2 != 0 || len(pairs) == 0 {
-		return fmt.Errorf("missing arg in let*")
+		return nil, fmt.Errorf("'%v' first arg should be an even List, has length %d", ast[0], len(pairs))
 	}
-	switch pairs[0].(type) {
-	default:
-		return fmt.Errorf("non-symbol arg in let*: %v", pairs[0])
-	case core.Symbol:
+	for {
+		switch pairs[0].(type) {
+		default:
+			return nil, fmt.Errorf("'%v' called with non-symbol '%v'", ast[0], pairs[0])
+		case core.Symbol:
+			break
+		}
 		val, err := Eval(pairs[1], env)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		env.Set(pairs[0].(core.Symbol), val)
-		if len(pairs) > 2 {
-			SetPairs(env, pairs[2:])
+		pairs = pairs[2:]
+		if len(pairs) == 0 {
+			break
 		}
 	}
-	return nil
+	return EvalTail(ast[2], *newEnv), nil
 }

@@ -19,9 +19,10 @@ func NewEnv(outer *Env, binds List, exprs List) (*Env, error) {
 		default:
 			return nil, fmt.Errorf("binds must be symbols: %v", bind)
 		case Symbol:
-			expr := exprs[i]
-			data[bind.(Symbol)] = expr
+			break
 		}
+		expr := exprs[i]
+		data[bind.(Symbol)] = expr
 	}
 	return &Env{outer, data}, nil
 }
