@@ -11,6 +11,7 @@ import (
 )
 
 var Base = map[string]core.Any{
+	// nil / bool
 	"nil":    core.Nil{},
 	"true":   core.Bool(true),
 	"false":  core.Bool(false),
@@ -19,17 +20,19 @@ var Base = map[string]core.Any{
 	"false?": Function(false_Q),
 	"bool":   Function(bool),
 	"not":    Function(not),
-	"type":   Function(type_),
-	"def!":   Function(def_E),
-	"let*":   Function(let_S),
 	"and":    Function(and),
 	"or":     Function(or),
-	"add":    Function(add),
-	"sub":    Function(sub),
-	"mul":    Function(mul),
-	"quot":   Function(quot),
-	"rem":    Function(rem),
-	"quot*":  Function(quot_S),
+	// numbers
+	"add":   Function(add),
+	"sub":   Function(sub),
+	"mul":   Function(mul),
+	"quot":  Function(quot),
+	"rem":   Function(rem),
+	"quot*": Function(quot_S),
+	// special
+	"type": Function(type_),
+	"def!": Function(def_E),
+	"let*": Function(let_S),
 }
 
 type Function func(ast core.List, env Env) (core.Any, error)
