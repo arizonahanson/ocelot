@@ -32,7 +32,7 @@ func EvalStr(in string, env *core.Env) (core.Any, error) {
 
 // trampoline eval for making non-tail calls
 func Eval(ast core.Any, env core.Env) (core.Any, error) {
-	value, err := evalAny(ast, env)
+	value, err := evalAst(ast, env)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func Eval(ast core.Any, env core.Env) (core.Any, error) {
 // thunked eval for tail-calls
 func EvalTail(ast core.Any, env core.Env) Thunk {
 	return func() (core.Any, error) {
-		return evalAny(ast, env)
+		return evalAst(ast, env)
 	}
 }
 
@@ -67,7 +67,7 @@ func FnTail(fn core.Function, ast core.List, env core.Env) Thunk {
 }
 
 // eval impl
-func evalAny(ast core.Any, env core.Env) (core.Any, error) {
+func evalAst(ast core.Any, env core.Env) (core.Any, error) {
 	switch ast.(type) {
 	default:
 		// String, Number
@@ -88,25 +88,18 @@ func evalList(ast core.List, env core.Env) (core.Any, error) {
 	for i, item := range ast {
 		if i == 0 {
 			// check for function symbols.
-			switch item.(type) {
+			first, err := Eval(item, env)
+			if err != nil {
+				return nil, err
+			}
+			switch first.(type) {
 			default:
-				// first isn't symbol
-				break
-			case core.Symbol:
-				// first is a symbol, get
-				val, err := env.Get(item.(core.Symbol))
-				if err != nil {
-					return nil, err
-				}
-				switch val.(type) {
-				default:
-					// not a function, append
-					res = append(res, val)
-					continue
-				case core.Function:
-					// tail-call function (unevaluated ast)
-					return FnTail(val.(core.Function), ast, env), nil
-				}
+				// not a function, append
+				res = append(res, first)
+				continue
+			case core.Function:
+				// tail-call function (unevaluated ast)
+				return FnTail(first.(core.Function), ast, env), nil
 			}
 		}
 		// default list resolution for rest
