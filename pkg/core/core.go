@@ -135,7 +135,7 @@ func (val Nil) String() string {
 func (fn Function) String() string {
 	strs := strings.Split(runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name(), ".")
 	str := strs[len(strs)-1]
-	str = strings.ReplaceAll(str, "_", "")
+	str = strings.ReplaceAll(str, "Z", "")
 	str = strings.ReplaceAll(str, "E", "!")
 	str = strings.ReplaceAll(str, "Q", "?")
 	str = strings.ReplaceAll(str, "S", "*")
