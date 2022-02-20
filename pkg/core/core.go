@@ -40,7 +40,11 @@ type Number decimal.Decimal
 type Function func(ast List, env Env) (Any, error)
 
 var Zero = Number(decimal.Zero)
-var One = Number(decimal.NewFromInt(1))
+var One = NewNumber(1)
+
+func NewNumber(num int) Number {
+	return Number(decimal.NewFromInt(int64(num)))
+}
 
 // parse quoted, escaped string
 func (val String) Unquote() (String, error) {

@@ -2,6 +2,7 @@ package base
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/starlight/ocelot/pkg/core"
 )
@@ -26,12 +27,18 @@ var Base = map[string]core.Any{
 	"rem":   core.Function(rem),
 	"quot*": core.Function(quot_S),
 	// special
-	"type": core.Function(type_),
-	"def!": core.Function(def_E),
-	"let*": core.Function(let_S),
-	"do":   core.Function(do),
-	"if":   core.Function(if_),
-	"fn*":  core.Function(fn_S),
+	"type":   core.Function(type_),
+	"def!":   core.Function(def_E),
+	"let*":   core.Function(let_S),
+	"do":     core.Function(do),
+	"if":     core.Function(if_),
+	"fn*":    core.Function(fn_S),
+	"prn":    core.Function(prn),
+	"list":   core.Function(list),
+	"list?":  core.Function(list_Q),
+	"empty?": core.Function(empty_Q),
+	"count":  core.Function(count),
+	"equal?": core.Function(equal_Q),
 }
 
 func exactLen(ast core.List, num int) error {
@@ -44,6 +51,13 @@ func exactLen(ast core.List, num int) error {
 func rangeLen(ast core.List, min int, max int) error {
 	if len(ast) < min || len(ast) > max {
 		return fmt.Errorf("%v wanted %d-%d args, got %d", ast[0], min-1, max-1, len(ast)-1)
+	}
+	return nil
+}
+
+func minLen(ast core.List, min int) error {
+	if len(ast) < min {
+		return fmt.Errorf("%v wanted at least %d args, got %d", ast[0], min-1, len(ast)-1)
 	}
 	return nil
 }
@@ -397,11 +411,11 @@ func fn_S(ast core.List, env core.Env) (core.Any, error) {
 		if err != nil {
 			return nil, err
 		}
-		exprs, err := apply(args[1:], outer)
+		exprs, err := list(args, outer)
 		if err != nil {
 			return nil, err
 		}
-		newEnv, err := core.NewEnv(&env, binds, exprs)
+		newEnv, err := core.NewEnv(&env, binds, exprs.(core.List))
 		if err != nil {
 			return nil, err
 		}
@@ -410,9 +424,18 @@ func fn_S(ast core.List, env core.Env) (core.Any, error) {
 	return core.Function(lambda), nil
 }
 
-func apply(ast core.List, env core.Env) (core.List, error) {
+func prn(ast core.List, env core.Env) (core.Any, error) {
+	vals, err := list(ast, env)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("%v\n", vals)
+	return core.Nil{}, nil
+}
+
+func list(ast core.List, env core.Env) (core.Any, error) {
 	exprs := []core.Any{}
-	for _, item := range ast {
+	for _, item := range ast[1:] {
 		val, err := Eval(item, env)
 		if err != nil {
 			return nil, err
@@ -420,4 +443,111 @@ func apply(ast core.List, env core.Env) (core.List, error) {
 		exprs = append(exprs, val)
 	}
 	return core.List(exprs), nil
+}
+
+func list_Q(ast core.List, env core.Env) (core.Any, error) {
+	err := exactLen(ast, 2)
+	if err != nil {
+		return nil, err
+	}
+	val, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch val.(type) {
+	default:
+		return core.Bool(false), nil
+	case core.List:
+		return core.Bool(true), nil
+	}
+}
+
+func count(ast core.List, env core.Env) (core.Any, error) {
+	err := exactLen(ast, 2)
+	if err != nil {
+		return nil, err
+	}
+	val, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch val.(type) {
+	default:
+		return nil, fmt.Errorf("%v arg should be a List, got '%v'", ast[0], val)
+	case core.List:
+		break
+	}
+	return core.NewNumber(len(val.(core.List))), nil
+}
+
+func empty_Q(ast core.List, env core.Env) (core.Any, error) {
+	cnt, err := count(ast, env)
+	if err != nil {
+		return nil, err
+	}
+	return core.Bool(cnt.(core.Number).Decimal().Equal(core.Zero.Decimal())), nil
+}
+
+func equal_Q(ast core.List, env core.Env) (core.Any, error) {
+	err := minLen(ast, 3)
+	if err != nil {
+		return nil, err
+	}
+	first, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range ast[2:] {
+		value, err := Eval(item, env)
+		if err != nil {
+			return nil, err
+		}
+		if !isEqual(first, value) {
+			return core.Bool(false), nil
+		}
+	}
+	return core.Bool(true), nil
+}
+
+func isEqual(first core.Any, item core.Any) bool {
+	if reflect.TypeOf(item) != reflect.TypeOf(first) {
+		return false
+	}
+	switch first.(type) {
+	default:
+		if item != first {
+			return false
+		}
+	case core.Function:
+		return false
+	case core.Symbol:
+		if item.(core.Symbol).Val != first.(core.Symbol).Val {
+			return false
+		}
+	case core.Number:
+		if !item.(core.Number).Decimal().Equal(first.(core.Number).Decimal()) {
+			return false
+		}
+	case core.List:
+		if len(first.(core.List)) != len(item.(core.List)) {
+			return false
+		}
+		for i, a := range first.(core.List) {
+			b := item.(core.List)[i]
+			if !isEqual(a, b) {
+				return false
+			}
+		}
+	case core.Vector:
+		if len(first.(core.Vector)) != len(item.(core.Vector)) {
+			return false
+		}
+		for i, a := range first.(core.Vector) {
+			b := item.(core.Vector)[i]
+			if !isEqual(a, b) {
+				return false
+			}
+		}
+	}
+	return true
 }
