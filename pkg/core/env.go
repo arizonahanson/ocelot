@@ -37,7 +37,7 @@ func (env Env) Get(sym Symbol) (Any, error) {
 		if env.outer != nil {
 			return env.outer.Get(sym)
 		}
-		return nil, fmt.Errorf("%v not found", sym)
+		return nil, fmt.Errorf("%v: not found", sym)
 	}
 	return value, nil
 }

@@ -65,7 +65,7 @@ func (val String) Number() (Number, error) {
 }
 
 func (val Symbol) String() string {
-	return fmt.Sprintf("ocelot:%d:%d (%d): '%s'", val.Pos.Line, val.Pos.Col, val.Pos.Offset, val.Val)
+	return fmt.Sprintf("%s:%d:%d (%d)", val.Val, val.Pos.Line, val.Pos.Col, val.Pos.Offset)
 }
 
 func (val List) String() string {
@@ -135,9 +135,5 @@ func (val Nil) String() string {
 func (fn Function) String() string {
 	strs := strings.Split(runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name(), ".")
 	str := strs[len(strs)-1]
-	str = strings.ReplaceAll(str, "Z", "")
-	str = strings.ReplaceAll(str, "E", "!")
-	str = strings.ReplaceAll(str, "Q", "?")
-	str = strings.ReplaceAll(str, "S", "*")
 	return "&" + str
 }

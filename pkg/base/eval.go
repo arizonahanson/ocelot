@@ -8,7 +8,7 @@ import (
 type Thunk func() (core.Any, error)
 
 func Parse(in string) (core.Any, error) {
-	ast, err := parser.Parse("ocelot", []byte(in))
+	ast, err := parser.Parse("parse", []byte(in))
 	if err != nil {
 		return nil, err
 	}
