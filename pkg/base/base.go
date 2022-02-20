@@ -39,6 +39,7 @@ var Base = map[string]core.Any{
 	"if":     core.Function(_if),
 	"fn*":    core.Function(fnS),
 	"prn":    core.Function(prn),
+	"eval":   core.Function(eval),
 	// lists
 	"list":   core.Function(list),
 	"list?":  core.Function(listQ),
@@ -676,4 +677,16 @@ func gteqQ(ast core.List, env core.Env) (core.Any, error) {
 		break
 	}
 	return core.Bool(arg1.(core.Number).Decimal().GreaterThanOrEqual(arg2.(core.Number).Decimal())), nil
+}
+
+func eval(ast core.List, env core.Env) (core.Any, error) {
+	err := exactLen(ast, 2)
+	if err != nil {
+		return nil, err
+	}
+	val, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	return EvalTail(val, env), nil
 }

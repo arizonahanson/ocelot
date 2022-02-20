@@ -30,7 +30,7 @@ func EvalStr(in string, env *core.Env) (core.Any, error) {
 	return Eval(ast, *env)
 }
 
-// trampoline eval for making non-tail calls
+// trampoline eval for making non-tail calls (eager)
 func Eval(ast core.Any, env core.Env) (core.Any, error) {
 	value, err := evalAst(ast, env)
 	if err != nil {
@@ -52,14 +52,14 @@ func Eval(ast core.Any, env core.Env) (core.Any, error) {
 	}
 }
 
-// thunked eval for tail-calls
+// thunked eval for tail-calls (lazy)
 func EvalTail(ast core.Any, env core.Env) Thunk {
 	return func() (core.Any, error) {
 		return evalAst(ast, env)
 	}
 }
 
-// thunked function call
+// thunked function call (always lazy)
 func FnTail(fn core.Function, ast core.List, env core.Env) Thunk {
 	return func() (core.Any, error) {
 		return fn(ast, env)
