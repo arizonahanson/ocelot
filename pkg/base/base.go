@@ -26,6 +26,10 @@ var Base = map[string]core.Any{
 	"quot":  core.Function(quot),
 	"rem":   core.Function(rem),
 	"quot*": core.Function(quot_S),
+	"lt?":   core.Function(lt_Q),
+	"lteq?": core.Function(lteq_Q),
+	"gt?":   core.Function(gt_Q),
+	"gteq?": core.Function(gteq_Q),
 	// special
 	"type":   core.Function(type_),
 	"def!":   core.Function(def_E),
@@ -550,4 +554,116 @@ func isEqual(first core.Any, item core.Any) bool {
 		}
 	}
 	return true
+}
+
+func lt_Q(ast core.List, env core.Env) (core.Any, error) {
+	err := exactLen(ast, 3)
+	if err != nil {
+		return nil, err
+	}
+	arg1, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch arg1.(type) {
+	default:
+		return nil, fmt.Errorf("%v called with non-number: '%v'", ast[0], arg1)
+	case core.Number:
+		break
+	}
+	arg2, err := Eval(ast[2], env)
+	if err != nil {
+		return nil, err
+	}
+	switch arg2.(type) {
+	default:
+		return nil, fmt.Errorf("%v called with non-number: '%v'", ast[0], arg2)
+	case core.Number:
+		break
+	}
+	return core.Bool(arg1.(core.Number).Decimal().LessThan(arg2.(core.Number).Decimal())), nil
+}
+
+func lteq_Q(ast core.List, env core.Env) (core.Any, error) {
+	err := exactLen(ast, 3)
+	if err != nil {
+		return nil, err
+	}
+	arg1, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch arg1.(type) {
+	default:
+		return nil, fmt.Errorf("%v called with non-number: '%v'", ast[0], arg1)
+	case core.Number:
+		break
+	}
+	arg2, err := Eval(ast[2], env)
+	if err != nil {
+		return nil, err
+	}
+	switch arg2.(type) {
+	default:
+		return nil, fmt.Errorf("%v called with non-number: '%v'", ast[0], arg2)
+	case core.Number:
+		break
+	}
+	return core.Bool(arg1.(core.Number).Decimal().LessThanOrEqual(arg2.(core.Number).Decimal())), nil
+}
+
+func gt_Q(ast core.List, env core.Env) (core.Any, error) {
+	err := exactLen(ast, 3)
+	if err != nil {
+		return nil, err
+	}
+	arg1, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch arg1.(type) {
+	default:
+		return nil, fmt.Errorf("%v called with non-number: '%v'", ast[0], arg1)
+	case core.Number:
+		break
+	}
+	arg2, err := Eval(ast[2], env)
+	if err != nil {
+		return nil, err
+	}
+	switch arg2.(type) {
+	default:
+		return nil, fmt.Errorf("%v called with non-number: '%v'", ast[0], arg2)
+	case core.Number:
+		break
+	}
+	return core.Bool(arg1.(core.Number).Decimal().GreaterThan(arg2.(core.Number).Decimal())), nil
+}
+
+func gteq_Q(ast core.List, env core.Env) (core.Any, error) {
+	err := exactLen(ast, 3)
+	if err != nil {
+		return nil, err
+	}
+	arg1, err := Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch arg1.(type) {
+	default:
+		return nil, fmt.Errorf("%v called with non-number: '%v'", ast[0], arg1)
+	case core.Number:
+		break
+	}
+	arg2, err := Eval(ast[2], env)
+	if err != nil {
+		return nil, err
+	}
+	switch arg2.(type) {
+	default:
+		return nil, fmt.Errorf("%v called with non-number: '%v'", ast[0], arg2)
+	case core.Number:
+		break
+	}
+	return core.Bool(arg1.(core.Number).Decimal().GreaterThanOrEqual(arg2.(core.Number).Decimal())), nil
 }
