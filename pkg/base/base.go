@@ -480,13 +480,18 @@ func count(ast core.List, env core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
+	var cnt int
 	switch val.(type) {
 	default:
-		return nil, fmt.Errorf("%v: arg should be a List, got '%v'", ast[0], val)
+		return nil, fmt.Errorf("%v: arg should be a collection, got '%v'", ast[0], val)
+	case core.Vector:
+		cnt = len(val.(core.Vector))
+		break
 	case core.List:
+		cnt = len(val.(core.List))
 		break
 	}
-	return core.NewNumber(len(val.(core.List))), nil
+	return core.NewNumber(cnt), nil
 }
 
 func emptyQ(ast core.List, env core.Env) (core.Any, error) {
