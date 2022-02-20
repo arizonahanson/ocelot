@@ -223,6 +223,7 @@ func quot(ast core.List, env core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
+	args := core.List{}
 	for _, item := range ast[1:] {
 		arg, err := Eval(item, env)
 		if err != nil {
@@ -232,12 +233,13 @@ func quot(ast core.List, env core.Env) (core.Any, error) {
 		default:
 			return nil, fmt.Errorf("%v called with non-number '%v'", ast[0], arg)
 		case core.Number:
+			args = append(args, arg)
 			continue
 		}
 	}
-	arg1 := ast[1].(core.Number).Decimal()
-	arg2 := ast[2].(core.Number).Decimal()
-	prec := ast[3].(core.Number).Decimal().IntPart()
+	arg1 := args[0].(core.Number).Decimal()
+	arg2 := args[1].(core.Number).Decimal()
+	prec := args[2].(core.Number).Decimal().IntPart()
 	q, _ := arg1.QuoRem(arg2, int32(prec))
 	return core.Number(q), nil
 }
@@ -247,6 +249,7 @@ func rem(ast core.List, env core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
+	args := core.List{}
 	for _, item := range ast[1:] {
 		arg, err := Eval(item, env)
 		if err != nil {
@@ -256,12 +259,13 @@ func rem(ast core.List, env core.Env) (core.Any, error) {
 		default:
 			return nil, fmt.Errorf("%v called with non-number '%v'", ast[0], arg)
 		case core.Number:
+			args = append(args, arg)
 			continue
 		}
 	}
-	arg1 := ast[1].(core.Number).Decimal()
-	arg2 := ast[2].(core.Number).Decimal()
-	prec := ast[3].(core.Number).Decimal().IntPart()
+	arg1 := args[0].(core.Number).Decimal()
+	arg2 := args[1].(core.Number).Decimal()
+	prec := args[2].(core.Number).Decimal().IntPart()
 	_, r := arg1.QuoRem(arg2, int32(prec))
 	return core.Number(r), nil
 }
