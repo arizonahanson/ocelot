@@ -49,9 +49,7 @@ var rootCmd = &cobra.Command{
 			err := ocelot.Repl("❱❱ ")
 			cobra.CheckErr(err)
 		} else {
-			env, err := base.BaseEnv()
-			cobra.CheckErr(err)
-			out, err := ocelot.Eval(strings.Join(args, " "), env)
+			out, err := base.EvalStr(strings.Join(args, " "), nil)
 			cobra.CheckErr(err)
 			fmt.Println(out)
 		}

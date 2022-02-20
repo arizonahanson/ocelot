@@ -1,10 +1,34 @@
 package base
 
 import (
+	"github.com/starlight/ocelot/internal/parser"
 	"github.com/starlight/ocelot/pkg/core"
 )
 
 type Thunk func() (core.Any, error)
+
+func Parse(in string) (core.Any, error) {
+	ast, err := parser.Parse("ocelot", []byte(in))
+	if err != nil {
+		return nil, err
+	}
+	return ast, nil
+}
+
+func EvalStr(in string, env *core.Env) (core.Any, error) {
+	ast, err := Parse(in)
+	if err != nil {
+		return nil, err
+	}
+	if env == nil {
+		base, err := BaseEnv()
+		if err != nil {
+			return nil, err
+		}
+		env = base
+	}
+	return Eval(ast, *env)
+}
 
 // trampoline eval for making non-tail calls
 func Eval(ast core.Any, env core.Env) (core.Any, error) {

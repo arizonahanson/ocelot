@@ -5,26 +5,9 @@ import (
 	"os"
 
 	goprompt "github.com/c-bata/go-prompt"
-	"github.com/starlight/ocelot/internal/parser"
 	"github.com/starlight/ocelot/pkg/base"
-	"github.com/starlight/ocelot/pkg/core"
 	"golang.org/x/term"
 )
-
-func Eval(in string, env *core.Env) (core.Any, error) {
-	ast, err := parser.Parse("ocelot", []byte(in))
-	if err != nil {
-		return nil, err
-	}
-	if env == nil {
-		base, err := base.BaseEnv()
-		if err != nil {
-			return nil, err
-		}
-		env = base
-	}
-	return base.Eval(ast, *env)
-}
 
 func Repl(prompt string) error {
 	env, err := base.BaseEnv()
@@ -35,7 +18,7 @@ func Repl(prompt string) error {
 		if in == "" {
 			return
 		}
-		out, err := Eval(in, env)
+		out, err := base.EvalStr(in, env)
 		if err != nil {
 			fmt.Println(err)
 			return
