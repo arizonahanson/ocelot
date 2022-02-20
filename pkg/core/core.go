@@ -65,7 +65,7 @@ func (val String) Number() (Number, error) {
 }
 
 func (val Symbol) String() string {
-	return fmt.Sprintf("%s:%d:%d (%d)", val.Val, val.Pos.Line, val.Pos.Col, val.Pos.Offset)
+	return fmt.Sprintf("%s<%d,%d;%d>", val.Val, val.Pos.Line, val.Pos.Col, val.Pos.Offset)
 }
 
 func (val List) String() string {

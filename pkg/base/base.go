@@ -42,6 +42,7 @@ var Base = map[string]core.Any{
 	"eval":   core.Function(eval),
 	// lists
 	"list":   core.Function(list),
+	"list*":  core.Function(listS),
 	"list?":  core.Function(listQ),
 	"empty?": core.Function(emptyQ),
 	"count":  core.Function(count),
@@ -441,6 +442,10 @@ func prn(ast core.List, env core.Env) (core.Any, error) {
 	}
 	fmt.Printf("%v\n", vals)
 	return core.Nil{}, nil
+}
+
+func listS(ast core.List, env core.Env) (core.Any, error) {
+	return ast[1:], nil
 }
 
 func list(ast core.List, env core.Env) (core.Any, error) {
