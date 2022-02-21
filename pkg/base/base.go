@@ -40,9 +40,9 @@ var Base = map[string]core.Any{
 	"fn*":    core.Function(fnS),
 	"prn":    core.Function(prn),
 	"eval":   core.Function(eval),
+	"quote":  core.Function(quote),
 	// lists
 	"list":   core.Function(list),
-	"list*":  core.Function(listS),
 	"list?":  core.Function(listQ),
 	"empty?": core.Function(emptyQ),
 	"count":  core.Function(count),
@@ -444,10 +444,6 @@ func prn(ast core.List, env core.Env) (core.Any, error) {
 	return core.Nil{}, nil
 }
 
-func listS(ast core.List, env core.Env) (core.Any, error) {
-	return ast[1:], nil
-}
-
 func list(ast core.List, env core.Env) (core.Any, error) {
 	exprs := []core.Any{}
 	for _, item := range ast[1:] {
@@ -684,14 +680,29 @@ func gteqQ(ast core.List, env core.Env) (core.Any, error) {
 	return core.Bool(arg1.(core.Number).Decimal().GreaterThanOrEqual(arg2.(core.Number).Decimal())), nil
 }
 
+func quote(ast core.List, env core.Env) (core.Any, error) {
+	err := exactLen(ast, 2)
+	if err != nil {
+		return nil, err
+	}
+	return ast[1], nil
+}
+
 func eval(ast core.List, env core.Env) (core.Any, error) {
 	err := exactLen(ast, 2)
 	if err != nil {
 		return nil, err
 	}
-	val, err := Eval(ast[1], env)
-	if err != nil {
-		return nil, err
+	// double-eval TCO'd
+	return dualEvalTail(ast[1], env), nil
+}
+
+func dualEvalTail(ast core.Any, env core.Env) Thunk {
+	return func() (core.Any, error) {
+		val, err := Eval(ast, env)
+		if err != nil {
+			return nil, err
+		}
+		return Eval(val, env)
 	}
-	return EvalTail(val, env), nil
 }

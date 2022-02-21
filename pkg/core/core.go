@@ -69,7 +69,10 @@ func (val Symbol) String() string {
 }
 
 func (val Symbol) GoString() string {
-	return fmt.Sprintf("%s<%d,%d;%d>", val.Val, val.Pos.Line, val.Pos.Col, val.Pos.Offset)
+	if val.Pos != nil {
+		return fmt.Sprintf("%s<%d,%d;%d>", val.Val, val.Pos.Line, val.Pos.Col, val.Pos.Offset)
+	}
+	return fmt.Sprintf("%s<?>", val.Val)
 }
 
 func (val String) String() string {
