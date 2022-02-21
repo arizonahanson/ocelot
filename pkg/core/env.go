@@ -9,7 +9,7 @@ type Env struct {
 	data  map[string]Any
 }
 
-func NewEnv(outer *Env, binds List, exprs List) (*Env, error) {
+func NewEnv(outer *Env, binds Vector, exprs List) (*Env, error) {
 	data := make(map[string]Any)
 	if len(binds) != len(exprs) {
 		return nil, fmt.Errorf("binds and exprs must be the same length: %d", len(binds))
