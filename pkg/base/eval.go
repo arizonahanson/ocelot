@@ -84,7 +84,7 @@ func evalAst(ast core.Any, env core.Env) (core.Any, error) {
 }
 
 func evalList(ast core.List, env core.Env) (core.Any, error) {
-	res := []core.Any{}
+	res := make([]core.Any, len(ast))
 	for i, item := range ast {
 		if i == 0 {
 			// check for function symbols.
@@ -94,8 +94,8 @@ func evalList(ast core.List, env core.Env) (core.Any, error) {
 			}
 			switch first.(type) {
 			default:
-				// not a function, append
-				res = append(res, first)
+				// not a function
+				res[0] = first
 				continue
 			case core.Function:
 				// tail-call function (unevaluated ast)
@@ -107,20 +107,20 @@ func evalList(ast core.List, env core.Env) (core.Any, error) {
 		if err != nil {
 			return nil, err
 		}
-		res = append(res, any)
+		res[i] = any
 	}
 	// empty list
 	return core.List(res), nil
 }
 
 func evalVector(ast core.Vector, env core.Env) (core.Vector, error) {
-	res := []core.Any{}
-	for _, item := range ast {
+	res := make([]core.Any, len(ast))
+	for i, item := range ast {
 		any, err := Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
-		res = append(res, any)
+		res[i] = any
 	}
 	return core.Vector(res), nil
 }

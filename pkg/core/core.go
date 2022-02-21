@@ -116,17 +116,19 @@ func (val Vector) String() string {
 }
 
 func (val Map) String() string {
-	res := []string{}
+	res := make([]string, len(val)*2)
+	i := 0
 	for key, value := range val {
-		res = append(res, fmt.Sprintf("%v", key))
+		res[i] = fmt.Sprintf("%v", key)
 		switch value.(type) {
 		default:
-			res = append(res, fmt.Sprintf("%v", value))
+			res[i+1] = fmt.Sprintf("%v", value)
 			break
 		case List:
-			res = append(res, fmt.Sprintf("(%v)", value))
+			res[i+1] = fmt.Sprintf("(%v)", value)
 			break
 		}
+		i += 2
 	}
 	return "{" + strings.Join(res, " ") + "}"
 }

@@ -225,8 +225,8 @@ func quot(ast core.List, env core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	args := core.List{}
-	for _, item := range ast[1:] {
+	args := make(core.List, 3)
+	for i, item := range ast[1:] {
 		arg, err := Eval(item, env)
 		if err != nil {
 			return nil, err
@@ -235,7 +235,7 @@ func quot(ast core.List, env core.Env) (core.Any, error) {
 		default:
 			return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg)
 		case core.Number:
-			args = append(args, arg)
+			args[i] = arg
 			continue
 		}
 	}
@@ -251,8 +251,8 @@ func rem(ast core.List, env core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	args := core.List{}
-	for _, item := range ast[1:] {
+	args := make(core.List, 3)
+	for i, item := range ast[1:] {
 		arg, err := Eval(item, env)
 		if err != nil {
 			return nil, err
@@ -261,7 +261,7 @@ func rem(ast core.List, env core.Env) (core.Any, error) {
 		default:
 			return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg)
 		case core.Number:
-			args = append(args, arg)
+			args[i] = arg
 			continue
 		}
 	}
@@ -445,13 +445,13 @@ func prn(ast core.List, env core.Env) (core.Any, error) {
 }
 
 func list(ast core.List, env core.Env) (core.Any, error) {
-	exprs := []core.Any{}
-	for _, item := range ast[1:] {
+	exprs := make([]core.Any, len(ast)-1)
+	for i, item := range ast[1:] {
 		val, err := Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
-		exprs = append(exprs, val)
+		exprs[i] = val
 	}
 	return core.List(exprs), nil
 }

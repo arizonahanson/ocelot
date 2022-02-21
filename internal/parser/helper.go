@@ -15,10 +15,12 @@ func join(first, rest interface{}, index int) []core.Any {
 	if first == nil {
 		return []core.Any{}
 	}
-	result := []core.Any{first}
-	for _, group := range slice(rest) {
+	more := slice(rest)
+	result := make([]core.Any, len(more)+1)
+	result[0] = first
+	for i, group := range more {
 		next := slice(group)[index]
-		result = append(result, next)
+		result[i+1] = next
 	}
 	return result
 }
