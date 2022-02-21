@@ -34,7 +34,7 @@ var Base = map[string]core.Any{
 	"type":   core.Function(_type),
 	"equal?": core.Function(equalQ),
 	"def!":   core.Function(defE),
-	"let*":   core.Function(letS),
+	"let":    core.Function(let),
 	"do":     core.Function(do),
 	"if":     core.Function(_if),
 	"fn*":    core.Function(fnS),
@@ -326,7 +326,7 @@ func defE(ast core.List, env core.Env) (core.Any, error) {
 	return val, nil
 }
 
-func letS(ast core.List, env core.Env) (core.Any, error) {
+func let(ast core.List, env core.Env) (core.Any, error) {
 	err := exactLen(ast, 3)
 	if err != nil {
 		return nil, err
@@ -356,7 +356,7 @@ func letS(ast core.List, env core.Env) (core.Any, error) {
 		if err != nil {
 			return nil, err
 		}
-		env.Set(pairs[0].(core.Symbol), val)
+		newEnv.Set(pairs[0].(core.Symbol), val)
 		pairs = pairs[2:]
 		if len(pairs) == 0 {
 			break
