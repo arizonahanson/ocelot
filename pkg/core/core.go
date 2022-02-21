@@ -97,6 +97,28 @@ func (val List) String() string {
 	return str
 }
 
+func (val List) GoString() string {
+	str := "("
+	for i, item := range val {
+		if i != 0 {
+			str += " "
+		}
+		if i >= 2 {
+			str += "..."
+			break
+		}
+		switch item.(type) {
+		default:
+			str += fmt.Sprintf("%#v", item)
+			break
+		case List:
+			str += fmt.Sprintf("(%v)", item)
+			break
+		}
+	}
+	return str + ")"
+}
+
 func (val Vector) String() string {
 	str := ""
 	for i, item := range val {
@@ -113,6 +135,28 @@ func (val Vector) String() string {
 		}
 	}
 	return "[" + str + "]"
+}
+
+func (val Vector) GoString() string {
+	str := "["
+	for i, item := range val {
+		if i != 0 {
+			str += " "
+		}
+		if i >= 2 {
+			str += " ..."
+			break
+		}
+		switch item.(type) {
+		default:
+			str += fmt.Sprintf("%v", item)
+			break
+		case List:
+			str += fmt.Sprintf("(%v)", item)
+			break
+		}
+	}
+	return str + "]"
 }
 
 func (val Map) String() string {
