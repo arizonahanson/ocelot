@@ -145,3 +145,7 @@ func (fn Function) String() string {
 	str := strs[len(strs)-1]
 	return "&" + str
 }
+
+func (fn Function) GoString() string {
+	return fn.String()
+}
