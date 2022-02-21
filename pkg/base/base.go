@@ -50,21 +50,21 @@ var Base = map[string]core.Any{
 
 func exactLen(ast core.List, num int) error {
 	if len(ast) != num {
-		return fmt.Errorf("%v: wanted %d arg(s), got %d", ast[0], num-1, len(ast)-1)
+		return fmt.Errorf("%#v: wanted %d arg(s), got %d", ast[0], num-1, len(ast)-1)
 	}
 	return nil
 }
 
 func rangeLen(ast core.List, min int, max int) error {
 	if len(ast) < min || len(ast) > max {
-		return fmt.Errorf("%v: wanted %d-%d args, got %d", ast[0], min-1, max-1, len(ast)-1)
+		return fmt.Errorf("%#v: wanted %d-%d args, got %d", ast[0], min-1, max-1, len(ast)-1)
 	}
 	return nil
 }
 
 func minLen(ast core.List, min int) error {
 	if len(ast) < min {
-		return fmt.Errorf("%v: wanted at least %d args, got %d", ast[0], min-1, len(ast)-1)
+		return fmt.Errorf("%#v: wanted at least %d args, got %d", ast[0], min-1, len(ast)-1)
 	}
 	return nil
 }
@@ -170,7 +170,7 @@ func add(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg)
 		case core.Number:
 			break
 		}
@@ -188,7 +188,7 @@ func sub(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg)
 		case core.Number:
 			break
 		}
@@ -211,7 +211,7 @@ func mul(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg)
 		case core.Number:
 			break
 		}
@@ -233,7 +233,7 @@ func quot(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg)
 		case core.Number:
 			args = append(args, arg)
 			continue
@@ -259,7 +259,7 @@ func rem(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg)
 		case core.Number:
 			args = append(args, arg)
 			continue
@@ -281,7 +281,7 @@ func quotS(ast core.List, env core.Env) (core.Any, error) {
 		}
 		switch arg.(type) {
 		default:
-			return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg)
+			return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg)
 		case core.Number:
 			break
 		}
@@ -314,7 +314,7 @@ func defE(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch ast[1].(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-symbol '%v'", ast[0], ast[1])
+		return nil, fmt.Errorf("%#v: called with non-symbol %v", ast[0], ast[1])
 	case core.Symbol:
 		break
 	}
@@ -333,7 +333,7 @@ func letS(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch ast[1].(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-list '%v'", ast[0], ast[1])
+		return nil, fmt.Errorf("%#v: called with non-list %v", ast[0], ast[1])
 	case core.List:
 		break
 	}
@@ -343,12 +343,12 @@ func letS(ast core.List, env core.Env) (core.Any, error) {
 	}
 	pairs := ast[1].(core.List)
 	if len(pairs)%2 != 0 || len(pairs) == 0 {
-		return nil, fmt.Errorf("%v: binding missing", ast[0])
+		return nil, fmt.Errorf("%#v: binding missing", ast[0])
 	}
 	for {
 		switch pairs[0].(type) {
 		default:
-			return nil, fmt.Errorf("%v: called with non-symbol '%v'", ast[0], pairs[0])
+			return nil, fmt.Errorf("%#v: called with non-symbol %v", ast[0], pairs[0])
 		case core.Symbol:
 			break
 		}
@@ -403,7 +403,7 @@ func fnS(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch ast[1].(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-list '%v'", ast[0], ast[1])
+		return nil, fmt.Errorf("%#v: called with non-list %v", ast[0], ast[1])
 	case core.List:
 		break
 	}
@@ -411,7 +411,7 @@ func fnS(ast core.List, env core.Env) (core.Any, error) {
 	for _, item := range binds {
 		switch item.(type) {
 		default:
-			return nil, fmt.Errorf("%v: bind expression contained non-symbol: '%v'", ast[0], item)
+			return nil, fmt.Errorf("%#v: bind expression contained non-symbol %v", ast[0], item)
 		case core.Symbol:
 			break
 		}
@@ -489,7 +489,7 @@ func count(ast core.List, env core.Env) (core.Any, error) {
 	var cnt int
 	switch val.(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-collection '%v'", ast[0], val)
+		return nil, fmt.Errorf("%#v: called with non-collection %v", ast[0], val)
 	case core.Vector:
 		cnt = len(val.(core.Vector))
 		break
@@ -583,7 +583,7 @@ func ltQ(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch arg1.(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg1)
+		return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg1)
 	case core.Number:
 		break
 	}
@@ -593,7 +593,7 @@ func ltQ(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch arg2.(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg2)
+		return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg2)
 	case core.Number:
 		break
 	}
@@ -611,7 +611,7 @@ func lteqQ(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch arg1.(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg1)
+		return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg1)
 	case core.Number:
 		break
 	}
@@ -621,7 +621,7 @@ func lteqQ(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch arg2.(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg2)
+		return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg2)
 	case core.Number:
 		break
 	}
@@ -639,7 +639,7 @@ func gtQ(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch arg1.(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg1)
+		return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg1)
 	case core.Number:
 		break
 	}
@@ -649,7 +649,7 @@ func gtQ(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch arg2.(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg2)
+		return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg2)
 	case core.Number:
 		break
 	}
@@ -667,7 +667,7 @@ func gteqQ(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch arg1.(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg1)
+		return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg1)
 	case core.Number:
 		break
 	}
@@ -677,7 +677,7 @@ func gteqQ(ast core.List, env core.Env) (core.Any, error) {
 	}
 	switch arg2.(type) {
 	default:
-		return nil, fmt.Errorf("%v: called with non-number '%v'", ast[0], arg2)
+		return nil, fmt.Errorf("%#v: called with non-number %v", ast[0], arg2)
 	case core.Number:
 		break
 	}

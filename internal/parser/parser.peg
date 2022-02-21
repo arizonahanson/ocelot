@@ -12,7 +12,7 @@ Expr ←  _* first:Any? rest:(_+ Any)* _* {
   return join(first, rest, 1), nil
 }
 // parent `any` type
-Any ←  List / Vector / Map / atom
+Any ←  List / Vector / Map / String / Symbol / Key / Number
 // expression list
 List ←  '(' expr:Expr ')' {
   return core.List(expr.([]core.Any)), nil
@@ -31,11 +31,9 @@ Map ←  '{' _* first:(Key _+ Any)? rest:(_+ Key _+ Any)* _* '}' {
 } / '{' _* (Key _+ Any) (_+ Key _+ Any)* _* !'}' {
   return nil, errors.New("not terminated")
 }
-Key ←  ':' letter (letter / digit)* {
+Key ←  ':' word {
   return core.Key(string(c.text)), nil
 }
-// singletons
-atom ←  String / Symbol / Key / Number
 // literal string
 String ←  '"' runeChr* '"' {
   return core.String(string(c.text)).Unquote()
@@ -54,11 +52,12 @@ Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
   return core.String(string(c.text)).Number()
 }
 // identifiers (like ϕa_2)
-Symbol ←  letter (letter / digit)* suffix? {
+Symbol ←  word suffix? {
   return core.Symbol{Val: string(c.text), Pos: pos(c.pos)}, nil
 }
+word ←  letter (letter / digit)*
 // suffix
-suffix ← [!?*]
+suffix ←  [!?*]
 // integer part of Number
 digit ←  [0-9]
 // unicode letters, and underscore, in indentifiers
