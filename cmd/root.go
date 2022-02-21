@@ -46,7 +46,7 @@ var rootCmd = &cobra.Command{
 	Version: version,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			err := ocelot.Repl("❱❱ ")
+			err := ocelot.Repl("$ ")
 			cobra.CheckErr(err)
 		} else {
 			out, err := base.EvalStr(strings.Join(args, " "), nil)
