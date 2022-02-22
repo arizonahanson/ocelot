@@ -26,13 +26,14 @@ func join(first, rest interface{}, index int) []core.Any {
 }
 
 func merge(first, rest interface{}, keyIndex int, valueIndex int) map[core.Key]core.Any {
-	result := make(map[core.Key]core.Any)
+	more := slice(rest)
+	result := make(map[core.Key]core.Any, len(more)+1)
 	pair := slice(first)
 	if pair == nil {
 		return result
 	}
 	result[pair[keyIndex].(core.Key)] = pair[valueIndex]
-	for _, group := range slice(rest) {
+	for _, group := range more {
 		pair := slice(group)
 		result[pair[keyIndex+1].(core.Key)] = pair[valueIndex+1]
 	}

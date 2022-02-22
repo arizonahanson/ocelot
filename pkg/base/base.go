@@ -161,11 +161,10 @@ func evalNumber(ast core.Any, env core.Env) (*core.Number, error) {
 	if err != nil {
 		return nil, err
 	}
-	switch arg.(type) {
+	switch val := arg.(type) {
 	default:
-		return nil, fmt.Errorf("called with non-number %v", arg)
+		return nil, fmt.Errorf("called with non-number %v", val)
 	case core.Number:
-		val := arg.(core.Number)
 		return &val, nil
 	}
 }
@@ -411,7 +410,7 @@ func prn(ast core.List, env core.Env) (core.Any, error) {
 }
 
 func list(ast core.List, env core.Env) (core.Any, error) {
-	exprs := make([]core.Any, len(ast)-1)
+	exprs := make(core.List, len(ast)-1)
 	for i, item := range ast[1:] {
 		val, err := Eval(item, env)
 		if err != nil {
@@ -419,7 +418,7 @@ func list(ast core.List, env core.Env) (core.Any, error) {
 		}
 		exprs[i] = val
 	}
-	return core.List(exprs), nil
+	return exprs, nil
 }
 
 func listQ(ast core.List, env core.Env) (core.Any, error) {
@@ -447,14 +446,14 @@ func count(ast core.List, env core.Env) (core.Any, error) {
 		return nil, err
 	}
 	var cnt int
-	switch val.(type) {
+	switch any := val.(type) {
 	default:
-		return nil, fmt.Errorf("%#v: called with non-collection %v", ast[0], val)
+		return nil, fmt.Errorf("%#v: called with non-collection %v", ast[0], any)
 	case core.Vector:
-		cnt = len(val.(core.Vector))
+		cnt = len(any)
 		break
 	case core.List:
-		cnt = len(val.(core.List))
+		cnt = len(any)
 		break
 	}
 	return core.NewNumber(cnt), nil
@@ -492,36 +491,34 @@ func isEqual(first core.Any, item core.Any) bool {
 	if reflect.TypeOf(item) != reflect.TypeOf(first) {
 		return false
 	}
-	switch first.(type) {
+	switch val := first.(type) {
 	default:
-		if item != first {
-			return false
-		}
+		return item == val
 	case core.Function:
 		return false
 	case core.Symbol:
-		if item.(core.Symbol).Val != first.(core.Symbol).Val {
+		if item.(core.Symbol).Val != val.Val {
 			return false
 		}
 	case core.Number:
-		if !item.(core.Number).Decimal().Equal(first.(core.Number).Decimal()) {
+		if !item.(core.Number).Decimal().Equal(val.Decimal()) {
 			return false
 		}
 	case core.List:
-		if len(first.(core.List)) != len(item.(core.List)) {
+		if len(val) != len(item.(core.List)) {
 			return false
 		}
-		for i, a := range first.(core.List) {
+		for i, a := range val {
 			b := item.(core.List)[i]
 			if !isEqual(a, b) {
 				return false
 			}
 		}
 	case core.Vector:
-		if len(first.(core.Vector)) != len(item.(core.Vector)) {
+		if len(val) != len(item.(core.Vector)) {
 			return false
 		}
-		for i, a := range first.(core.Vector) {
+		for i, a := range val {
 			b := item.(core.Vector)[i]
 			if !isEqual(a, b) {
 				return false
