@@ -31,24 +31,18 @@ func EvalStr(in string, env *core.Env) (core.Any, error) {
 }
 
 // trampoline eval for making non-tail calls (eager)
-func Eval(ast core.Any, env core.Env) (core.Any, error) {
-	value, err := evalAst(ast, env)
-	if err != nil {
-		return nil, err
-	}
+func Eval(ast core.Any, env core.Env) (value core.Any, err error) {
+	value, err = evalAst(ast, env)
 	for {
-		switch value.(type) {
-		default:
-			return value, nil
-		case Thunk:
-			break
-		}
-		thunk := value.(Thunk)
-		next, err := thunk()
 		if err != nil {
-			return nil, err
+			return
 		}
-		value = next
+		switch thunk := value.(type) {
+		default:
+			return
+		case Thunk:
+			value, err = thunk()
+		}
 	}
 }
 
@@ -68,38 +62,38 @@ func FnTail(fn core.Function, ast core.List, env core.Env) Thunk {
 
 // eval impl
 func evalAst(ast core.Any, env core.Env) (core.Any, error) {
-	switch ast.(type) {
+	switch any := ast.(type) {
 	default:
 		// String, Number
-		return ast, nil
+		return any, nil
 	case core.Symbol:
-		return env.Get(ast.(core.Symbol))
+		return env.Get(any)
 	case core.List:
-		return evalList(ast.(core.List), env)
+		return evalList(any, env)
 	case core.Vector:
-		return evalVector(ast.(core.Vector), env)
+		return evalVector(any, env)
 	case core.Map:
-		return evalMap(ast.(core.Map), env)
+		return evalMap(any, env)
 	}
 }
 
 func evalList(ast core.List, env core.Env) (core.Any, error) {
-	res := make([]core.Any, len(ast))
+	res := make(core.List, len(ast))
 	for i, item := range ast {
 		if i == 0 {
 			// check for function symbols.
-			first, err := Eval(item, env)
+			any, err := Eval(item, env)
 			if err != nil {
 				return nil, err
 			}
-			switch first.(type) {
+			switch first := any.(type) {
 			default:
 				// not a function
 				res[0] = first
 				continue
 			case core.Function:
 				// tail-call function (unevaluated ast)
-				return FnTail(first.(core.Function), ast, env), nil
+				return FnTail(first, ast, env), nil
 			}
 		}
 		// default list resolution for rest
@@ -109,12 +103,11 @@ func evalList(ast core.List, env core.Env) (core.Any, error) {
 		}
 		res[i] = any
 	}
-	// empty list
-	return core.List(res), nil
+	return res, nil
 }
 
 func evalVector(ast core.Vector, env core.Env) (core.Vector, error) {
-	res := make([]core.Any, len(ast))
+	res := make(core.Vector, len(ast))
 	for i, item := range ast {
 		any, err := Eval(item, env)
 		if err != nil {
@@ -122,11 +115,11 @@ func evalVector(ast core.Vector, env core.Env) (core.Vector, error) {
 		}
 		res[i] = any
 	}
-	return core.Vector(res), nil
+	return res, nil
 }
 
 func evalMap(ast core.Map, env core.Env) (core.Map, error) {
-	res := make(map[core.Key]core.Any)
+	res := make(core.Map, len(ast))
 	for key, item := range ast {
 		val, err := Eval(item, env)
 		if err != nil {
@@ -134,7 +127,7 @@ func evalMap(ast core.Map, env core.Env) (core.Map, error) {
 		}
 		res[key] = val
 	}
-	return core.Map(res), nil
+	return res, nil
 }
 
 func BaseEnv() (*core.Env, error) {
