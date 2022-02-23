@@ -37,46 +37,53 @@ type Bool bool
 
 type Number decimal.Decimal
 
-type Function func(ast List, env Env) (Any, error)
+type Function func(ast List, env *Env) (Any, error)
 
-var Zero = Number(decimal.Zero)
+var Zero = NewNumber(0)
 var One = NewNumber(1)
 
-func NewNumber(num int) Number {
-	return Number(decimal.NewFromInt(int64(num)))
+func NewNumber(num int) *Number {
+	n := Number(decimal.NewFromInt(int64(num)))
+	return &n
 }
 
 // parse quoted, escaped string
-func (val String) Unquote() (String, error) {
-	str, err := strconv.Unquote(string(val))
+func (val *String) Unquote() (*String, error) {
+	str, err := strconv.Unquote(string(*val))
 	if err != nil {
-		return String(""), err
+		return nil, err
 	}
-	return String(str), nil
+	s := String(str)
+	return &s, nil
 }
 
 // parse number
-func (val String) Number() (Number, error) {
-	dec, err := decimal.NewFromString(string(val))
+func (val *String) Number() (*Number, error) {
+	dec, err := decimal.NewFromString(string(*val))
 	if err != nil {
-		return Number(decimal.Zero), err
+		return nil, err
 	}
-	return Number(dec), nil
+	n := Number(dec)
+	return &n, nil
 }
 
-func (val Symbol) String() string {
+func (val *Symbol) String() string {
 	return fmt.Sprintf("%s", val.Val)
 }
 
-func (val Symbol) GoString() string {
+func (val *Symbol) GoString() string {
 	if val.Pos != nil {
 		return fmt.Sprintf("%s<%d,%d;%d>", val.Val, val.Pos.Line, val.Pos.Col, val.Pos.Offset)
 	}
 	return fmt.Sprintf("%s<?>", val.Val)
 }
 
-func (val String) String() string {
-	return fmt.Sprintf("%#v", val)
+func (val *String) String() string {
+	return fmt.Sprintf("%#v", *val)
+}
+
+func (key *Key) String() string {
+	return fmt.Sprintf("%s", *key)
 }
 
 func (val List) String() string {
@@ -177,12 +184,12 @@ func (val Map) String() string {
 	return "{" + strings.Join(res, " ") + "}"
 }
 
-func (val Number) String() string {
+func (val *Number) String() string {
 	return val.Decimal().String()
 }
 
-func (val Number) Decimal() decimal.Decimal {
-	return decimal.Decimal(val)
+func (val *Number) Decimal() decimal.Decimal {
+	return decimal.Decimal(*val)
 }
 
 func (val Nil) String() string {

@@ -32,11 +32,13 @@ Map ←  '{' _* first:(Key _+ Any)? rest:(_+ Key _+ Any)* _* '}' {
   return nil, errors.New("not terminated")
 }
 Key ←  ':' word {
-  return core.Key(string(c.text)), nil
+  key := core.Key(string(c.text))
+  return &key, nil
 }
 // literal string
 String ←  '"' runeChr* '"' {
-  return core.String(string(c.text)).Unquote()
+  str := core.String(string(c.text))
+  return (&str).Unquote()
 } / '"' runeChr* !'"' {
 	return nil, errors.New("not terminated")
 }
@@ -49,11 +51,12 @@ runeEsc ←  `\` ([abfnrtv"\\] /
 hexDigit ← [0-9a-f]i
 // literal real number like (-123.45e-67)
 Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
-  return core.String(string(c.text)).Number()
+  str := core.String(string(c.text))
+  return (&str).Number()
 }
 // identifiers (like ϕa_2)
 Symbol ←  word suffix? {
-  return core.Symbol{Val: string(c.text), Pos: pos(c.pos)}, nil
+  return &core.Symbol{Val: string(c.text), Pos: pos(c.pos)}, nil
 }
 word ←  letter (letter / digit)*
 // suffix

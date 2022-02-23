@@ -32,10 +32,12 @@ func merge(first, rest interface{}, keyIndex int, valueIndex int) map[core.Key]c
 	if pair == nil {
 		return result
 	}
-	result[pair[keyIndex].(core.Key)] = pair[valueIndex]
+	key := *pair[keyIndex].(*core.Key)
+	result[key] = pair[valueIndex]
 	for _, group := range more {
 		pair := slice(group)
-		result[pair[keyIndex+1].(core.Key)] = pair[valueIndex+1]
+		key := *pair[keyIndex+1].(*core.Key)
+		result[key] = pair[valueIndex+1]
 	}
 	return result
 }
