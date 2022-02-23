@@ -190,8 +190,8 @@ func evalNumber(ast core.Any, env *Env) (*core.Number, error) {
 	switch val := arg.(type) {
 	default:
 		return nil, fmt.Errorf("called with non-number %#v", val)
-	case *core.Number:
-		return val, nil
+	case core.Number:
+		return &val, nil
 	}
 }
 
@@ -204,7 +204,7 @@ func add(ast core.List, env *Env) (core.Any, error) {
 		}
 		res = res.Add(arg.Decimal())
 	}
-	return (*core.Number)(&res), nil
+	return core.Number(res), nil
 }
 
 func sub(ast core.List, env *Env) (core.Any, error) {
@@ -220,7 +220,7 @@ func sub(ast core.List, env *Env) (core.Any, error) {
 			res = res.Sub(arg.Decimal())
 		}
 	}
-	return (*core.Number)(&res), nil
+	return core.Number(res), nil
 }
 
 func mul(ast core.List, env *Env) (core.Any, error) {
@@ -232,7 +232,7 @@ func mul(ast core.List, env *Env) (core.Any, error) {
 		}
 		res = res.Mul(arg.Decimal())
 	}
-	return (*core.Number)(&res), nil
+	return core.Number(res), nil
 }
 
 func quot(ast core.List, env *Env) (core.Any, error) {
@@ -252,7 +252,7 @@ func quot(ast core.List, env *Env) (core.Any, error) {
 		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	q, _ := arg1.Decimal().QuoRem(arg2.Decimal(), int32(arg3.Decimal().IntPart()))
-	return (*core.Number)(&q), nil
+	return core.Number(q), nil
 }
 
 func rem(ast core.List, env *Env) (core.Any, error) {
@@ -272,7 +272,7 @@ func rem(ast core.List, env *Env) (core.Any, error) {
 		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	_, r := arg1.Decimal().QuoRem(arg2.Decimal(), int32(arg3.Decimal().IntPart()))
-	return (*core.Number)(&r), nil
+	return core.Number(r), nil
 }
 
 func quotS(ast core.List, env *Env) (core.Any, error) {
@@ -288,7 +288,7 @@ func quotS(ast core.List, env *Env) (core.Any, error) {
 			res = res.Div(arg.Decimal())
 		}
 	}
-	return (*core.Number)(&res), nil
+	return core.Number(res), nil
 }
 
 func _type(ast core.List, env *Env) (core.Any, error) {
@@ -300,7 +300,7 @@ func _type(ast core.List, env *Env) (core.Any, error) {
 		return nil, err
 	}
 	str := core.String(fmt.Sprintf("%T", arg1))
-	return &str, nil
+	return str, nil
 }
 
 func defE(ast core.List, env *Env) (core.Any, error) {
@@ -310,14 +310,14 @@ func defE(ast core.List, env *Env) (core.Any, error) {
 	switch ast[1].(type) {
 	default:
 		return nil, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], ast[1])
-	case *core.Symbol:
+	case core.Symbol:
 		break
 	}
 	val, err := Eval(ast[2], env)
 	if err != nil {
 		return nil, err
 	}
-	env.Set(ast[1].(*core.Symbol), val)
+	env.Set(ast[1].(core.Symbol), val)
 	return val, nil
 }
 
@@ -343,14 +343,14 @@ func let(ast core.List, env *Env) (core.Any, error) {
 		switch pairs[0].(type) {
 		default:
 			return nil, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], pairs[0])
-		case *core.Symbol:
+		case core.Symbol:
 			break
 		}
 		val, err := Eval(pairs[1], env)
 		if err != nil {
 			return nil, err
 		}
-		newEnv.Set(pairs[0].(*core.Symbol), val)
+		newEnv.Set(pairs[0].(core.Symbol), val)
 		pairs = pairs[2:]
 		if len(pairs) == 0 {
 			break
@@ -404,7 +404,7 @@ func fnS(ast core.List, env *Env) (core.Any, error) {
 		switch item.(type) {
 		default:
 			return nil, fmt.Errorf("%#v: bind expression contained non-symbol %#v", ast[0], item)
-		case *core.Symbol:
+		case core.Symbol:
 			break
 		}
 	}
@@ -479,6 +479,9 @@ func count(ast core.List, env *Env) (core.Any, error) {
 	case core.Vector:
 		cnt = len(any)
 		break
+	case core.Map:
+		cnt = len(any)
+		break
 	case core.List:
 		cnt = len(any)
 		break
@@ -491,7 +494,7 @@ func emptyQ(ast core.List, env *Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Bool(cnt.(*core.Number).Decimal().Equal(core.Zero.Decimal())), nil
+	return Bool(cnt.(core.Number).Decimal().Equal(core.Zero.Decimal())), nil
 }
 
 func equalQ(ast core.List, env *Env) (core.Any, error) {
@@ -523,20 +526,20 @@ func isEqual(first core.Any, item core.Any) bool {
 		return item == val
 	case Function:
 		return false
-	case *core.String:
-		if *item.(*core.String) != *val {
+	case core.String:
+		if item.(core.String) != val {
 			return false
 		}
-	case *core.Symbol:
-		if item.(*core.Symbol).Val != val.Val {
+	case core.Symbol:
+		if item.(core.Symbol).Val != val.Val {
 			return false
 		}
-	case *core.Key:
-		if *item.(*core.Key) != *val {
+	case core.Key:
+		if item.(core.Key) != val {
 			return false
 		}
-	case *core.Number:
-		if !item.(*core.Number).Decimal().Equal(val.Decimal()) {
+	case core.Number:
+		if !item.(core.Number).Decimal().Equal(val.Decimal()) {
 			return false
 		}
 	case core.List:

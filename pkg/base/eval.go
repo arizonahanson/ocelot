@@ -66,7 +66,7 @@ func evalAst(ast core.Any, env *Env) (core.Any, error) {
 	default:
 		// String, Number, Key
 		return any, nil
-	case *core.Symbol:
+	case core.Symbol:
 		return env.Get(any)
 	case core.List:
 		return evalList(any, env)
@@ -137,7 +137,7 @@ func BaseEnv() (*Env, error) {
 		return nil, err
 	}
 	for sym, value := range Base {
-		env.Set(&core.Symbol{Val: sym, Pos: nil}, value)
+		env.Set(core.Symbol{Val: sym, Pos: nil}, value)
 	}
 	return env, nil
 }

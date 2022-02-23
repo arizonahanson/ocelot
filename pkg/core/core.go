@@ -34,68 +34,47 @@ type List []Any
 var Zero = NewNumber(0)
 var One = NewNumber(1)
 
-func NewNumber(num int) *Number {
-	n := Number(decimal.NewFromInt(int64(num)))
-	return &n
+func NewNumber(num int) Number {
+	return Number(decimal.NewFromInt(int64(num)))
 }
 
-func (val *Number) String() string {
+func (val Number) String() string {
 	return val.Decimal().String()
 }
 
-func (val *Number) GoString() string {
+func (val Number) GoString() string {
 	return val.String()
 }
 
-func (val *Number) Decimal() decimal.Decimal {
-	return decimal.Decimal(*val)
+func (val Number) Decimal() decimal.Decimal {
+	return decimal.Decimal(val)
 }
 
 // parse quoted, escaped string
-func (val *String) Unquote() (*String, error) {
-	str, err := strconv.Unquote(string(*val))
-	if err != nil {
-		return nil, err
-	}
-	s := String(str)
-	return &s, nil
+func (val String) Unquote() (String, error) {
+	str, err := strconv.Unquote(string(val))
+	return String(str), err
 }
 
 // parse number
-func (val *String) Number() (*Number, error) {
-	dec, err := decimal.NewFromString(string(*val))
-	if err != nil {
-		return nil, err
-	}
-	n := Number(dec)
-	return &n, nil
+func (val String) Number() (Number, error) {
+	dec, err := decimal.NewFromString(string(val))
+	return Number(dec), err
 }
 
-func (val *String) String() string {
-	return fmt.Sprintf("%v", *val)
-}
-
-func (val *String) GoString() string {
-	return fmt.Sprintf("%#v", *val)
-}
-
-func (val *Symbol) String() string {
+func (val Symbol) String() string {
 	return fmt.Sprintf("%s", val.Val)
 }
 
-func (val *Symbol) GoString() string {
+func (val Symbol) GoString() string {
 	if val.Pos != nil {
 		return fmt.Sprintf("%s<%d,%d;%d>", val.Val, val.Pos.Line, val.Pos.Col, val.Pos.Offset)
 	}
 	return fmt.Sprintf("%s<?>", val.Val)
 }
 
-func (key *Key) String() string {
-	return fmt.Sprintf("%s", *key)
-}
-
-func (key *Key) GoString() string {
-	return key.String()
+func (key Key) GoString() string {
+	return fmt.Sprintf("%s", key)
 }
 
 func (val List) String() string {

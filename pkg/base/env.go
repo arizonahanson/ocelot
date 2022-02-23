@@ -20,20 +20,20 @@ func NewEnv(outer *Env, binds core.Vector, exprs core.List) (*Env, error) {
 		switch bind.(type) {
 		default:
 			return nil, fmt.Errorf("binds must be symbols: %v", bind)
-		case *core.Symbol:
+		case core.Symbol:
 			break
 		}
 		expr := exprs[i]
-		data[bind.(*core.Symbol).Val] = expr
+		data[bind.(core.Symbol).Val] = expr
 	}
 	return &Env{outer, data}, nil
 }
 
-func (env *Env) Set(sym *core.Symbol, value core.Any) {
+func (env *Env) Set(sym core.Symbol, value core.Any) {
 	env.data[sym.Val] = value
 }
 
-func (env *Env) Get(sym *core.Symbol) (core.Any, error) {
+func (env *Env) Get(sym core.Symbol) (core.Any, error) {
 	value, ok := env.data[sym.Val]
 	if !ok {
 		if env.outer != nil {
