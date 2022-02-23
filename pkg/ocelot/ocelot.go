@@ -5,6 +5,7 @@ import (
 	"os"
 
 	goprompt "github.com/c-bata/go-prompt"
+	"github.com/fatih/color"
 	"github.com/starlight/ocelot/pkg/base"
 	"github.com/starlight/ocelot/pkg/core"
 	"golang.org/x/term"
@@ -43,6 +44,7 @@ func Repl(prompt string) error {
 }
 
 func print(val core.Any) {
+	fmt.Print(color.WhiteString("→ "))
 	switch any := val.(type) {
 	default:
 		fmt.Printf("%#v\n", any)
