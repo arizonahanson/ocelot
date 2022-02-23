@@ -12,8 +12,6 @@ import (
 
 type Any interface{}
 
-type Nil struct{}
-
 type List []Any
 
 type Vector []Any
@@ -32,8 +30,6 @@ type String string
 type Key string
 
 type Map map[Key]Any
-
-type Bool bool
 
 type Number decimal.Decimal
 
@@ -190,10 +186,6 @@ func (val *Number) String() string {
 
 func (val *Number) Decimal() decimal.Decimal {
 	return decimal.Decimal(*val)
-}
-
-func (val Nil) String() string {
-	return "nil"
 }
 
 func (fn Function) String() string {

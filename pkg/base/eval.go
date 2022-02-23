@@ -64,7 +64,7 @@ func FnTail(fn core.Function, ast core.List, env *core.Env) Thunk {
 func evalAst(ast core.Any, env *core.Env) (core.Any, error) {
 	switch any := ast.(type) {
 	default:
-		// String, Number
+		// String, Number, Key
 		return any, nil
 	case *core.Symbol:
 		return env.Get(any)
@@ -78,7 +78,7 @@ func evalAst(ast core.Any, env *core.Env) (core.Any, error) {
 }
 
 func evalList(ast core.List, env *core.Env) (core.Any, error) {
-	res := make(core.List, len(ast))
+	var res core.List
 	for i, item := range ast {
 		if i == 0 {
 			// check for function symbols.
@@ -89,6 +89,7 @@ func evalList(ast core.List, env *core.Env) (core.Any, error) {
 			switch first := any.(type) {
 			default:
 				// not a function
+				res = make(core.List, len(ast))
 				res[0] = first
 				continue
 			case core.Function:

@@ -7,11 +7,19 @@ import (
 	"github.com/starlight/ocelot/pkg/core"
 )
 
+type Nil struct{}
+
+type Bool bool
+
+func (val Nil) String() string {
+	return "nil"
+}
+
 var Base = map[string]core.Any{
 	// nil / bool
-	"nil":    core.Nil{},
-	"true":   core.Bool(true),
-	"false":  core.Bool(false),
+	"nil":    Nil{},
+	"true":   Bool(true),
+	"false":  Bool(false),
 	"nil?":   core.Function(nilQ),
 	"true?":  core.Function(trueQ),
 	"false?": core.Function(falseQ),
@@ -77,7 +85,7 @@ func nilQ(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return core.Bool(arg1 == core.Nil{}), nil
+	return Bool(arg1 == Nil{}), nil
 }
 
 func trueQ(ast core.List, env *core.Env) (core.Any, error) {
@@ -88,7 +96,7 @@ func trueQ(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return core.Bool(arg1 == core.Bool(true)), nil
+	return Bool(arg1 == Bool(true)), nil
 }
 
 func falseQ(ast core.List, env *core.Env) (core.Any, error) {
@@ -99,7 +107,7 @@ func falseQ(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return core.Bool(arg1 == core.Bool(false)), nil
+	return Bool(arg1 == Bool(false)), nil
 }
 
 func _bool(ast core.List, env *core.Env) (core.Any, error) {
@@ -110,7 +118,7 @@ func _bool(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return core.Bool(arg1 != core.Bool(false) && arg1 != core.Nil{}), nil
+	return Bool(arg1 != Bool(false) && arg1 != Nil{}), nil
 }
 
 func not(ast core.List, env *core.Env) (core.Any, error) {
@@ -121,19 +129,19 @@ func not(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return core.Bool(arg1 == core.Bool(false) || arg1 == core.Nil{}), nil
+	return Bool(arg1 == Bool(false) || arg1 == Nil{}), nil
 }
 
 func and(ast core.List, env *core.Env) (core.Any, error) {
 	if len(ast) == 1 {
-		return core.Bool(true), nil
+		return Bool(true), nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
 		arg, err := Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
-		if (arg == core.Bool(false) || arg == core.Nil{}) {
+		if (arg == Bool(false) || arg == Nil{}) {
 			return arg, nil
 		}
 	}
@@ -142,14 +150,14 @@ func and(ast core.List, env *core.Env) (core.Any, error) {
 
 func or(ast core.List, env *core.Env) (core.Any, error) {
 	if len(ast) == 1 {
-		return core.Bool(false), nil
+		return Bool(false), nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
 		arg, err := Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
-		if (arg != core.Bool(false) && arg != core.Nil{}) {
+		if (arg != Bool(false) && arg != Nil{}) {
 			return arg, nil
 		}
 	}
@@ -335,7 +343,7 @@ func let(ast core.List, env *core.Env) (core.Any, error) {
 
 func do(ast core.List, env *core.Env) (core.Any, error) {
 	if len(ast) == 1 {
-		return core.Nil{}, nil
+		return Nil{}, nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
 		_, err := Eval(item, env)
@@ -354,13 +362,13 @@ func _if(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	if (cond != core.Bool(false) && cond != core.Nil{}) {
+	if (cond != Bool(false) && cond != Nil{}) {
 		return EvalTail(ast[2], env), nil
 	}
 	if len(ast) == 4 {
 		return EvalTail(ast[3], env), nil
 	}
-	return core.Nil{}, nil
+	return Nil{}, nil
 }
 
 func fnS(ast core.List, env *core.Env) (core.Any, error) {
@@ -407,7 +415,7 @@ func prn(ast core.List, env *core.Env) (core.Any, error) {
 		return nil, err
 	}
 	fmt.Printf("%v\n", vals)
-	return core.Nil{}, nil
+	return Nil{}, nil
 }
 
 func list(ast core.List, env *core.Env) (core.Any, error) {
@@ -432,9 +440,9 @@ func listQ(ast core.List, env *core.Env) (core.Any, error) {
 	}
 	switch val.(type) {
 	default:
-		return core.Bool(false), nil
+		return Bool(false), nil
 	case core.List:
-		return core.Bool(true), nil
+		return Bool(true), nil
 	}
 }
 
@@ -465,7 +473,7 @@ func emptyQ(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return core.Bool(cnt.(*core.Number).Decimal().Equal(core.Zero.Decimal())), nil
+	return Bool(cnt.(*core.Number).Decimal().Equal(core.Zero.Decimal())), nil
 }
 
 func equalQ(ast core.List, env *core.Env) (core.Any, error) {
@@ -482,10 +490,10 @@ func equalQ(ast core.List, env *core.Env) (core.Any, error) {
 			return nil, err
 		}
 		if !isEqual(first, value) {
-			return core.Bool(false), nil
+			return Bool(false), nil
 		}
 	}
-	return core.Bool(true), nil
+	return Bool(true), nil
 }
 
 func isEqual(first core.Any, item core.Any) bool {
@@ -549,7 +557,7 @@ func ltQ(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%#v: %v", ast[0], err)
 	}
-	return core.Bool(arg1.Decimal().LessThan(arg2.Decimal())), nil
+	return Bool(arg1.Decimal().LessThan(arg2.Decimal())), nil
 }
 
 func lteqQ(ast core.List, env *core.Env) (core.Any, error) {
@@ -564,7 +572,7 @@ func lteqQ(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%#v: %v", ast[0], err)
 	}
-	return core.Bool(arg1.Decimal().LessThanOrEqual(arg2.Decimal())), nil
+	return Bool(arg1.Decimal().LessThanOrEqual(arg2.Decimal())), nil
 }
 
 func gtQ(ast core.List, env *core.Env) (core.Any, error) {
@@ -579,7 +587,7 @@ func gtQ(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%#v: %v", ast[0], err)
 	}
-	return core.Bool(arg1.Decimal().GreaterThan(arg2.Decimal())), nil
+	return Bool(arg1.Decimal().GreaterThan(arg2.Decimal())), nil
 }
 
 func gteqQ(ast core.List, env *core.Env) (core.Any, error) {
@@ -594,7 +602,7 @@ func gteqQ(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%#v: %v", ast[0], err)
 	}
-	return core.Bool(arg1.Decimal().GreaterThanOrEqual(arg2.Decimal())), nil
+	return Bool(arg1.Decimal().GreaterThanOrEqual(arg2.Decimal())), nil
 }
 
 func quote(ast core.List, env *core.Env) (core.Any, error) {
