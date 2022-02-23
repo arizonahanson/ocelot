@@ -2,8 +2,6 @@ package core
 
 import (
 	"fmt"
-	"reflect"
-	"runtime"
 	"strconv"
 	"strings"
 
@@ -32,8 +30,6 @@ type Map map[Key]Any
 type Vector []Any
 
 type List []Any
-
-type Function func(ast List, env *Env) (Any, error)
 
 var Zero = NewNumber(0)
 var One = NewNumber(1)
@@ -195,14 +191,4 @@ func (val Map) String() string {
 
 func (val Map) GoString() string {
 	return val.String()
-}
-
-func (fn Function) String() string {
-	strs := strings.Split(runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name(), ".")
-	str := strs[len(strs)-1]
-	return "&" + str
-}
-
-func (fn Function) GoString() string {
-	return fn.String()
 }
