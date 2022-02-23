@@ -12,9 +12,9 @@ import (
 
 type Any interface{}
 
-type List []Any
+type Number decimal.Decimal
 
-type Vector []Any
+type String string
 
 type Symbol struct {
 	Val string
@@ -25,13 +25,13 @@ type Position struct {
 	Line, Col, Offset int
 }
 
-type String string
-
 type Key string
 
 type Map map[Key]Any
 
-type Number decimal.Decimal
+type Vector []Any
+
+type List []Any
 
 type Function func(ast List, env *Env) (Any, error)
 
@@ -41,6 +41,18 @@ var One = NewNumber(1)
 func NewNumber(num int) *Number {
 	n := Number(decimal.NewFromInt(int64(num)))
 	return &n
+}
+
+func (val *Number) String() string {
+	return val.Decimal().String()
+}
+
+func (val *Number) GoString() string {
+	return val.String()
+}
+
+func (val *Number) Decimal() decimal.Decimal {
+	return decimal.Decimal(*val)
 }
 
 // parse quoted, escaped string
@@ -63,6 +75,14 @@ func (val *String) Number() (*Number, error) {
 	return &n, nil
 }
 
+func (val *String) String() string {
+	return fmt.Sprintf("%v", *val)
+}
+
+func (val *String) GoString() string {
+	return fmt.Sprintf("%#v", *val)
+}
+
 func (val *Symbol) String() string {
 	return fmt.Sprintf("%s", val.Val)
 }
@@ -74,12 +94,12 @@ func (val *Symbol) GoString() string {
 	return fmt.Sprintf("%s<?>", val.Val)
 }
 
-func (val *String) String() string {
-	return fmt.Sprintf("%#v", *val)
-}
-
 func (key *Key) String() string {
 	return fmt.Sprintf("%s", *key)
+}
+
+func (key *Key) GoString() string {
+	return key.String()
 }
 
 func (val List) String() string {
@@ -110,14 +130,7 @@ func (val List) GoString() string {
 			str += "..."
 			break
 		}
-		switch item.(type) {
-		default:
-			str += fmt.Sprintf("%#v", item)
-			break
-		case List:
-			str += fmt.Sprintf("(%v)", item)
-			break
-		}
+		str += fmt.Sprintf("%#v", item)
 	}
 	return str + ")"
 }
@@ -152,10 +165,10 @@ func (val Vector) GoString() string {
 		}
 		switch item.(type) {
 		default:
-			str += fmt.Sprintf("%v", item)
+			str += fmt.Sprintf("%#v", item)
 			break
 		case List:
-			str += fmt.Sprintf("(%v)", item)
+			str += fmt.Sprintf("(%#v)", item)
 			break
 		}
 	}
@@ -180,12 +193,8 @@ func (val Map) String() string {
 	return "{" + strings.Join(res, " ") + "}"
 }
 
-func (val *Number) String() string {
-	return val.Decimal().String()
-}
-
-func (val *Number) Decimal() decimal.Decimal {
-	return decimal.Decimal(*val)
+func (val Map) GoString() string {
+	return val.String()
 }
 
 func (fn Function) String() string {

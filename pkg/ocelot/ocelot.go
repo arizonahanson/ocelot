@@ -6,6 +6,7 @@ import (
 
 	goprompt "github.com/c-bata/go-prompt"
 	"github.com/starlight/ocelot/pkg/base"
+	"github.com/starlight/ocelot/pkg/core"
 	"golang.org/x/term"
 )
 
@@ -23,7 +24,7 @@ func Repl(prompt string) error {
 			fmt.Println(err)
 			return
 		}
-		fmt.Println(out)
+		print(out)
 	}
 	completer := func(d goprompt.Document) []goprompt.Suggest {
 		return []goprompt.Suggest{}
@@ -39,6 +40,18 @@ func Repl(prompt string) error {
 	)
 	p.Run()
 	return nil
+}
+
+func print(val core.Any) {
+	switch any := val.(type) {
+	default:
+		fmt.Printf("%#v\n", any)
+	case core.List:
+		for _, item := range any {
+			fmt.Printf("%#v ", item)
+		}
+		fmt.Println("")
+	}
 }
 
 var termState *term.State

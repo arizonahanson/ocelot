@@ -15,6 +15,10 @@ func (val Nil) String() string {
 	return "nil"
 }
 
+func (val Nil) GoString() string {
+	return val.String()
+}
+
 var Base = map[string]core.Any{
 	// nil / bool
 	"nil":    Nil{},
@@ -171,7 +175,7 @@ func evalNumber(ast core.Any, env *core.Env) (*core.Number, error) {
 	}
 	switch val := arg.(type) {
 	default:
-		return nil, fmt.Errorf("called with non-number %v", val)
+		return nil, fmt.Errorf("called with non-number %#v", val)
 	case *core.Number:
 		return val, nil
 	}
@@ -182,7 +186,7 @@ func add(ast core.List, env *core.Env) (core.Any, error) {
 	for _, item := range ast[1:] {
 		arg, err := evalNumber(item, env)
 		if err != nil {
-			return nil, fmt.Errorf("%#v: %v", ast[0], err)
+			return nil, fmt.Errorf("%#v: %s", ast[0], err)
 		}
 		res = res.Add(arg.Decimal())
 	}
@@ -194,7 +198,7 @@ func sub(ast core.List, env *core.Env) (core.Any, error) {
 	for i, item := range ast[1:] {
 		arg, err := evalNumber(item, env)
 		if err != nil {
-			return nil, fmt.Errorf("%#v: %v", ast[0], err)
+			return nil, fmt.Errorf("%#v: %s", ast[0], err)
 		}
 		if i == 0 && len(ast) > 2 {
 			res = arg.Decimal()
@@ -210,7 +214,7 @@ func mul(ast core.List, env *core.Env) (core.Any, error) {
 	for _, item := range ast[1:] {
 		arg, err := evalNumber(item, env)
 		if err != nil {
-			return nil, fmt.Errorf("%#v: %v", ast[0], err)
+			return nil, fmt.Errorf("%#v: %s", ast[0], err)
 		}
 		res = res.Mul(arg.Decimal())
 	}
@@ -223,15 +227,15 @@ func quot(ast core.List, env *core.Env) (core.Any, error) {
 	}
 	arg1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	arg2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	arg3, err := evalNumber(ast[3], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	q, _ := arg1.Decimal().QuoRem(arg2.Decimal(), int32(arg3.Decimal().IntPart()))
 	return (*core.Number)(&q), nil
@@ -243,15 +247,15 @@ func rem(ast core.List, env *core.Env) (core.Any, error) {
 	}
 	arg1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	arg2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	arg3, err := evalNumber(ast[3], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	_, r := arg1.Decimal().QuoRem(arg2.Decimal(), int32(arg3.Decimal().IntPart()))
 	return (*core.Number)(&r), nil
@@ -262,7 +266,7 @@ func quotS(ast core.List, env *core.Env) (core.Any, error) {
 	for i, item := range ast[1:] {
 		arg, err := evalNumber(item, env)
 		if err != nil {
-			return nil, fmt.Errorf("%#v: %v", ast[0], err)
+			return nil, fmt.Errorf("%#v: %s", ast[0], err)
 		}
 		if i == 0 && len(ast) > 2 {
 			res = arg.Decimal()
@@ -291,7 +295,7 @@ func defE(ast core.List, env *core.Env) (core.Any, error) {
 	}
 	switch ast[1].(type) {
 	default:
-		return nil, fmt.Errorf("%#v: called with non-symbol %v", ast[0], ast[1])
+		return nil, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], ast[1])
 	case *core.Symbol:
 		break
 	}
@@ -309,7 +313,7 @@ func let(ast core.List, env *core.Env) (core.Any, error) {
 	}
 	switch ast[1].(type) {
 	default:
-		return nil, fmt.Errorf("%#v: called with non-list %v", ast[0], ast[1])
+		return nil, fmt.Errorf("%#v: called with non-list %#v", ast[0], ast[1])
 	case core.List:
 		break
 	}
@@ -324,7 +328,7 @@ func let(ast core.List, env *core.Env) (core.Any, error) {
 	for {
 		switch pairs[0].(type) {
 		default:
-			return nil, fmt.Errorf("%#v: called with non-symbol %v", ast[0], pairs[0])
+			return nil, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], pairs[0])
 		case *core.Symbol:
 			break
 		}
@@ -377,7 +381,7 @@ func fnS(ast core.List, env *core.Env) (core.Any, error) {
 	}
 	switch ast[1].(type) {
 	default:
-		return nil, fmt.Errorf("%#v: called with non-vector %v", ast[0], ast[1])
+		return nil, fmt.Errorf("%#v: called with non-vector %#v", ast[0], ast[1])
 	case core.Vector:
 		break
 	}
@@ -385,7 +389,7 @@ func fnS(ast core.List, env *core.Env) (core.Any, error) {
 	for _, item := range binds {
 		switch item.(type) {
 		default:
-			return nil, fmt.Errorf("%#v: bind expression contained non-symbol %v", ast[0], item)
+			return nil, fmt.Errorf("%#v: bind expression contained non-symbol %#v", ast[0], item)
 		case *core.Symbol:
 			break
 		}
@@ -414,7 +418,7 @@ func prn(ast core.List, env *core.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("%v\n", vals)
+	fmt.Printf("%s\n", vals)
 	return Nil{}, nil
 }
 
@@ -457,7 +461,7 @@ func count(ast core.List, env *core.Env) (core.Any, error) {
 	var cnt int
 	switch any := val.(type) {
 	default:
-		return nil, fmt.Errorf("%#v: called with non-collection %v", ast[0], any)
+		return nil, fmt.Errorf("%#v: called with non-collection %#v", ast[0], any)
 	case core.Vector:
 		cnt = len(any)
 		break
@@ -551,11 +555,11 @@ func ltQ(ast core.List, env *core.Env) (core.Any, error) {
 	}
 	arg1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	arg2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	return Bool(arg1.Decimal().LessThan(arg2.Decimal())), nil
 }
@@ -566,11 +570,11 @@ func lteqQ(ast core.List, env *core.Env) (core.Any, error) {
 	}
 	arg1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	arg2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	return Bool(arg1.Decimal().LessThanOrEqual(arg2.Decimal())), nil
 }
@@ -581,11 +585,11 @@ func gtQ(ast core.List, env *core.Env) (core.Any, error) {
 	}
 	arg1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	arg2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	return Bool(arg1.Decimal().GreaterThan(arg2.Decimal())), nil
 }
@@ -596,11 +600,11 @@ func gteqQ(ast core.List, env *core.Env) (core.Any, error) {
 	}
 	arg1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	arg2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
 	return Bool(arg1.Decimal().GreaterThanOrEqual(arg2.Decimal())), nil
 }
