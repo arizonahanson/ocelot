@@ -163,7 +163,7 @@ func and(ast core.List, env *Env) (core.Any, error) {
 			return arg, nil
 		}
 	}
-	return EvalTail(ast[len(ast)-1], env), nil
+	return EvalLazy(ast[len(ast)-1], env), nil
 }
 
 func or(ast core.List, env *Env) (core.Any, error) {
@@ -179,7 +179,7 @@ func or(ast core.List, env *Env) (core.Any, error) {
 			return arg, nil
 		}
 	}
-	return EvalTail(ast[len(ast)-1], env), nil
+	return EvalLazy(ast[len(ast)-1], env), nil
 }
 
 func evalNumber(ast core.Any, env *Env) (*core.Number, error) {
@@ -356,7 +356,7 @@ func let(ast core.List, env *Env) (core.Any, error) {
 			break
 		}
 	}
-	return EvalTail(ast[2], newEnv), nil
+	return EvalLazy(ast[2], newEnv), nil
 }
 
 func do(ast core.List, env *Env) (core.Any, error) {
@@ -369,7 +369,7 @@ func do(ast core.List, env *Env) (core.Any, error) {
 			return nil, err
 		}
 	}
-	return EvalTail(ast[len(ast)-1], env), nil
+	return EvalLazy(ast[len(ast)-1], env), nil
 }
 
 func _if(ast core.List, env *Env) (core.Any, error) {
@@ -381,10 +381,10 @@ func _if(ast core.List, env *Env) (core.Any, error) {
 		return nil, err
 	}
 	if (cond != Bool(false) && cond != Nil{}) {
-		return EvalTail(ast[2], env), nil
+		return EvalLazy(ast[2], env), nil
 	}
 	if len(ast) == 4 {
-		return EvalTail(ast[3], env), nil
+		return EvalLazy(ast[3], env), nil
 	}
 	return Nil{}, nil
 }
@@ -409,30 +409,31 @@ func fnS(ast core.List, env *Env) (core.Any, error) {
 		}
 	}
 	body := ast[2]
-	lambda := func(args core.List, outer *Env) (core.Any, error) {
-		err := exactLen(args, len(binds)+1)
+	lambda := func(call core.List, outer *Env) (core.Any, error) {
+		err := exactLen(call, len(binds)+1)
 		if err != nil {
 			return nil, err
 		}
-		exprs, err := thunks(args, outer)
+		// capture argument scope, but don't eval (yet)
+		args := thunks(call, outer)
+		// use fn definition scope for bind env
+		newEnv, err := NewEnv(env, binds, args)
 		if err != nil {
 			return nil, err
 		}
-		newEnv, err := NewEnv(env, binds, exprs.(core.List))
-		if err != nil {
-			return nil, err
-		}
-		return EvalTail(body, newEnv), nil
+		// done with these scopes
+		return EvalLazy(body, newEnv), nil
 	}
 	return Function(lambda), nil
 }
 
-func thunks(ast core.List, env *Env) (core.Any, error) {
-	exprs := make(core.List, len(ast)-1)
+// list of arguments lazily evaluated
+func thunks(ast core.List, env *Env) (args core.List) {
+	args = make(core.List, len(ast)-1)
 	for i, item := range ast[1:] {
-		exprs[i] = EvalTail(item, env)
+		args[i] = EvalLazy(item, env)
 	}
-	return exprs, nil
+	return
 }
 
 func prn(ast core.List, env *Env) (core.Any, error) {
@@ -646,15 +647,15 @@ func eval(ast core.List, env *Env) (core.Any, error) {
 		return nil, err
 	}
 	// double-eval TCO'd
-	return dualEvalTail(ast[1], env), nil
+	return dualEvalLazy(ast[1], env), nil
 }
 
-func dualEvalTail(ast core.Any, env *Env) Thunk {
+func dualEvalLazy(ast core.Any, env *Env) Thunk {
 	return func() (core.Any, error) {
 		val, err := Eval(ast, env)
 		if err != nil {
 			return nil, err
 		}
-		return Eval(val, env)
+		return EvalLazy(val, env), nil
 	}
 }
