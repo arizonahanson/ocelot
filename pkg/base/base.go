@@ -414,7 +414,7 @@ func fnS(ast core.List, env *Env) (core.Any, error) {
 		if err != nil {
 			return nil, err
 		}
-		exprs, err := list(args, outer)
+		exprs, err := thunks(args, outer)
 		if err != nil {
 			return nil, err
 		}
@@ -425,6 +425,14 @@ func fnS(ast core.List, env *Env) (core.Any, error) {
 		return EvalTail(body, newEnv), nil
 	}
 	return Function(lambda), nil
+}
+
+func thunks(ast core.List, env *Env) (core.Any, error) {
+	exprs := make(core.List, len(ast)-1)
+	for i, item := range ast[1:] {
+		exprs[i] = EvalTail(item, env)
+	}
+	return exprs, nil
 }
 
 func prn(ast core.List, env *Env) (core.Any, error) {
