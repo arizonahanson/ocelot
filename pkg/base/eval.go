@@ -7,7 +7,24 @@ import (
 	"github.com/starlight/ocelot/pkg/core"
 )
 
-type Thunk func() (core.Any, error)
+func EvalStr(in string, env *Env) (core.Any, error) {
+	ast, err := Parse(in)
+	if err != nil {
+		return nil, err
+	}
+	return Eval(ast, env)
+}
+
+func BaseEnv() (*Env, error) {
+	env, err := NewEnv(nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	for sym, value := range Base {
+		env.Set(core.Symbol{Val: sym, Pos: nil}, value)
+	}
+	return env, nil
+}
 
 func Parse(in string) (core.Any, error) {
 	ast, err := parser.Parse("parse", []byte(in))
@@ -15,14 +32,6 @@ func Parse(in string) (core.Any, error) {
 		return nil, err
 	}
 	return ast, nil
-}
-
-func EvalStr(in string, env *Env) (core.Any, error) {
-	ast, err := Parse(in)
-	if err != nil {
-		return nil, err
-	}
-	return Eval(ast, env)
 }
 
 // trampoline eval for making non-tail calls (eager)
@@ -40,6 +49,8 @@ func Eval(ast core.Any, env *Env) (value core.Any, err error) {
 		}
 	}
 }
+
+type Thunk func() (core.Any, error)
 
 // thunked eval for tail-calls (lazy)
 func EvalLazy(ast core.Any, env *Env) Thunk {
@@ -79,7 +90,7 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 	var res core.List
 	for i, item := range ast {
 		if i == 0 {
-			// check for function symbols.
+			// check for function
 			any, err := Eval(item, env)
 			if err != nil {
 				return nil, err
@@ -127,15 +138,4 @@ func evalMap(ast core.Map, env *Env) (core.Map, error) {
 		res[key] = val
 	}
 	return res, nil
-}
-
-func BaseEnv() (*Env, error) {
-	env, err := NewEnv(nil, nil, nil)
-	if err != nil {
-		return nil, err
-	}
-	for sym, value := range Base {
-		env.Set(core.Symbol{Val: sym, Pos: nil}, value)
-	}
-	return env, nil
 }
