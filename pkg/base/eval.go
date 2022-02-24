@@ -1,6 +1,8 @@
 package base
 
 import (
+	"errors"
+
 	"github.com/starlight/ocelot/internal/parser"
 	"github.com/starlight/ocelot/pkg/core"
 )
@@ -19,13 +21,6 @@ func EvalStr(in string, env *Env) (core.Any, error) {
 	ast, err := Parse(in)
 	if err != nil {
 		return nil, err
-	}
-	if env == nil {
-		base, err := BaseEnv()
-		if err != nil {
-			return nil, err
-		}
-		env = base
 	}
 	return Eval(ast, env)
 }
@@ -62,6 +57,9 @@ func FnLazy(fn Function, ast core.List, env *Env) Thunk {
 
 // eval impl
 func evalAst(ast core.Any, env *Env) (core.Any, error) {
+	if env == nil {
+		return nil, errors.New("evaluation with nil env")
+	}
 	switch any := ast.(type) {
 	default:
 		// String, Number, Key
