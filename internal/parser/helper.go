@@ -17,10 +17,10 @@ func join(first, rest interface{}, index int) []core.Any {
 	}
 	more := slice(rest)
 	result := make([]core.Any, len(more)+1)
-	result[0] = first
+	result[0] = first.(core.Any)
 	for i, group := range more {
 		next := slice(group)[index]
-		result[i+1] = next
+		result[i+1] = next.(core.Any)
 	}
 	return result
 }
@@ -33,11 +33,11 @@ func merge(first, rest interface{}, keyIndex int, valueIndex int) map[core.Key]c
 		return result
 	}
 	key := pair[keyIndex].(core.Key)
-	result[key] = pair[valueIndex]
+	result[key] = pair[valueIndex].(core.Any)
 	for _, group := range more {
 		pair := slice(group)
 		key := pair[keyIndex+1].(core.Key)
-		result[key] = pair[valueIndex+1]
+		result[key] = pair[valueIndex+1].(core.Any)
 	}
 	return result
 }

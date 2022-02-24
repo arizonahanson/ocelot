@@ -7,31 +7,23 @@ import (
 	"github.com/starlight/ocelot/pkg/core"
 )
 
-func EvalStr(in string, env *Env) (core.Any, error) {
-	ast, err := Parse(in)
-	if err != nil {
-		return nil, err
-	}
-	return Eval(ast, env)
-}
-
-func BaseEnv() (*Env, error) {
-	env, err := NewEnv(nil, nil, nil)
-	if err != nil {
-		return nil, err
-	}
-	for sym, value := range Base {
-		env.Set(core.Symbol{Val: sym, Pos: nil}, value)
-	}
-	return env, nil
-}
-
 func Parse(in string) (core.Any, error) {
 	ast, err := parser.Parse("parse", []byte(in))
 	if err != nil {
 		return nil, err
 	}
-	return ast, nil
+	return ast.(core.Any), nil
+}
+
+func EvalStr(in string, env *Env) (core.Any, error) {
+	if env == nil {
+		return nil, errors.New("evaluation with nil env")
+	}
+	ast, err := Parse(in)
+	if err != nil {
+		return nil, err
+	}
+	return Eval(ast, env)
 }
 
 // trampoline eval for making non-tail calls (eager)
@@ -41,36 +33,24 @@ func Eval(ast core.Any, env *Env) (value core.Any, err error) {
 		if err != nil {
 			return
 		}
-		switch thunk := value.(type) {
+		switch eval := value.(type) {
 		default:
 			return
-		case Thunk:
-			value, err = thunk()
+		case Lazy:
+			value, err = eval()
 		}
 	}
 }
 
-type Thunk func() (core.Any, error)
-
 // thunked eval for tail-calls (lazy)
-func EvalLazy(ast core.Any, env *Env) Thunk {
+func EvalLazy(ast core.Any, env *Env) Lazy {
 	return func() (core.Any, error) {
 		return evalAst(ast, env)
 	}
 }
 
-// thunked function call (always lazy)
-func FnLazy(fn Function, ast core.List, env *Env) Thunk {
-	return func() (core.Any, error) {
-		return fn(ast, env)
-	}
-}
-
 // eval impl
 func evalAst(ast core.Any, env *Env) (core.Any, error) {
-	if env == nil {
-		return nil, errors.New("evaluation with nil env")
-	}
 	switch any := ast.(type) {
 	default:
 		// String, Number, Key
@@ -83,6 +63,13 @@ func evalAst(ast core.Any, env *Env) (core.Any, error) {
 		return evalVector(any, env)
 	case core.Map:
 		return evalMap(any, env)
+	}
+}
+
+// thunked function call (always lazy)
+func fnLazy(fn Func, ast core.List, env *Env) Lazy {
+	return func() (core.Any, error) {
+		return fn(ast, env)
 	}
 }
 
@@ -101,9 +88,9 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 				res = make(core.List, len(ast))
 				res[0] = first
 				continue
-			case Function:
+			case Func:
 				// tail-call function (unevaluated ast)
-				return FnLazy(first, ast, env), nil
+				return fnLazy(first, ast, env), nil
 			}
 		}
 		// default list resolution for rest

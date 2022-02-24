@@ -1,161 +1,122 @@
-package base
+package builtin
 
 import (
 	"fmt"
-	"reflect"
-	"runtime"
-	"strings"
 
+	"github.com/starlight/ocelot/pkg/base"
 	"github.com/starlight/ocelot/pkg/core"
 )
 
-type Nil struct{}
-
-type Bool bool
-
-type Function func(ast core.List, env *Env) (core.Any, error)
-
-func (val Nil) String() string {
-	return "nil"
+func BuiltinEnv() (*base.Env, error) {
+	env := base.NewEnv(nil)
+	for sym, value := range Builtin {
+		env.Set(core.Symbol{Val: sym, Pos: nil}, value)
+	}
+	return env, nil
 }
 
-func (val Nil) GoString() string {
-	return val.String()
-}
-
-func (fn Function) String() string {
-	strs := strings.Split(runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name(), ".")
-	str := strs[len(strs)-1]
-	return "&" + str
-}
-
-func (fn Function) GoString() string {
-	return fn.String()
-}
-
-var Base = map[string]core.Any{
+var Builtin = map[string]core.Any{
 	// nil / bool
 	"nil":    Nil{},
 	"true":   Bool(true),
 	"false":  Bool(false),
-	"nil?":   Function(nilQ),
-	"true?":  Function(trueQ),
-	"false?": Function(falseQ),
-	"bool":   Function(_bool),
-	"not":    Function(not),
-	"and":    Function(and),
-	"or":     Function(or),
+	"nil?":   base.Func(nilQ),
+	"true?":  base.Func(trueQ),
+	"false?": base.Func(falseQ),
+	"bool":   base.Func(_bool),
+	"not":    base.Func(not),
+	"and":    base.Func(and),
+	"or":     base.Func(or),
 	// numbers
-	"add":   Function(add),
-	"sub":   Function(sub),
-	"mul":   Function(mul),
-	"quot":  Function(quot),
-	"rem":   Function(rem),
-	"quot*": Function(quotS),
-	"lt?":   Function(ltQ),
-	"lteq?": Function(lteqQ),
-	"gt?":   Function(gtQ),
-	"gteq?": Function(gteqQ),
+	"add":   base.Func(add),
+	"sub":   base.Func(sub),
+	"mul":   base.Func(mul),
+	"quot":  base.Func(quot),
+	"rem":   base.Func(rem),
+	"quot*": base.Func(quotS),
+	"lt?":   base.Func(ltQ),
+	"lteq?": base.Func(lteqQ),
+	"gt?":   base.Func(gtQ),
+	"gteq?": base.Func(gteqQ),
 	// special
-	"type":   Function(_type),
-	"equal?": Function(equalQ),
-	"def!":   Function(defE),
-	"let":    Function(let),
-	"do":     Function(do),
-	"if":     Function(_if),
-	"fn*":    Function(fnS),
-	"prn":    Function(prn),
-	"eval":   Function(eval),
-	"quote":  Function(quote),
+	"type":   base.Func(_type),
+	"equal?": base.Func(equalQ),
+	"def!":   base.Func(defE),
+	"let":    base.Func(let),
+	"do":     base.Func(do),
+	"if":     base.Func(_if),
+	"fn*":    base.Func(fnS),
+	"prn":    base.Func(prn),
+	"eval":   base.Func(eval),
+	"quote":  base.Func(quote),
 	// lists
-	"list":   Function(list),
-	"list?":  Function(listQ),
-	"empty?": Function(emptyQ),
-	"count":  Function(count),
+	"list":   base.Func(list),
+	"list?":  base.Func(listQ),
+	"empty?": base.Func(emptyQ),
+	"count":  base.Func(count),
 }
 
-func exactLen(ast core.List, num int) error {
-	if len(ast) != num {
-		return fmt.Errorf("%#v: wanted %d arg(s), got %d", ast[0], num-1, len(ast)-1)
-	}
-	return nil
-}
-
-func rangeLen(ast core.List, min int, max int) error {
-	if len(ast) < min || len(ast) > max {
-		return fmt.Errorf("%#v: wanted %d-%d args, got %d", ast[0], min-1, max-1, len(ast)-1)
-	}
-	return nil
-}
-
-func minLen(ast core.List, min int) error {
-	if len(ast) < min {
-		return fmt.Errorf("%#v: wanted at least %d args, got %d", ast[0], min-1, len(ast)-1)
-	}
-	return nil
-}
-
-func nilQ(ast core.List, env *Env) (core.Any, error) {
+func nilQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return nil, err
 	}
-	arg1, err := Eval(ast[1], env)
+	arg1, err := base.Eval(ast[1], env)
 	if err != nil {
 		return nil, err
 	}
 	return Bool(arg1 == Nil{}), nil
 }
 
-func trueQ(ast core.List, env *Env) (core.Any, error) {
+func trueQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return nil, err
 	}
-	arg1, err := Eval(ast[1], env)
+	arg1, err := base.Eval(ast[1], env)
 	if err != nil {
 		return nil, err
 	}
 	return Bool(arg1 == Bool(true)), nil
 }
 
-func falseQ(ast core.List, env *Env) (core.Any, error) {
+func falseQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return nil, err
 	}
-	arg1, err := Eval(ast[1], env)
+	arg1, err := base.Eval(ast[1], env)
 	if err != nil {
 		return nil, err
 	}
 	return Bool(arg1 == Bool(false)), nil
 }
 
-func _bool(ast core.List, env *Env) (core.Any, error) {
+func _bool(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return nil, err
 	}
-	arg1, err := Eval(ast[1], env)
+	arg1, err := base.Eval(ast[1], env)
 	if err != nil {
 		return nil, err
 	}
 	return Bool(arg1 != Bool(false) && arg1 != Nil{}), nil
 }
 
-func not(ast core.List, env *Env) (core.Any, error) {
+func not(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return nil, err
 	}
-	arg1, err := Eval(ast[1], env)
+	arg1, err := base.Eval(ast[1], env)
 	if err != nil {
 		return nil, err
 	}
 	return Bool(arg1 == Bool(false) || arg1 == Nil{}), nil
 }
 
-func and(ast core.List, env *Env) (core.Any, error) {
+func and(ast core.List, env *base.Env) (core.Any, error) {
 	if len(ast) == 1 {
 		return Bool(true), nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
-		arg, err := Eval(item, env)
+		arg, err := base.Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
@@ -163,15 +124,15 @@ func and(ast core.List, env *Env) (core.Any, error) {
 			return arg, nil
 		}
 	}
-	return EvalLazy(ast[len(ast)-1], env), nil
+	return base.EvalLazy(ast[len(ast)-1], env), nil
 }
 
-func or(ast core.List, env *Env) (core.Any, error) {
+func or(ast core.List, env *base.Env) (core.Any, error) {
 	if len(ast) == 1 {
 		return Bool(false), nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
-		arg, err := Eval(item, env)
+		arg, err := base.Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
@@ -179,23 +140,10 @@ func or(ast core.List, env *Env) (core.Any, error) {
 			return arg, nil
 		}
 	}
-	return EvalLazy(ast[len(ast)-1], env), nil
+	return base.EvalLazy(ast[len(ast)-1], env), nil
 }
 
-func evalNumber(ast core.Any, env *Env) (*core.Number, error) {
-	arg, err := Eval(ast, env)
-	if err != nil {
-		return nil, err
-	}
-	switch val := arg.(type) {
-	default:
-		return nil, fmt.Errorf("called with non-number %#v", val)
-	case core.Number:
-		return &val, nil
-	}
-}
-
-func add(ast core.List, env *Env) (core.Any, error) {
+func add(ast core.List, env *base.Env) (core.Any, error) {
 	res := core.Zero.Decimal()
 	for _, item := range ast[1:] {
 		arg, err := evalNumber(item, env)
@@ -207,7 +155,7 @@ func add(ast core.List, env *Env) (core.Any, error) {
 	return core.Number(res), nil
 }
 
-func sub(ast core.List, env *Env) (core.Any, error) {
+func sub(ast core.List, env *base.Env) (core.Any, error) {
 	res := core.Zero.Decimal()
 	for i, item := range ast[1:] {
 		arg, err := evalNumber(item, env)
@@ -223,7 +171,7 @@ func sub(ast core.List, env *Env) (core.Any, error) {
 	return core.Number(res), nil
 }
 
-func mul(ast core.List, env *Env) (core.Any, error) {
+func mul(ast core.List, env *base.Env) (core.Any, error) {
 	res := core.One.Decimal()
 	for _, item := range ast[1:] {
 		arg, err := evalNumber(item, env)
@@ -235,7 +183,7 @@ func mul(ast core.List, env *Env) (core.Any, error) {
 	return core.Number(res), nil
 }
 
-func quot(ast core.List, env *Env) (core.Any, error) {
+func quot(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 4); err != nil {
 		return nil, err
 	}
@@ -255,7 +203,7 @@ func quot(ast core.List, env *Env) (core.Any, error) {
 	return core.Number(q), nil
 }
 
-func rem(ast core.List, env *Env) (core.Any, error) {
+func rem(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 4); err != nil {
 		return nil, err
 	}
@@ -275,7 +223,7 @@ func rem(ast core.List, env *Env) (core.Any, error) {
 	return core.Number(r), nil
 }
 
-func quotS(ast core.List, env *Env) (core.Any, error) {
+func quotS(ast core.List, env *base.Env) (core.Any, error) {
 	res := core.One.Decimal()
 	for i, item := range ast[1:] {
 		arg, err := evalNumber(item, env)
@@ -291,19 +239,19 @@ func quotS(ast core.List, env *Env) (core.Any, error) {
 	return core.Number(res), nil
 }
 
-func _type(ast core.List, env *Env) (core.Any, error) {
+func _type(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return nil, err
 	}
-	arg1, err := Eval(ast[1], env)
+	arg1, err := base.Eval(ast[1], env)
 	if err != nil {
 		return nil, err
 	}
-	str := core.String(fmt.Sprintf("%T", arg1))
+	str := core.String{Val: fmt.Sprintf("%T", arg1)}
 	return str, nil
 }
 
-func defE(ast core.List, env *Env) (core.Any, error) {
+func defE(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return nil, err
 	}
@@ -313,7 +261,7 @@ func defE(ast core.List, env *Env) (core.Any, error) {
 	case core.Symbol:
 		break
 	}
-	val, err := Eval(ast[2], env)
+	val, err := base.Eval(ast[2], env)
 	if err != nil {
 		return nil, err
 	}
@@ -321,7 +269,7 @@ func defE(ast core.List, env *Env) (core.Any, error) {
 	return val, nil
 }
 
-func let(ast core.List, env *Env) (core.Any, error) {
+func let(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return nil, err
 	}
@@ -331,65 +279,61 @@ func let(ast core.List, env *Env) (core.Any, error) {
 	case core.List:
 		break
 	}
-	newEnv, err := NewEnv(env, nil, nil)
-	if err != nil {
-		return nil, err
-	}
+	newEnv := base.NewEnv(env)
 	pairs := ast[1].(core.List)
-	if len(pairs)%2 != 0 || len(pairs) == 0 {
+	if len(pairs)%2 != 0 {
 		return nil, fmt.Errorf("%#v: binding missing", ast[0])
 	}
 	for {
-		switch pairs[0].(type) {
-		default:
-			return nil, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], pairs[0])
-		case core.Symbol:
-			break
-		}
-		val, err := Eval(pairs[1], env)
-		if err != nil {
-			return nil, err
-		}
-		newEnv.Set(pairs[0].(core.Symbol), val)
-		pairs = pairs[2:]
 		if len(pairs) == 0 {
 			break
 		}
+		switch sym := pairs[0].(type) {
+		default:
+			return nil, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], pairs[0])
+		case core.Symbol:
+			val, err := base.Eval(pairs[1], env)
+			if err != nil {
+				return nil, err
+			}
+			newEnv.Set(sym, val)
+			pairs = pairs[2:]
+		}
 	}
-	return EvalLazy(ast[2], newEnv), nil
+	return base.EvalLazy(ast[2], newEnv), nil
 }
 
-func do(ast core.List, env *Env) (core.Any, error) {
+func do(ast core.List, env *base.Env) (core.Any, error) {
 	if len(ast) == 1 {
 		return Nil{}, nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
-		_, err := Eval(item, env)
+		_, err := base.Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return EvalLazy(ast[len(ast)-1], env), nil
+	return base.EvalLazy(ast[len(ast)-1], env), nil
 }
 
-func _if(ast core.List, env *Env) (core.Any, error) {
+func _if(ast core.List, env *base.Env) (core.Any, error) {
 	if err := rangeLen(ast, 3, 4); err != nil {
 		return nil, err
 	}
-	cond, err := Eval(ast[1], env)
+	cond, err := base.Eval(ast[1], env)
 	if err != nil {
 		return nil, err
 	}
 	if (cond != Bool(false) && cond != Nil{}) {
-		return EvalLazy(ast[2], env), nil
+		return base.EvalLazy(ast[2], env), nil
 	}
 	if len(ast) == 4 {
-		return EvalLazy(ast[3], env), nil
+		return base.EvalLazy(ast[3], env), nil
 	}
 	return Nil{}, nil
 }
 
-func fnS(ast core.List, env *Env) (core.Any, error) {
+func fnS(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return nil, err
 	}
@@ -409,34 +353,30 @@ func fnS(ast core.List, env *Env) (core.Any, error) {
 		}
 	}
 	body := ast[2]
-	lambda := func(call core.List, outer *Env) (core.Any, error) {
-		err := exactLen(call, len(binds)+1)
+	lambda := func(args core.List, outer *base.Env) (core.Any, error) {
+		err := exactLen(args, len(binds)+1)
 		if err != nil {
 			return nil, err
 		}
-		// capture argument scope, but don't eval (yet)
-		args := thunks(call, outer)
-		// use fn definition scope for bind env
-		newEnv, err := NewEnv(env, binds, args)
-		if err != nil {
-			return nil, err
+		// binds in fn* scope, args eval in outer scope lazily
+		inner := base.NewEnv(env)
+		for i, bind := range binds {
+			switch sym := bind.(type) {
+			default:
+				return nil, fmt.Errorf("%#v: bindings must be symbols: %#v", args[0], bind)
+			case core.Symbol:
+				expr := args[i+1]
+				// in inner env, bind sym to expr, lazy eval in outer env
+				bindLazy(inner, sym, outer, expr)
+			}
 		}
 		// done with these scopes
-		return EvalLazy(body, newEnv), nil
+		return base.EvalLazy(body, inner), nil
 	}
-	return Function(lambda), nil
+	return base.Func(lambda), nil
 }
 
-// list of arguments lazily evaluated
-func thunks(ast core.List, env *Env) (args core.List) {
-	args = make(core.List, len(ast)-1)
-	for i, item := range ast[1:] {
-		args[i] = EvalLazy(item, env)
-	}
-	return
-}
-
-func prn(ast core.List, env *Env) (core.Any, error) {
+func prn(ast core.List, env *base.Env) (core.Any, error) {
 	vals, err := list(ast, env)
 	if err != nil {
 		return nil, err
@@ -445,10 +385,10 @@ func prn(ast core.List, env *Env) (core.Any, error) {
 	return Nil{}, nil
 }
 
-func list(ast core.List, env *Env) (core.Any, error) {
+func list(ast core.List, env *base.Env) (core.Any, error) {
 	exprs := make(core.List, len(ast)-1)
 	for i, item := range ast[1:] {
-		val, err := Eval(item, env)
+		val, err := base.Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
@@ -457,11 +397,11 @@ func list(ast core.List, env *Env) (core.Any, error) {
 	return exprs, nil
 }
 
-func listQ(ast core.List, env *Env) (core.Any, error) {
+func listQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return nil, err
 	}
-	val, err := Eval(ast[1], env)
+	val, err := base.Eval(ast[1], env)
 	if err != nil {
 		return nil, err
 	}
@@ -473,11 +413,11 @@ func listQ(ast core.List, env *Env) (core.Any, error) {
 	}
 }
 
-func count(ast core.List, env *Env) (core.Any, error) {
+func count(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return nil, err
 	}
-	val, err := Eval(ast[1], env)
+	val, err := base.Eval(ast[1], env)
 	if err != nil {
 		return nil, err
 	}
@@ -498,84 +438,35 @@ func count(ast core.List, env *Env) (core.Any, error) {
 	return core.NewNumber(cnt), nil
 }
 
-func emptyQ(ast core.List, env *Env) (core.Any, error) {
+func emptyQ(ast core.List, env *base.Env) (core.Any, error) {
 	cnt, err := count(ast, env)
 	if err != nil {
 		return nil, err
 	}
-	return Bool(cnt.(core.Number).Decimal().Equal(core.Zero.Decimal())), nil
+	return Bool(cnt.Equal(core.Zero)), nil
 }
 
-func equalQ(ast core.List, env *Env) (core.Any, error) {
+func equalQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := minLen(ast, 3); err != nil {
 		return nil, err
 	}
-	first, err := Eval(ast[1], env)
+	first, err := base.Eval(ast[1], env)
 	if err != nil {
 		return nil, err
 	}
 	for _, item := range ast[2:] {
-		value, err := Eval(item, env)
+		value, err := base.Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
-		if !isEqual(first, value) {
+		if !first.Equal(value) {
 			return Bool(false), nil
 		}
 	}
 	return Bool(true), nil
 }
 
-func isEqual(first core.Any, item core.Any) bool {
-	if reflect.TypeOf(item) != reflect.TypeOf(first) {
-		return false
-	}
-	switch val := first.(type) {
-	default:
-		return item == val
-	case Function:
-		return false
-	case core.String:
-		if item.(core.String) != val {
-			return false
-		}
-	case core.Symbol:
-		if item.(core.Symbol).Val != val.Val {
-			return false
-		}
-	case core.Key:
-		if item.(core.Key) != val {
-			return false
-		}
-	case core.Number:
-		if !item.(core.Number).Decimal().Equal(val.Decimal()) {
-			return false
-		}
-	case core.List:
-		if len(val) != len(item.(core.List)) {
-			return false
-		}
-		for i, a := range val {
-			b := item.(core.List)[i]
-			if !isEqual(a, b) {
-				return false
-			}
-		}
-	case core.Vector:
-		if len(val) != len(item.(core.Vector)) {
-			return false
-		}
-		for i, a := range val {
-			b := item.(core.Vector)[i]
-			if !isEqual(a, b) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-func ltQ(ast core.List, env *Env) (core.Any, error) {
+func ltQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return nil, err
 	}
@@ -590,7 +481,7 @@ func ltQ(ast core.List, env *Env) (core.Any, error) {
 	return Bool(arg1.Decimal().LessThan(arg2.Decimal())), nil
 }
 
-func lteqQ(ast core.List, env *Env) (core.Any, error) {
+func lteqQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return nil, err
 	}
@@ -605,7 +496,7 @@ func lteqQ(ast core.List, env *Env) (core.Any, error) {
 	return Bool(arg1.Decimal().LessThanOrEqual(arg2.Decimal())), nil
 }
 
-func gtQ(ast core.List, env *Env) (core.Any, error) {
+func gtQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return nil, err
 	}
@@ -620,7 +511,7 @@ func gtQ(ast core.List, env *Env) (core.Any, error) {
 	return Bool(arg1.Decimal().GreaterThan(arg2.Decimal())), nil
 }
 
-func gteqQ(ast core.List, env *Env) (core.Any, error) {
+func gteqQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return nil, err
 	}
@@ -635,27 +526,17 @@ func gteqQ(ast core.List, env *Env) (core.Any, error) {
 	return Bool(arg1.Decimal().GreaterThanOrEqual(arg2.Decimal())), nil
 }
 
-func quote(ast core.List, env *Env) (core.Any, error) {
+func quote(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return nil, err
 	}
 	return ast[1], nil
 }
 
-func eval(ast core.List, env *Env) (core.Any, error) {
+func eval(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return nil, err
 	}
 	// double-eval TCO'd
 	return dualEvalLazy(ast[1], env), nil
-}
-
-func dualEvalLazy(ast core.Any, env *Env) Thunk {
-	return func() (core.Any, error) {
-		val, err := Eval(ast, env)
-		if err != nil {
-			return nil, err
-		}
-		return EvalLazy(val, env), nil
-	}
 }

@@ -11,24 +11,6 @@ type Env struct {
 	data  map[string]core.Any
 }
 
-func NewEnv(outer *Env, binds core.Vector, exprs core.List) (*Env, error) {
-	data := make(map[string]core.Any)
-	if len(binds) != len(exprs) {
-		return nil, fmt.Errorf("binds and exprs must be the same length: %d", len(binds))
-	}
-	for i, bind := range binds {
-		switch bind.(type) {
-		default:
-			return nil, fmt.Errorf("binds must be symbols: %v", bind)
-		case core.Symbol:
-			break
-		}
-		expr := exprs[i]
-		data[bind.(core.Symbol).Val] = expr
-	}
-	return &Env{outer, data}, nil
-}
-
 func (env *Env) Set(sym core.Symbol, value core.Any) {
 	env.data[sym.Val] = value
 }
@@ -39,7 +21,12 @@ func (env *Env) Get(sym core.Symbol) (core.Any, error) {
 		if env.outer != nil {
 			return env.outer.Get(sym)
 		}
-		return nil, fmt.Errorf("%#v: not found", sym)
+		return nil, fmt.Errorf("%#v: unable to resolve symbol", sym)
 	}
 	return value, nil
+}
+
+func NewEnv(outer *Env) *Env {
+	data := make(map[string]core.Any)
+	return &Env{outer, data}
 }

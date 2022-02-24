@@ -7,12 +7,13 @@ import (
 	goprompt "github.com/c-bata/go-prompt"
 	"github.com/fatih/color"
 	"github.com/starlight/ocelot/pkg/base"
+	"github.com/starlight/ocelot/pkg/builtin"
 	"github.com/starlight/ocelot/pkg/core"
 	"golang.org/x/term"
 )
 
 func Repl(prompt string) error {
-	env, err := base.BaseEnv()
+	env, err := builtin.BuiltinEnv()
 	if err != nil {
 		return err
 	}

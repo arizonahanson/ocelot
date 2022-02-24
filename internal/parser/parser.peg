@@ -36,8 +36,7 @@ Key ←  ':' word {
 }
 // literal string
 String ←  '"' runeChr* '"' {
-  str := core.String(string(c.text))
-  return (&str).Unquote()
+  return core.String{Val: string(c.text)}.Unquote()
 } / '"' runeChr* !'"' {
 	return nil, errors.New("not terminated")
 }
@@ -50,7 +49,7 @@ runeEsc ←  `\` ([abfnrtv"\\] /
 hexDigit ← [0-9a-f]i
 // literal real number like (-123.45e-67)
 Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
-  return core.String(string(c.text)).Number()
+  return core.String{Val: string(c.text)}.Number()
 }
 // identifiers (like ϕa_2)
 Symbol ←  word suffix? {

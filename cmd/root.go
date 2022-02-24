@@ -29,6 +29,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/starlight/ocelot/pkg/base"
+	"github.com/starlight/ocelot/pkg/builtin"
 	"github.com/starlight/ocelot/pkg/ocelot"
 )
 
@@ -49,7 +50,7 @@ var rootCmd = &cobra.Command{
 			err := ocelot.Repl("$ ")
 			cobra.CheckErr(err)
 		} else {
-			env, err := base.BaseEnv()
+			env, err := builtin.BuiltinEnv()
 			cobra.CheckErr(err)
 			out, err := base.EvalStr(strings.Join(args, " "), env)
 			cobra.CheckErr(err)
