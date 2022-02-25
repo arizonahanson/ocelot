@@ -345,29 +345,29 @@ func _fn(ast core.List, env *base.Env) (core.Any, error) {
 		break
 	}
 	binds := ast[1].(core.Vector)
-	for _, item := range binds {
-		switch item.(type) {
+	symbols := make([]core.Symbol, len(binds))
+	for i, item := range binds {
+		switch sym := item.(type) {
 		default:
 			return nil, fmt.Errorf("%#v: bind expression contained non-symbol %#v", ast[0], item)
 		case core.Symbol:
+			symbols[i] = sym
 			break
 		}
 	}
 	body := ast[2]
 	lambda := func(args core.List, outer *base.Env) (core.Any, error) {
-		err := exactLen(args, len(binds)+1)
+		err := exactLen(args, len(symbols)+1)
 		if err != nil {
 			return nil, err
 		}
-		// binds in fn* scope, args eval in outer scope lazily
-		inner := base.NewEnv(env)
-		for i, bind := range binds {
-			expr := args[i+1]
-			// in inner env, bind sym to expr, lazy eval in outer env
-			inner.SetLazy(bind.(core.Symbol), base.EvalLazy(expr, outer))
+		local := base.NewEnv(env)
+		for i, symbol := range symbols {
+			// bind sym to arg in local, but lazy eval arg in outer
+			local.SetLazy(symbol, base.EvalLazy(args[i+1], outer))
 		}
-		// done with these scopes
-		return base.EvalLazy(body, inner), nil
+		// lazy eval body in local
+		return base.EvalLazy(body, local), nil
 	}
 	return base.Func(lambda), nil
 }
