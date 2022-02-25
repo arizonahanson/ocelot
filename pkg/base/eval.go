@@ -26,9 +26,30 @@ func EvalStr(in string, env *Env) (core.Any, error) {
 	return Eval(ast, env)
 }
 
-// trampoline eval for making non-tail calls (eager)
+// eval that resolves lazy values
 func Eval(ast core.Any, env *Env) (value core.Any, err error) {
 	value, err = evalAst(ast, env)
+	if err != nil {
+		return
+	}
+	switch lazy := value.(type) {
+	default:
+		return
+	case Lazy:
+		return lazy.Resolve()
+	}
+}
+
+// thunked eval for tail-calls (lazy)
+func EvalLazy(ast core.Any, env *Env) Lazy {
+	return func() (core.Any, error) {
+		return evalAst(ast, env)
+	}
+}
+
+// trampoline to resolve lazy values
+func (lazy Lazy) Resolve() (value core.Any, err error) {
+	value, err = lazy()
 	for {
 		if err != nil {
 			return
@@ -39,13 +60,6 @@ func Eval(ast core.Any, env *Env) (value core.Any, err error) {
 		case Lazy:
 			value, err = eval()
 		}
-	}
-}
-
-// thunked eval for tail-calls (lazy)
-func EvalLazy(ast core.Any, env *Env) Lazy {
-	return func() (core.Any, error) {
-		return evalAst(ast, env)
 	}
 }
 

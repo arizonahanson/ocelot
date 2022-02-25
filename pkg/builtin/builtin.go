@@ -361,14 +361,9 @@ func fnS(ast core.List, env *base.Env) (core.Any, error) {
 		// binds in fn* scope, args eval in outer scope lazily
 		inner := base.NewEnv(env)
 		for i, bind := range binds {
-			switch sym := bind.(type) {
-			default:
-				return nil, fmt.Errorf("%#v: bindings must be symbols: %#v", args[0], bind)
-			case core.Symbol:
-				expr := args[i+1]
-				// in inner env, bind sym to expr, lazy eval in outer env
-				bindLazy(inner, sym, outer, expr)
-			}
+			expr := args[i+1]
+			// in inner env, bind sym to expr, lazy eval in outer env
+			inner.SetLazy(bind.(core.Symbol), base.EvalLazy(expr, outer))
 		}
 		// done with these scopes
 		return base.EvalLazy(body, inner), nil

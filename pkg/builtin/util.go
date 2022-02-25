@@ -41,19 +41,6 @@ func evalNumber(ast core.Any, env *base.Env) (*core.Number, error) {
 	}
 }
 
-func bindLazy(inner *base.Env, sym core.Symbol, outer *base.Env, expr core.Any) {
-	lazy := func() (core.Any, error) {
-		val, err := base.Eval(expr, outer)
-		if err != nil {
-			return nil, err
-		}
-		// memoize
-		inner.Set(sym, val)
-		return val, nil
-	}
-	inner.Set(sym, base.Lazy(lazy))
-}
-
 // eval then lazy-eval the result
 func dualEvalLazy(ast core.Any, env *base.Env) base.Lazy {
 	return func() (core.Any, error) {

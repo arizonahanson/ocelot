@@ -11,8 +11,9 @@ type Env struct {
 	data  map[string]core.Any
 }
 
-func (env *Env) Set(sym core.Symbol, value core.Any) {
-	env.data[sym.Val] = value
+func NewEnv(outer *Env) *Env {
+	data := make(map[string]core.Any)
+	return &Env{outer, data}
 }
 
 func (env *Env) Get(sym core.Symbol) (core.Any, error) {
@@ -26,7 +27,20 @@ func (env *Env) Get(sym core.Symbol) (core.Any, error) {
 	return value, nil
 }
 
-func NewEnv(outer *Env) *Env {
-	data := make(map[string]core.Any)
-	return &Env{outer, data}
+func (env *Env) Set(sym core.Symbol, value core.Any) {
+	env.data[sym.Val] = value
+}
+
+// bind symbol in env to lazy value
+// expression evaluated only once
+func (env *Env) SetLazy(sym core.Symbol, lazy Lazy) {
+	eval := func() (val core.Any, err error) {
+		val, err = lazy.Resolve()
+		if err != nil {
+			return
+		}
+		env.Set(sym, val)
+		return
+	}
+	env.Set(sym, Lazy(eval))
 }
