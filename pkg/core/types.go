@@ -151,7 +151,7 @@ func (val List) GoString() string {
 		if i != 0 {
 			str += " "
 		}
-		if i >= 2 {
+		if i == 1 && len(val) > 2 {
 			str += "..."
 			break
 		}
@@ -187,8 +187,8 @@ func (val Vector) GoString() string {
 		if i != 0 {
 			str += " "
 		}
-		if i >= 2 {
-			str += " ..."
+		if i == 1 && len(val) > 2 {
+			str += "..."
 			break
 		}
 		switch item.(type) {
