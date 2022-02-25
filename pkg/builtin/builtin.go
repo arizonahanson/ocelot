@@ -54,6 +54,7 @@ var Builtin = map[string]core.Any{
 	"list?":  base.Func(listQ),
 	"empty?": base.Func(emptyQ),
 	"count":  base.Func(count),
+	"map":    base.Func(_map),
 }
 
 func nilQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -534,4 +535,37 @@ func eval(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	// double-eval TCO'd
 	return dualEvalLazy(ast[1], env), nil
+}
+
+func _map(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 3); err != nil {
+		return nil, err
+	}
+	arg1, err := base.Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch fn := arg1.(type) {
+	default:
+		return nil, fmt.Errorf("%#v: called with non-function: %#v", ast[0], arg1)
+	case base.Func:
+		arg2, err := base.Eval(ast[2], env)
+		if err != nil {
+			return nil, err
+		}
+		switch list := arg2.(type) {
+		default:
+			return nil, fmt.Errorf("%#v: called with non-list: %#v", ast[0], arg2)
+		case core.List:
+			res := make(core.List, len(list))
+			for i, item := range list {
+				val, err := base.Eval(core.List{fn, item}, env)
+				if err != nil {
+					return nil, err
+				}
+				res[i] = val
+			}
+			return res, nil
+		}
+	}
 }

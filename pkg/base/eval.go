@@ -81,7 +81,7 @@ func evalAst(ast core.Any, env *Env) (core.Any, error) {
 }
 
 // thunked function call (always lazy)
-func fnLazy(fn Func, ast core.List, env *Env) Lazy {
+func FnLazy(fn Func, ast core.List, env *Env) Lazy {
 	return func() (core.Any, error) {
 		return fn(ast, env)
 	}
@@ -104,7 +104,7 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 				continue
 			case Func:
 				// tail-call function (unevaluated ast)
-				return fnLazy(first, ast, env), nil
+				return FnLazy(first, ast, env), nil
 			}
 		}
 		// default list resolution for rest
