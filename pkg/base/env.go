@@ -31,16 +31,16 @@ func (env *Env) Set(sym core.Symbol, value core.Any) {
 	env.data[sym.Val] = value
 }
 
-// bind symbol in env to lazy value
+// bind symbol in env to future value
 // expression evaluated only once
-func (env *Env) SetLazy(sym core.Symbol, lazy Lazy) {
+func (env *Env) SetFuture(sym core.Symbol, future Future) {
 	eval := func() (val core.Any, err error) {
-		val, err = lazy.Resolve()
+		val, err = future.Resolve()
 		if err != nil {
 			return
 		}
 		env.Set(sym, val)
 		return
 	}
-	env.Set(sym, Lazy(eval))
+	env.Set(sym, Future(eval))
 }

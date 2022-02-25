@@ -26,40 +26,47 @@ func EvalStr(in string, env *Env) (core.Any, error) {
 	return Eval(ast, env)
 }
 
-// eval that resolves lazy values
+// eval that resolves future values
 func Eval(ast core.Any, env *Env) (value core.Any, err error) {
 	value, err = evalAst(ast, env)
 	if err != nil {
 		return
 	}
-	switch lazy := value.(type) {
+	switch future := value.(type) {
 	default:
 		return
-	case Lazy:
-		return lazy.Resolve()
+	case Future:
+		return future.Resolve()
+	}
+}
+
+// trampoline to resolve future values
+func (future Future) Resolve() (value core.Any, err error) {
+	value, err = future()
+	for {
+		if err != nil {
+			return
+		}
+		switch next := value.(type) {
+		default:
+			return
+		case Future:
+			value, err = next()
+		}
 	}
 }
 
 // thunked eval for tail-calls (lazy)
-func EvalLazy(ast core.Any, env *Env) Lazy {
+func EvalFuture(ast core.Any, env *Env) Future {
 	return func() (core.Any, error) {
 		return evalAst(ast, env)
 	}
 }
 
-// trampoline to resolve lazy values
-func (lazy Lazy) Resolve() (value core.Any, err error) {
-	value, err = lazy()
-	for {
-		if err != nil {
-			return
-		}
-		switch eval := value.(type) {
-		default:
-			return
-		case Lazy:
-			value, err = eval()
-		}
+// thunked function call (always lazy)
+func FnFuture(fn Func, ast core.List, env *Env) Future {
+	return func() (core.Any, error) {
+		return fn(ast, env)
 	}
 }
 
@@ -80,13 +87,6 @@ func evalAst(ast core.Any, env *Env) (core.Any, error) {
 	}
 }
 
-// thunked function call (always lazy)
-func FnLazy(fn Func, ast core.List, env *Env) Lazy {
-	return func() (core.Any, error) {
-		return fn(ast, env)
-	}
-}
-
 func evalList(ast core.List, env *Env) (core.Any, error) {
 	var res core.List
 	for i, item := range ast {
@@ -104,7 +104,7 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 				continue
 			case Func:
 				// tail-call function (unevaluated ast)
-				return FnLazy(first, ast, env), nil
+				return FnFuture(first, ast, env), nil
 			}
 		}
 		// default list resolution for rest

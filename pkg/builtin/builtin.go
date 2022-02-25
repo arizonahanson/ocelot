@@ -125,7 +125,7 @@ func _and(ast core.List, env *base.Env) (core.Any, error) {
 			return arg, nil
 		}
 	}
-	return base.EvalLazy(ast[len(ast)-1], env), nil
+	return base.EvalFuture(ast[len(ast)-1], env), nil
 }
 
 func _or(ast core.List, env *base.Env) (core.Any, error) {
@@ -141,7 +141,7 @@ func _or(ast core.List, env *base.Env) (core.Any, error) {
 			return arg, nil
 		}
 	}
-	return base.EvalLazy(ast[len(ast)-1], env), nil
+	return base.EvalFuture(ast[len(ast)-1], env), nil
 }
 
 func _add(ast core.List, env *base.Env) (core.Any, error) {
@@ -301,7 +301,7 @@ func _let(ast core.List, env *base.Env) (core.Any, error) {
 			pairs = pairs[2:]
 		}
 	}
-	return base.EvalLazy(ast[2], newEnv), nil
+	return base.EvalFuture(ast[2], newEnv), nil
 }
 
 func _do(ast core.List, env *base.Env) (core.Any, error) {
@@ -314,7 +314,7 @@ func _do(ast core.List, env *base.Env) (core.Any, error) {
 			return nil, err
 		}
 	}
-	return base.EvalLazy(ast[len(ast)-1], env), nil
+	return base.EvalFuture(ast[len(ast)-1], env), nil
 }
 
 func _if(ast core.List, env *base.Env) (core.Any, error) {
@@ -326,10 +326,10 @@ func _if(ast core.List, env *base.Env) (core.Any, error) {
 		return nil, err
 	}
 	if (cond != Bool(false) && cond != Nil{}) {
-		return base.EvalLazy(ast[2], env), nil
+		return base.EvalFuture(ast[2], env), nil
 	}
 	if len(ast) == 4 {
-		return base.EvalLazy(ast[3], env), nil
+		return base.EvalFuture(ast[3], env), nil
 	}
 	return Nil{}, nil
 }
@@ -364,10 +364,10 @@ func _fn(ast core.List, env *base.Env) (core.Any, error) {
 		local := base.NewEnv(env)
 		for i, symbol := range symbols {
 			// bind sym to arg in local, but lazy eval arg in outer
-			local.SetLazy(symbol, base.EvalLazy(args[i+1], outer))
+			local.SetFuture(symbol, base.EvalFuture(args[i+1], outer))
 		}
 		// lazy eval body in local
-		return base.EvalLazy(body, local), nil
+		return base.EvalFuture(body, local), nil
 	}
 	return base.Func(lambda), nil
 }
@@ -534,7 +534,7 @@ func _eval(ast core.List, env *base.Env) (core.Any, error) {
 		return nil, err
 	}
 	// double-eval TCO'd
-	return dualEvalLazy(ast[1], env), nil
+	return dualEvalFuture(ast[1], env), nil
 }
 
 func _map(ast core.List, env *base.Env) (core.Any, error) {

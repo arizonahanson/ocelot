@@ -42,12 +42,12 @@ func evalNumber(ast core.Any, env *base.Env) (*core.Number, error) {
 }
 
 // eval then lazy-eval the result
-func dualEvalLazy(ast core.Any, env *base.Env) base.Lazy {
+func dualEvalFuture(ast core.Any, env *base.Env) base.Future {
 	return func() (core.Any, error) {
 		val, err := base.Eval(ast, env)
 		if err != nil {
 			return nil, err
 		}
-		return base.EvalLazy(val, env), nil
+		return base.EvalFuture(val, env), nil
 	}
 }

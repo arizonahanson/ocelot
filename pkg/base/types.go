@@ -26,17 +26,17 @@ func (fn Func) Equal(any core.Any) bool {
 	return false // not comparable
 }
 
-// type:lazy
-type Lazy func() (core.Any, error)
+// type:future
+type Future func() (core.Any, error)
 
-func (lazy Lazy) String() string {
+func (future Future) String() string {
 	return "<?>" // should not happen
 }
 
-func (lazy Lazy) GoString() string {
+func (future Future) GoString() string {
 	return "<?>" // should not happen
 }
 
-func (lazy Lazy) Equal(any core.Any) bool {
+func (future Future) Equal(any core.Any) bool {
 	return false // not equal to anything yet
 }
