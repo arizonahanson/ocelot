@@ -28,16 +28,17 @@ var Builtin = map[string]core.Any{
 	"and":    base.Func(_and),
 	"or":     base.Func(_or),
 	// numbers
-	"add":   base.Func(_add),
-	"sub":   base.Func(_sub),
-	"mul":   base.Func(_mul),
-	"quot":  base.Func(_quot),
-	"rem":   base.Func(_rem),
-	"quot*": base.Func(_quotS),
-	"lt?":   base.Func(_ltQ),
-	"lteq?": base.Func(_lteqQ),
-	"gt?":   base.Func(_gtQ),
-	"gteq?": base.Func(_gteqQ),
+	"number?": base.Func(_numberQ),
+	"add":     base.Func(_add),
+	"sub":     base.Func(_sub),
+	"mul":     base.Func(_mul),
+	"quot":    base.Func(_quot),
+	"rem":     base.Func(_rem),
+	"quot*":   base.Func(_quotS),
+	"lt?":     base.Func(_ltQ),
+	"lteq?":   base.Func(_lteqQ),
+	"gt?":     base.Func(_gtQ),
+	"gteq?":   base.Func(_gteqQ),
 	// special
 	"func":   base.Func(_func),
 	"type":   base.Func(_type),
@@ -142,6 +143,22 @@ func _or(ast core.List, env *base.Env) (core.Any, error) {
 		}
 	}
 	return base.EvalFuture(ast[len(ast)-1], env), nil
+}
+
+func _numberQ(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return nil, err
+	}
+	arg, err := base.Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch arg.(type) {
+	default:
+		return Bool(false), nil
+	case core.Number:
+		return Bool(true), nil
+	}
 }
 
 func _add(ast core.List, env *base.Env) (core.Any, error) {
