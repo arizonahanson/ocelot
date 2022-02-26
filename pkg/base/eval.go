@@ -58,7 +58,7 @@ func FnFuture(fn Func, ast core.List, env *Env) Future {
 func evalAst(ast core.Any, env *Env) (core.Any, error) {
 	switch any := ast.(type) {
 	default:
-		// String, Number, Key
+		// String, Number, Key, Bool, Nil
 		return any, nil
 	case core.Symbol:
 		return env.Get(any)

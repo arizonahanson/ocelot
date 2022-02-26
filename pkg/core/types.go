@@ -34,6 +34,26 @@ func (val Nil) Equal(any Any) bool {
 	}
 }
 
+// type:bool
+type Bool bool
+
+func (val Bool) String() string {
+	return fmt.Sprintf("%v", bool(val))
+}
+
+func (val Bool) GoString() string {
+	return val.String()
+}
+
+func (val Bool) Equal(any Any) bool {
+	switch arg := any.(type) {
+	default:
+		return false
+	case Bool:
+		return val == arg
+	}
+}
+
 // type:number
 type Number decimal.Decimal
 

@@ -12,7 +12,7 @@ Expr ←  _* first:Any? rest:(_+ Any)* _* {
   return join(first, rest, 1), nil
 }
 // parent `any` type
-Any ←  List / Vector / Map / String / Symbol / Key / Number
+Any ←  List / Vector / Map / String / Nil / Bool / Symbol / Key / Number
 // expression list
 List ←  '(' expr:Expr ')' {
   return core.List(expr.([]core.Any)), nil
@@ -33,6 +33,16 @@ Map ←  '{' _* first:(Key _+ Any)? rest:(_+ Key _+ Any)* _* '}' {
 }
 Key ←  ':' word {
   return core.Key(string(c.text)), nil
+}
+// nil
+Nil ←  "nil" {
+  return core.Nil{}, nil
+}
+// bool
+Bool ←  "true" {
+  return core.Bool(true), nil
+} / "false" {
+  return core.Bool(false), nil
 }
 // literal string
 String ←  '"' runeChr* '"' {

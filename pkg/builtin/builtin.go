@@ -17,9 +17,6 @@ func BuiltinEnv() (*base.Env, error) {
 
 var Builtin = map[string]core.Any{
 	// nil / bool
-	"nil":    core.Nil{},
-	"true":   Bool(true),
-	"false":  Bool(false),
 	"nil?":   base.Func(_nilQ),
 	"true?":  base.Func(_trueQ),
 	"false?": base.Func(_falseQ),
@@ -69,7 +66,7 @@ func _nilQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Bool(arg1 == core.Nil{}), nil
+	return core.Bool(arg1 == core.Nil{}), nil
 }
 
 func _trueQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -77,7 +74,7 @@ func _trueQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Bool(arg1 == Bool(true)), nil
+	return core.Bool(arg1 == core.Bool(true)), nil
 }
 
 func _falseQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -85,7 +82,7 @@ func _falseQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Bool(arg1 == Bool(false)), nil
+	return core.Bool(arg1 == core.Bool(false)), nil
 }
 
 func _bool(ast core.List, env *base.Env) (core.Any, error) {
@@ -93,7 +90,7 @@ func _bool(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Bool(arg1 != Bool(false) && arg1 != core.Nil{}), nil
+	return core.Bool(arg1 != core.Bool(false) && arg1 != core.Nil{}), nil
 }
 
 func _not(ast core.List, env *base.Env) (core.Any, error) {
@@ -101,19 +98,19 @@ func _not(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Bool(arg1 == Bool(false) || arg1 == core.Nil{}), nil
+	return core.Bool(arg1 == core.Bool(false) || arg1 == core.Nil{}), nil
 }
 
 func _and(ast core.List, env *base.Env) (core.Any, error) {
 	if len(ast) == 1 {
-		return Bool(true), nil
+		return core.Bool(true), nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
 		arg, err := base.Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
-		if (arg == Bool(false) || arg == core.Nil{}) {
+		if (arg == core.Bool(false) || arg == core.Nil{}) {
 			return arg, nil
 		}
 	}
@@ -122,14 +119,14 @@ func _and(ast core.List, env *base.Env) (core.Any, error) {
 
 func _or(ast core.List, env *base.Env) (core.Any, error) {
 	if len(ast) == 1 {
-		return Bool(false), nil
+		return core.Bool(false), nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
 		arg, err := base.Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
-		if (arg != Bool(false) && arg != core.Nil{}) {
+		if (arg != core.Bool(false) && arg != core.Nil{}) {
 			return arg, nil
 		}
 	}
@@ -143,9 +140,9 @@ func _numberQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	switch arg1.(type) {
 	default:
-		return Bool(false), nil
+		return core.Bool(false), nil
 	case core.Number:
-		return Bool(true), nil
+		return core.Bool(true), nil
 	}
 }
 
@@ -327,7 +324,7 @@ func _if(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	if (cond != Bool(false) && cond != core.Nil{}) {
+	if (cond != core.Bool(false) && cond != core.Nil{}) {
 		return base.EvalFuture(ast[2], env), nil
 	}
 	if len(ast) == 4 {
@@ -405,9 +402,9 @@ func _listQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	switch val.(type) {
 	default:
-		return Bool(false), nil
+		return core.Bool(false), nil
 	case core.List:
-		return Bool(true), nil
+		return core.Bool(true), nil
 	}
 }
 
@@ -421,9 +418,9 @@ func _vectorQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	switch val.(type) {
 	default:
-		return Bool(false), nil
+		return core.Bool(false), nil
 	case core.Vector:
-		return Bool(true), nil
+		return core.Bool(true), nil
 	}
 }
 
@@ -437,9 +434,9 @@ func _symbolQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	switch val.(type) {
 	default:
-		return Bool(false), nil
+		return core.Bool(false), nil
 	case core.Symbol:
-		return Bool(true), nil
+		return core.Bool(true), nil
 	}
 }
 
@@ -453,9 +450,9 @@ func _boolQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	switch val.(type) {
 	default:
-		return Bool(false), nil
-	case Bool:
-		return Bool(true), nil
+		return core.Bool(false), nil
+	case core.Bool:
+		return core.Bool(true), nil
 	}
 }
 
@@ -469,9 +466,9 @@ func _keyQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	switch val.(type) {
 	default:
-		return Bool(false), nil
+		return core.Bool(false), nil
 	case core.Key:
-		return Bool(true), nil
+		return core.Bool(true), nil
 	}
 }
 
@@ -485,9 +482,9 @@ func _stringQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	switch val.(type) {
 	default:
-		return Bool(false), nil
+		return core.Bool(false), nil
 	case core.String:
-		return Bool(true), nil
+		return core.Bool(true), nil
 	}
 }
 
@@ -501,9 +498,9 @@ func _mapQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	switch val.(type) {
 	default:
-		return Bool(false), nil
+		return core.Bool(false), nil
 	case core.Map:
-		return Bool(true), nil
+		return core.Bool(true), nil
 	}
 }
 
@@ -534,7 +531,7 @@ func _emptyQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Bool(cnt.Equal(core.Zero)), nil
+	return core.Bool(cnt.Equal(core.Zero)), nil
 }
 
 func _equalQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -551,10 +548,10 @@ func _equalQ(ast core.List, env *base.Env) (core.Any, error) {
 			return nil, err
 		}
 		if !first.Equal(value) {
-			return Bool(false), nil
+			return core.Bool(false), nil
 		}
 	}
-	return Bool(true), nil
+	return core.Bool(true), nil
 }
 
 func _ltQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -569,7 +566,7 @@ func _ltQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
-	return Bool(arg1.Decimal().LessThan(arg2.Decimal())), nil
+	return core.Bool(arg1.Decimal().LessThan(arg2.Decimal())), nil
 }
 
 func _lteqQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -584,7 +581,7 @@ func _lteqQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
-	return Bool(arg1.Decimal().LessThanOrEqual(arg2.Decimal())), nil
+	return core.Bool(arg1.Decimal().LessThanOrEqual(arg2.Decimal())), nil
 }
 
 func _gtQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -599,7 +596,7 @@ func _gtQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
-	return Bool(arg1.Decimal().GreaterThan(arg2.Decimal())), nil
+	return core.Bool(arg1.Decimal().GreaterThan(arg2.Decimal())), nil
 }
 
 func _gteqQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -614,7 +611,7 @@ func _gteqQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%#v: %s", ast[0], err)
 	}
-	return Bool(arg1.Decimal().GreaterThanOrEqual(arg2.Decimal())), nil
+	return core.Bool(arg1.Decimal().GreaterThanOrEqual(arg2.Decimal())), nil
 }
 
 func _quote(ast core.List, env *base.Env) (core.Any, error) {
