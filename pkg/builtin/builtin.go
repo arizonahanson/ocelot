@@ -51,11 +51,16 @@ var Builtin = map[string]core.Any{
 	"eval":   base.Func(_eval),
 	"quote":  base.Func(_quote),
 	// lists
-	"list":   base.Func(_list),
-	"list?":  base.Func(_listQ),
-	"empty?": base.Func(_emptyQ),
-	"count":  base.Func(_count),
-	"map":    base.Func(_map),
+	"list":    base.Func(_list),
+	"list?":   base.Func(_listQ),
+	"vector?": base.Func(_vectorQ),
+	"empty?":  base.Func(_emptyQ),
+	"count":   base.Func(_count),
+	"map":     base.Func(_map),
+	"map?":    base.Func(_mapQ),
+	"string?": base.Func(_stringQ),
+	"symbol?": base.Func(_symbolQ),
+	"key?":    base.Func(_keyQ),
 }
 
 func _nilQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -405,6 +410,86 @@ func _listQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 }
 
+func _vectorQ(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return nil, err
+	}
+	val, err := base.Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch val.(type) {
+	default:
+		return Bool(false), nil
+	case core.Vector:
+		return Bool(true), nil
+	}
+}
+
+func _symbolQ(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return nil, err
+	}
+	val, err := base.Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch val.(type) {
+	default:
+		return Bool(false), nil
+	case core.Symbol:
+		return Bool(true), nil
+	}
+}
+
+func _keyQ(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return nil, err
+	}
+	val, err := base.Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch val.(type) {
+	default:
+		return Bool(false), nil
+	case core.Key:
+		return Bool(true), nil
+	}
+}
+
+func _stringQ(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return nil, err
+	}
+	val, err := base.Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch val.(type) {
+	default:
+		return Bool(false), nil
+	case core.String:
+		return Bool(true), nil
+	}
+}
+
+func _mapQ(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return nil, err
+	}
+	val, err := base.Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch val.(type) {
+	default:
+		return Bool(false), nil
+	case core.Map:
+		return Bool(true), nil
+	}
+}
+
 func _count(ast core.List, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
@@ -551,6 +636,16 @@ func _map(ast core.List, env *base.Env) (core.Any, error) {
 			return nil, fmt.Errorf("%#v: called with non-list: %#v", ast[0], arg2)
 		case core.List:
 			res := make(core.List, len(list))
+			for i, item := range list {
+				val, err := base.Eval(core.List{fn, item}, env)
+				if err != nil {
+					return nil, err
+				}
+				res[i] = val
+			}
+			return res, nil
+		case core.Vector:
+			res := make(core.Vector, len(list))
 			for i, item := range list {
 				val, err := base.Eval(core.List{fn, item}, env)
 				if err != nil {
