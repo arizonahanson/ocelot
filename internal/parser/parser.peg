@@ -17,19 +17,19 @@ Any ←  List / Vector / Map / String / Symbol / Key / Number
 List ←  '(' expr:Expr ')' {
   return core.List(expr.([]core.Any)), nil
 } / '(' Expr !')' {
-  return nil, errors.New("not terminated")
+  return core.Nil{}, errors.New("not terminated")
 }
 // vector
 Vector ←  '[' expr:Expr ']' {
   return core.Vector(expr.([]core.Any)), nil
 } / '[' Expr !']' {
-  return nil, errors.New("not terminated")
+  return core.Nil{}, errors.New("not terminated")
 }
 // map
 Map ←  '{' _* first:(Key _+ Any)? rest:(_+ Key _+ Any)* _* '}' {
   return core.Map(merge(first, rest, 0, 2)), nil
 } / '{' _* (Key _+ Any) (_+ Key _+ Any)* _* !'}' {
-  return nil, errors.New("not terminated")
+  return core.Nil{}, errors.New("not terminated")
 }
 Key ←  ':' word {
   return core.Key(string(c.text)), nil
@@ -38,7 +38,7 @@ Key ←  ':' word {
 String ←  '"' runeChr* '"' {
   return core.String{Val: string(c.text)}.Unquote()
 } / '"' runeChr* !'"' {
-	return nil, errors.New("not terminated")
+	return core.Nil{}, errors.New("not terminated")
 }
 // no bare " or \ inside a String, supports \\, \", \abfnrtv, \xff, \uffff, \Uffffffff
 runeChr ←  [^"\\] / runeEsc

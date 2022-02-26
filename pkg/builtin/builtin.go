@@ -17,12 +17,13 @@ func BuiltinEnv() (*base.Env, error) {
 
 var Builtin = map[string]core.Any{
 	// nil / bool
-	"nil":    Nil{},
+	"nil":    core.Nil{},
 	"true":   Bool(true),
 	"false":  Bool(false),
 	"nil?":   base.Func(_nilQ),
 	"true?":  base.Func(_trueQ),
 	"false?": base.Func(_falseQ),
+	"bool?":  base.Func(_boolQ),
 	"bool":   base.Func(_bool),
 	"not":    base.Func(_not),
 	"and":    base.Func(_and),
@@ -68,7 +69,7 @@ func _nilQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Bool(arg1 == Nil{}), nil
+	return Bool(arg1 == core.Nil{}), nil
 }
 
 func _trueQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -92,7 +93,7 @@ func _bool(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Bool(arg1 != Bool(false) && arg1 != Nil{}), nil
+	return Bool(arg1 != Bool(false) && arg1 != core.Nil{}), nil
 }
 
 func _not(ast core.List, env *base.Env) (core.Any, error) {
@@ -100,7 +101,7 @@ func _not(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Bool(arg1 == Bool(false) || arg1 == Nil{}), nil
+	return Bool(arg1 == Bool(false) || arg1 == core.Nil{}), nil
 }
 
 func _and(ast core.List, env *base.Env) (core.Any, error) {
@@ -112,7 +113,7 @@ func _and(ast core.List, env *base.Env) (core.Any, error) {
 		if err != nil {
 			return nil, err
 		}
-		if (arg == Bool(false) || arg == Nil{}) {
+		if (arg == Bool(false) || arg == core.Nil{}) {
 			return arg, nil
 		}
 	}
@@ -128,7 +129,7 @@ func _or(ast core.List, env *base.Env) (core.Any, error) {
 		if err != nil {
 			return nil, err
 		}
-		if (arg != Bool(false) && arg != Nil{}) {
+		if (arg != Bool(false) && arg != core.Nil{}) {
 			return arg, nil
 		}
 	}
@@ -307,7 +308,7 @@ func _let(ast core.List, env *base.Env) (core.Any, error) {
 
 func _do(ast core.List, env *base.Env) (core.Any, error) {
 	if len(ast) == 1 {
-		return Nil{}, nil
+		return core.Nil{}, nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
 		_, err := base.Eval(item, env)
@@ -326,13 +327,13 @@ func _if(ast core.List, env *base.Env) (core.Any, error) {
 	if err != nil {
 		return nil, err
 	}
-	if (cond != Bool(false) && cond != Nil{}) {
+	if (cond != Bool(false) && cond != core.Nil{}) {
 		return base.EvalFuture(ast[2], env), nil
 	}
 	if len(ast) == 4 {
 		return base.EvalFuture(ast[3], env), nil
 	}
-	return Nil{}, nil
+	return core.Nil{}, nil
 }
 
 func _func(ast core.List, env *base.Env) (core.Any, error) {
@@ -379,7 +380,7 @@ func _prn(ast core.List, env *base.Env) (core.Any, error) {
 		return nil, err
 	}
 	fmt.Printf("%s\n", vals)
-	return Nil{}, nil
+	return core.Nil{}, nil
 }
 
 func _list(ast core.List, env *base.Env) (core.Any, error) {
@@ -438,6 +439,22 @@ func _symbolQ(ast core.List, env *base.Env) (core.Any, error) {
 	default:
 		return Bool(false), nil
 	case core.Symbol:
+		return Bool(true), nil
+	}
+}
+
+func _boolQ(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return nil, err
+	}
+	val, err := base.Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch val.(type) {
+	default:
+		return Bool(false), nil
+	case Bool:
 		return Bool(true), nil
 	}
 }

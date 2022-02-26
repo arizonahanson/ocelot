@@ -14,6 +14,26 @@ type Any interface {
 	Equal(any Any) bool
 }
 
+// type:nil
+type Nil struct{}
+
+func (val Nil) String() string {
+	return "nil"
+}
+
+func (val Nil) GoString() string {
+	return val.String()
+}
+
+func (val Nil) Equal(any Any) bool {
+	switch any.(type) {
+	default:
+		return false
+	case Nil:
+		return true
+	}
+}
+
 // type:number
 type Number decimal.Decimal
 
