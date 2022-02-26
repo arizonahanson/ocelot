@@ -39,13 +39,13 @@ var Builtin = map[string]core.Any{
 	"gt?":   base.Func(_gtQ),
 	"gteq?": base.Func(_gteqQ),
 	// special
+	"func":   base.Func(_func),
 	"type":   base.Func(_type),
 	"equal?": base.Func(_equalQ),
 	"def!":   base.Func(_defE),
 	"let":    base.Func(_let),
 	"do":     base.Func(_do),
 	"if":     base.Func(_if),
-	"fn":     base.Func(_fn),
 	"prn":    base.Func(_prn),
 	"eval":   base.Func(_eval),
 	"quote":  base.Func(_quote),
@@ -334,7 +334,7 @@ func _if(ast core.List, env *base.Env) (core.Any, error) {
 	return Nil{}, nil
 }
 
-func _fn(ast core.List, env *base.Env) (core.Any, error) {
+func _func(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return nil, err
 	}
