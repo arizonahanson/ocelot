@@ -31,10 +31,9 @@ func (env *Env) Set(sym core.Symbol, value core.Any) {
 	env.data[sym.Val] = value
 }
 
-// bind symbol in env to future value
-// expression evaluated only once
+// bind symbol in env to future value evaluated once
 func (env *Env) SetFuture(sym core.Symbol, future Future) {
-	eval := func() (val core.Any, err error) {
+	once := func() (val core.Any, err error) {
 		val, err = future.Resolve()
 		if err != nil {
 			return
@@ -42,5 +41,5 @@ func (env *Env) SetFuture(sym core.Symbol, future Future) {
 		env.Set(sym, val)
 		return
 	}
-	env.Set(sym, Future(eval))
+	env.Set(sym, Future(once))
 }

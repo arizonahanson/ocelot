@@ -29,6 +29,22 @@ func (fn Func) Equal(any core.Any) bool {
 // type:future
 type Future func() (core.Any, error)
 
+// trampoline to resolve future values
+func (future Future) Resolve() (value core.Any, err error) {
+	value, err = future()
+	for {
+		if err != nil {
+			return
+		}
+		switch next := value.(type) {
+		default:
+			return
+		case Future:
+			value, err = next()
+		}
+	}
+}
+
 func (future Future) String() string {
 	return "<?>" // should not happen
 }

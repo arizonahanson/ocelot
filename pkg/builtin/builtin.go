@@ -59,10 +59,7 @@ var Builtin = map[string]core.Any{
 }
 
 func _nilQ(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return nil, err
-	}
-	arg1, err := base.Eval(ast[1], env)
+	arg1, err := oneLen(ast, env)
 	if err != nil {
 		return nil, err
 	}
@@ -70,10 +67,7 @@ func _nilQ(ast core.List, env *base.Env) (core.Any, error) {
 }
 
 func _trueQ(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return nil, err
-	}
-	arg1, err := base.Eval(ast[1], env)
+	arg1, err := oneLen(ast, env)
 	if err != nil {
 		return nil, err
 	}
@@ -81,10 +75,7 @@ func _trueQ(ast core.List, env *base.Env) (core.Any, error) {
 }
 
 func _falseQ(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return nil, err
-	}
-	arg1, err := base.Eval(ast[1], env)
+	arg1, err := oneLen(ast, env)
 	if err != nil {
 		return nil, err
 	}
@@ -92,10 +83,7 @@ func _falseQ(ast core.List, env *base.Env) (core.Any, error) {
 }
 
 func _bool(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return nil, err
-	}
-	arg1, err := base.Eval(ast[1], env)
+	arg1, err := oneLen(ast, env)
 	if err != nil {
 		return nil, err
 	}
@@ -103,10 +91,7 @@ func _bool(ast core.List, env *base.Env) (core.Any, error) {
 }
 
 func _not(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return nil, err
-	}
-	arg1, err := base.Eval(ast[1], env)
+	arg1, err := oneLen(ast, env)
 	if err != nil {
 		return nil, err
 	}
@@ -146,14 +131,11 @@ func _or(ast core.List, env *base.Env) (core.Any, error) {
 }
 
 func _numberQ(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return nil, err
-	}
-	arg, err := base.Eval(ast[1], env)
+	arg1, err := oneLen(ast, env)
 	if err != nil {
 		return nil, err
 	}
-	switch arg.(type) {
+	switch arg1.(type) {
 	default:
 		return Bool(false), nil
 	case core.Number:
@@ -258,10 +240,7 @@ func _quotS(ast core.List, env *base.Env) (core.Any, error) {
 }
 
 func _type(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return nil, err
-	}
-	arg1, err := base.Eval(ast[1], env)
+	arg1, err := oneLen(ast, env)
 	if err != nil {
 		return nil, err
 	}
@@ -427,10 +406,7 @@ func _listQ(ast core.List, env *base.Env) (core.Any, error) {
 }
 
 func _count(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return nil, err
-	}
-	val, err := base.Eval(ast[1], env)
+	val, err := oneLen(ast, env)
 	if err != nil {
 		return nil, err
 	}

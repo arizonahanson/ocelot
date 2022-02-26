@@ -40,22 +40,6 @@ func Eval(ast core.Any, env *Env) (value core.Any, err error) {
 	}
 }
 
-// trampoline to resolve future values
-func (future Future) Resolve() (value core.Any, err error) {
-	value, err = future()
-	for {
-		if err != nil {
-			return
-		}
-		switch next := value.(type) {
-		default:
-			return
-		case Future:
-			value, err = next()
-		}
-	}
-}
-
 // thunked eval for tail-calls (lazy)
 func EvalFuture(ast core.Any, env *Env) Future {
 	return func() (core.Any, error) {
