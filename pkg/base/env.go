@@ -27,21 +27,23 @@ func (env *Env) Get(sym core.Symbol) (core.Any, error) {
 	return value, nil
 }
 
-func (env *Env) Set(sym core.Symbol, value core.Any) {
+func (env *Env) Set(sym core.Symbol, value core.Any) core.Any {
 	switch future := value.(type) {
 	default:
+		// not a future
 		break
 	case Future:
-		// bind symbol in env to future value evaluated once
-		once := func() (val core.Any, err error) {
-			val, err = future.Resolve()
+		// wrap future in future that updates binding
+		rebind := func() (val core.Any, err error) {
+			val, err = future.Get()
 			if err != nil {
 				return
 			}
 			env.Set(sym, val)
 			return
 		}
-		value = Future(once)
+		value = Future(rebind)
 	}
 	env.data[sym.Val] = value
+	return value
 }

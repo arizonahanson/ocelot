@@ -30,17 +30,17 @@ func (fn Func) Equal(any core.Any) bool {
 type Future func() (core.Any, error)
 
 // trampoline to resolve future values
-func (future Future) Resolve() (value core.Any, err error) {
+func (future Future) Get() (value core.Any, err error) {
 	value, err = future()
 	for {
 		if err != nil {
 			return
 		}
-		switch next := value.(type) {
+		switch future := value.(type) {
 		default:
 			return
 		case Future:
-			value, err = next()
+			value, err = future()
 		}
 	}
 }
@@ -54,5 +54,5 @@ func (future Future) GoString() string {
 }
 
 func (future Future) Equal(any core.Any) bool {
-	return false // not equal to anything yet
+	return false // not comparable
 }

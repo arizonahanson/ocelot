@@ -36,7 +36,7 @@ func Eval(ast core.Any, env *Env) (value core.Any, err error) {
 	default:
 		return
 	case Future:
-		return future.Resolve()
+		return future.Get()
 	}
 }
 

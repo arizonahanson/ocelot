@@ -255,18 +255,12 @@ func _defE(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return nil, err
 	}
-	switch ast[1].(type) {
+	switch sym := ast[1].(type) {
 	default:
 		return nil, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], ast[1])
 	case core.Symbol:
-		break
+		return env.Set(sym, base.EvalFuture(ast[2], env)), nil
 	}
-	val, err := base.Eval(ast[2], env)
-	if err != nil {
-		return nil, err
-	}
-	env.Set(ast[1].(core.Symbol), val)
-	return val, nil
 }
 
 func _let(ast core.List, env *base.Env) (core.Any, error) {
@@ -279,11 +273,11 @@ func _let(ast core.List, env *base.Env) (core.Any, error) {
 	case core.List:
 		break
 	}
-	newEnv := base.NewEnv(env)
 	pairs := ast[1].(core.List)
 	if len(pairs)%2 != 0 {
 		return nil, fmt.Errorf("%#v: binding missing", ast[0])
 	}
+	newEnv := base.NewEnv(env)
 	for {
 		if len(pairs) == 0 {
 			break
@@ -292,11 +286,7 @@ func _let(ast core.List, env *base.Env) (core.Any, error) {
 		default:
 			return nil, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], pairs[0])
 		case core.Symbol:
-			val, err := base.Eval(pairs[1], env)
-			if err != nil {
-				return nil, err
-			}
-			newEnv.Set(sym, val)
+			newEnv.Set(sym, base.EvalFuture(pairs[1], newEnv))
 			pairs = pairs[2:]
 		}
 	}
