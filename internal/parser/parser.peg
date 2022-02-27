@@ -65,7 +65,7 @@ runeEsc ←  `\` ([abfnrtv"\\] /
 hexDigit ← [0-9a-f]i
 
 // nil
-Nil ←  "nil" {
+Nil ←  "nil" / "()" {
   return core.Nil{}, nil
 }
 
