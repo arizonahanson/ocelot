@@ -27,12 +27,12 @@ func EvalStr(in string, env *Env) (core.Any, error) {
 }
 
 // eval that resolves future values
-func Eval(ast core.Any, env *Env) (value core.Any, err error) {
-	value, err = evalAst(ast, env)
+func Eval(ast core.Any, env *Env) (val core.Any, err error) {
+	val, err = evalAst(ast, env)
 	if err != nil {
 		return
 	}
-	switch future := value.(type) {
+	switch future := val.(type) {
 	default:
 		return
 	case Future:
@@ -76,11 +76,11 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 	for i, item := range ast {
 		if i == 0 {
 			// check for function
-			any, err := Eval(item, env)
+			val, err := Eval(item, env)
 			if err != nil {
 				return nil, err
 			}
-			switch first := any.(type) {
+			switch first := val.(type) {
 			default:
 				// not a function
 				res = make(core.List, len(ast))
@@ -92,11 +92,11 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 			}
 		}
 		// default list resolution for rest
-		any, err := Eval(item, env)
+		val, err := Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
-		res[i] = any
+		res[i] = val
 	}
 	return res, nil
 }
@@ -104,11 +104,11 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 func evalVector(ast core.Vector, env *Env) (core.Vector, error) {
 	res := make(core.Vector, len(ast))
 	for i, item := range ast {
-		any, err := Eval(item, env)
+		val, err := Eval(item, env)
 		if err != nil {
 			return nil, err
 		}
-		res[i] = any
+		res[i] = val
 	}
 	return res, nil
 }

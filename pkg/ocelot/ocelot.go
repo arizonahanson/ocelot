@@ -21,12 +21,12 @@ func Repl(prompt string) error {
 		if in == "" {
 			return
 		}
-		out, err := base.EvalStr(in, env)
+		val, err := base.EvalStr(in, env)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		print(out)
+		print(val)
 	}
 	completer := func(d goprompt.Document) []goprompt.Suggest {
 		return []goprompt.Suggest{}
@@ -44,9 +44,9 @@ func Repl(prompt string) error {
 	return nil
 }
 
-func print(val core.Any) {
+func print(ast core.Any) {
 	fmt.Print(color.WhiteString("→ "))
-	switch any := val.(type) {
+	switch any := ast.(type) {
 	default:
 		fmt.Printf("%#v\n", any)
 	case core.List:

@@ -39,13 +39,13 @@ var configCmd = &cobra.Command{
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		// key
 		if len(args) == 0 {
-			ret := []string{}
+			res := []string{}
 			for _, key := range viper.AllKeys() {
 				if strings.Contains(key, toComplete) {
-					ret = append(ret, key)
+					res = append(res, key)
 				}
 			}
-			return ret, cobra.ShellCompDirectiveNoFileComp
+			return res, cobra.ShellCompDirectiveNoFileComp
 		}
 		// value
 		value := viper.Get(args[0])

@@ -52,9 +52,9 @@ var rootCmd = &cobra.Command{
 		} else {
 			env, err := builtin.BuiltinEnv()
 			cobra.CheckErr(err)
-			out, err := base.EvalStr(strings.Join(args, " "), env)
+			val, err := base.EvalStr(strings.Join(args, " "), env)
 			cobra.CheckErr(err)
-			fmt.Println(out)
+			fmt.Println(val)
 		}
 	},
 }

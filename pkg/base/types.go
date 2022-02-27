@@ -30,27 +30,27 @@ func (fn Func) Equal(any core.Any) bool {
 type Future func() (core.Any, error)
 
 // trampoline to resolve future values
-func (future Future) Get() (value core.Any, err error) {
-	value, err = future()
+func (future Future) Get() (val core.Any, err error) {
+	val, err = future()
 	for {
 		if err != nil {
 			return
 		}
-		switch future := value.(type) {
+		switch future := val.(type) {
 		default:
 			return
 		case Future:
-			value, err = future()
+			val, err = future()
 		}
 	}
 }
 
 func (future Future) String() string {
-	return "<?>" // should not happen
+	return "?← " // should not happen
 }
 
 func (future Future) GoString() string {
-	return "<?>" // should not happen
+	return "?← " // should not happen
 }
 
 func (future Future) Equal(any core.Any) bool {

@@ -17,18 +17,18 @@ func NewEnv(outer *Env) *Env {
 }
 
 func (env *Env) Get(sym core.Symbol) (core.Any, error) {
-	value, ok := env.data[sym.Val]
+	val, ok := env.data[sym.Val]
 	if !ok {
 		if env.outer != nil {
 			return env.outer.Get(sym)
 		}
 		return nil, fmt.Errorf("%#v: unable to resolve symbol", sym)
 	}
-	return value, nil
+	return val, nil
 }
 
-func (env *Env) Set(sym core.Symbol, value core.Any) core.Any {
-	switch future := value.(type) {
+func (env *Env) Set(sym core.Symbol, val core.Any) core.Any {
+	switch future := val.(type) {
 	default:
 		// not a future
 		break
@@ -42,8 +42,8 @@ func (env *Env) Set(sym core.Symbol, value core.Any) core.Any {
 			env.Set(sym, val)
 			return
 		}
-		value = Future(rebind)
+		val = Future(rebind)
 	}
-	env.data[sym.Val] = value
-	return value
+	env.data[sym.Val] = val
+	return val
 }

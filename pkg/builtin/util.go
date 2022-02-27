@@ -29,15 +29,15 @@ func minLen(ast core.List, min int) error {
 }
 
 func evalNumber(ast core.Any, env *base.Env) (*core.Number, error) {
-	arg, err := base.Eval(ast, env)
+	val, err := base.Eval(ast, env)
 	if err != nil {
 		return nil, err
 	}
-	switch val := arg.(type) {
+	switch num := val.(type) {
 	default:
 		return nil, fmt.Errorf("called with non-number %#v", val)
 	case core.Number:
-		return &val, nil
+		return &num, nil
 	}
 }
 
@@ -45,11 +45,11 @@ func oneLen(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return nil, err
 	}
-	arg, err := base.Eval(ast[1], env)
+	val, err := base.Eval(ast[1], env)
 	if err != nil {
 		return nil, err
 	}
-	return arg, nil
+	return val, nil
 }
 
 // eval then lazy-eval the result

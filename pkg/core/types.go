@@ -129,12 +129,12 @@ func (val Symbol) Equal(any Any) bool {
 // type:key
 type Key string
 
-func (key Key) String() string {
-	return fmt.Sprintf("%s", string(key))
+func (val Key) String() string {
+	return fmt.Sprintf("%s", string(val))
 }
 
-func (key Key) GoString() string {
-	return key.String()
+func (val Key) GoString() string {
+	return val.String()
 }
 
 func (val Key) Equal(any Any) bool {
@@ -267,14 +267,14 @@ type Map map[Key]Any
 func (val Map) String() string {
 	res := make([]string, len(val)*2)
 	i := 0
-	for key, value := range val {
+	for key, item := range val {
 		res[i] = fmt.Sprintf("%v", key)
-		switch value.(type) {
+		switch item.(type) {
 		default:
-			res[i+1] = fmt.Sprintf("%v", value)
+			res[i+1] = fmt.Sprintf("%v", item)
 			break
 		case List:
-			res[i+1] = fmt.Sprintf("(%v)", value)
+			res[i+1] = fmt.Sprintf("(%v)", item)
 			break
 		}
 		i += 2
