@@ -9,7 +9,7 @@ Module ←  expr:Expr EOF {
   return core.List(expr.([]core.Any)), nil
 }
 
-// expression list without parentheses
+// expression sequence without delimiters
 Expr ←  _* first:Any? rest:(_+ Any)* _* {
   return join(first, rest, 1), nil
 }
@@ -20,25 +20,17 @@ Any ←   Atom / Symbol / List
 // types that don't eval to another type (contents may)
 Atom ←  Number / String / Key / Vector / Map
 
-// expression list
-List ←  '(' !Atom expr:Expr ')' {
-  ast := expr.([]core.Any)
-  if len(ast) == 0 {
-    return core.Nil{}, nil
-  }
-  return core.List(ast), nil
-} / '(' !Atom Expr !')' {
+// list expression (non-atom first)
+List ←  '(' expr:Expr ')' {
+  return core.List(expr.([]core.Any)), nil
+} / '(' Expr !')' {
   return core.Nil{}, errors.New("not terminated")
 }
 
 // vector
 Vector ←  '[' expr:Expr ']' {
   return core.Vector(expr.([]core.Any)), nil
-} / '(' &Atom expr:Expr ')' {
-  return core.Vector(expr.([]core.Any)), nil
 } / '[' Expr !']' {
-  return core.Nil{}, errors.New("not terminated")
-} / '(' &Atom Expr !')' {
   return core.Nil{}, errors.New("not terminated")
 }
 
