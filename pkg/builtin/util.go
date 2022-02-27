@@ -43,22 +43,22 @@ func evalNumber(ast core.Any, env *base.Env) (*core.Number, error) {
 
 func oneLen(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return nil, err
+		return core.Nil{}, err
 	}
 	val, err := base.Eval(ast[1], env)
 	if err != nil {
-		return nil, err
+		return core.Nil{}, err
 	}
 	return val, nil
 }
 
-// eval then lazy-eval the result
+// eval then eval the result (lazy)
 func dualEvalFuture(ast core.Any, env *base.Env) base.Future {
 	return func() (core.Any, error) {
 		val, err := base.Eval(ast, env)
 		if err != nil {
-			return nil, err
+			return val, err
 		}
-		return base.EvalFuture(val, env), nil
+		return base.Eval(val, env)
 	}
 }

@@ -22,7 +22,7 @@ func (env *Env) Get(sym core.Symbol) (core.Any, error) {
 		if env.outer != nil {
 			return env.outer.Get(sym)
 		}
-		return nil, fmt.Errorf("%#v: unable to resolve symbol", sym)
+		return core.Nil{}, fmt.Errorf("%#v: unable to resolve symbol", sym)
 	}
 	return val, nil
 }
@@ -34,13 +34,9 @@ func (env *Env) Set(sym core.Symbol, val core.Any) core.Any {
 		break
 	case Future:
 		// wrap future in future that updates binding
-		rebind := func() (val core.Any, err error) {
-			val, err = future.Get()
-			if err != nil {
-				return
-			}
-			env.Set(sym, val)
-			return
+		rebind := func() (core.Any, error) {
+			val, err := future.Get()
+			return env.Set(sym, val), err
 		}
 		val = Future(rebind)
 	}

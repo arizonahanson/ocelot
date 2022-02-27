@@ -10,18 +10,18 @@ import (
 func Parse(in string) (core.Any, error) {
 	ast, err := parser.Parse("parse", []byte(in))
 	if err != nil {
-		return nil, err
+		return core.Nil{}, err
 	}
 	return ast.(core.Any), nil
 }
 
 func EvalStr(in string, env *Env) (core.Any, error) {
 	if env == nil {
-		return nil, errors.New("evaluation with nil env")
+		return core.Nil{}, errors.New("evaluation with nil env")
 	}
 	ast, err := Parse(in)
 	if err != nil {
-		return nil, err
+		return core.Nil{}, err
 	}
 	return Eval(ast, env)
 }
@@ -78,47 +78,47 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 			// check for function
 			val, err := Eval(item, env)
 			if err != nil {
-				return nil, err
+				return core.Nil{}, err
 			}
-			switch first := val.(type) {
+			switch fn := val.(type) {
 			default:
 				// not a function
 				res = make(core.List, len(ast))
-				res[0] = first
+				res[0] = val
 				continue
 			case Func:
 				// tail-call function (unevaluated ast)
-				return FnFuture(first, ast, env), nil
+				return FnFuture(fn, ast, env), nil
 			}
 		}
 		// default list resolution for rest
 		val, err := Eval(item, env)
 		if err != nil {
-			return nil, err
+			return core.Nil{}, err
 		}
 		res[i] = val
 	}
 	return res, nil
 }
 
-func evalVector(ast core.Vector, env *Env) (core.Vector, error) {
+func evalVector(ast core.Vector, env *Env) (core.Any, error) {
 	res := make(core.Vector, len(ast))
 	for i, item := range ast {
 		val, err := Eval(item, env)
 		if err != nil {
-			return nil, err
+			return core.Nil{}, err
 		}
 		res[i] = val
 	}
 	return res, nil
 }
 
-func evalMap(ast core.Map, env *Env) (core.Map, error) {
+func evalMap(ast core.Map, env *Env) (core.Any, error) {
 	res := make(core.Map, len(ast))
 	for key, item := range ast {
 		val, err := Eval(item, env)
 		if err != nil {
-			return nil, err
+			return core.Nil{}, err
 		}
 		res[key] = val
 	}
