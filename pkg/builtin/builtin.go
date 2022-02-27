@@ -51,6 +51,7 @@ var Builtin = map[string]core.Any{
 	// lists
 	"list":    base.Func(_list),
 	"list?":   base.Func(_listQ),
+	"vector":  base.Func(_vector),
 	"vector?": base.Func(_vectorQ),
 	"empty?":  base.Func(_emptyQ),
 	"count":   base.Func(_count),
@@ -368,6 +369,28 @@ func _prn(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	fmt.Printf("%s\n", vals)
 	return core.Nil{}, nil
+}
+
+func _vector(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return nil, err
+	}
+	val, err := base.Eval(ast[1], env)
+	if err != nil {
+		return nil, err
+	}
+	switch seq := val.(type) {
+	default:
+		return nil, fmt.Errorf("%#v: called with non-sequence: %#v", ast[0], val)
+	case core.Vector:
+		return seq, nil
+	case core.List:
+		vec := make(core.Vector, len(seq))
+		for i, any := range seq {
+			vec[i] = any
+		}
+		return vec, nil
+	}
 }
 
 func _list(ast core.List, env *base.Env) (core.Any, error) {
