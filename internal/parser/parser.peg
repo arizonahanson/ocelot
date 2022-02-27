@@ -3,47 +3,46 @@ package parser
 
 import "github.com/starlight/ocelot/pkg/core"
 }
+
 // root of AST
 Module ←  expr:Expr EOF {
   return core.List(expr.([]core.Any)), nil
 }
+
 // expression list without parentheses
 Expr ←  _* first:Any? rest:(_+ Any)* _* {
   return join(first, rest, 1), nil
 }
+
 // parent `any` type
-Any ←  List / Vector / Map / String / Nil / Bool / Symbol / Key / Number
+Any ←  Number / String / Nil / Bool / Symbol / Key / List / Vector / Map
+
 // expression list
 List ←  '(' expr:Expr ')' {
   return core.List(expr.([]core.Any)), nil
 } / '(' Expr !')' {
   return core.Nil{}, errors.New("not terminated")
 }
+
 // vector
 Vector ←  '[' expr:Expr ']' {
   return core.Vector(expr.([]core.Any)), nil
 } / '[' Expr !']' {
   return core.Nil{}, errors.New("not terminated")
 }
+
 // map
 Map ←  '{' _* first:(Key _+ Any)? rest:(_+ Key _+ Any)* _* '}' {
   return core.Map(merge(first, rest, 0, 2)), nil
 } / '{' _* (Key _+ Any) (_+ Key _+ Any)* _* !'}' {
   return core.Nil{}, errors.New("not terminated")
 }
-Key ←  ':' word {
-  return core.Key(string(c.text)), nil
+
+// literal real number like (-123.45e-67)
+Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
+  return core.String{Val: string(c.text)}.Number()
 }
-// nil
-Nil ←  "nil" {
-  return core.Nil{}, nil
-}
-// bool
-Bool ←  "true" {
-  return core.Bool(true), nil
-} / "false" {
-  return core.Bool(false), nil
-}
+
 // literal string
 String ←  '"' runeChr* '"' {
   return core.String{Val: string(c.text)}.Unquote()
@@ -57,14 +56,29 @@ runeEsc ←  `\` ([abfnrtv"\\] /
            ('u' hexDigit hexDigit hexDigit hexDigit) /
            ('U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit))
 hexDigit ← [0-9a-f]i
-// literal real number like (-123.45e-67)
-Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
-  return core.String{Val: string(c.text)}.Number()
+
+// nil
+Nil ←  "nil" {
+  return core.Nil{}, nil
 }
+
+// bool
+Bool ←  "true" {
+  return core.Bool(true), nil
+} / "false" {
+  return core.Bool(false), nil
+}
+
 // identifiers (like ϕa_2)
 Symbol ←  word suffix? {
   return core.Symbol{Val: string(c.text), Pos: pos(c.pos)}, nil
 }
+
+// key
+Key ←  ':' word {
+  return core.Key(string(c.text)), nil
+}
+
 word ←  letter (letter / digit)*
 // suffix
 suffix ←  [!?*]
@@ -72,13 +86,17 @@ suffix ←  [!?*]
 digit ←  [0-9]
 // unicode letters, and underscore, in indentifiers
 letter ←  [\p{L}] / '_'
+
 // UTF-8: whitespace and control chars/unused codes
 _ "whitespace" ←  [\p{Z}] / [\p{C}] / Comment
+
 // comments
 Comment ←  SingleLineComment / MultiLineComment
 SingleLineComment ← "//" (!EOL .)* EOL
 MultiLineComment ←  "/*" (!"*/" .)* "*/"
+
 // end of line
 EOL ←  '\n' / EOF
+
 // End of file
 EOF ←  !.
