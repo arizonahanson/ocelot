@@ -18,11 +18,15 @@ Expr ←  _* first:Any? rest:(_+ Any)* _* {
 Any ←   Atom / Symbol / List
 
 // types that don't eval to another type (contents may)
-Atom ←  Number / String / Nil / Bool / Key / Vector / Map
+Atom ←  Number / String / Key / Vector / Map
 
 // expression list
 List ←  '(' !Atom expr:Expr ')' {
-  return core.List(expr.([]core.Any)), nil
+  ast := expr.([]core.Any)
+  if len(ast) == 0 {
+    return core.Nil{}, nil
+  }
+  return core.List(ast), nil
 } / '(' !Atom Expr !')' {
   return core.Nil{}, errors.New("not terminated")
 }
@@ -64,21 +68,19 @@ runeEsc ←  `\` ([abfnrtv"\\] /
            ('U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit))
 hexDigit ← [0-9a-f]i
 
-// nil
-Nil ←  "nil" / "()" {
-  return core.Nil{}, nil
-}
-
-// bool
-Bool ←  "true" {
-  return core.Bool(true), nil
-} / "false" {
-  return core.Bool(false), nil
-}
-
 // identifiers (like ϕa_2)
 Symbol ←  word suffix? {
-  return core.Symbol{Val: string(c.text), Pos: pos(c.pos)}, nil
+  str := string(c.text)
+  if str == "nil" {
+    return core.Nil{}, nil
+  }
+  if str == "true" {
+    return core.Bool(true), nil
+  }
+  if str == "false" {
+    return core.Bool(false), nil
+  }
+  return core.Symbol{Val: str, Pos: pos(c.pos)}, nil
 }
 
 // key

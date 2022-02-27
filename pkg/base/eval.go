@@ -72,10 +72,10 @@ func evalAst(ast core.Any, env *Env) (core.Any, error) {
 }
 
 func evalList(ast core.List, env *Env) (core.Any, error) {
-	// eval to vector or function-call
 	if len(ast) == 0 {
-		return core.Vector{}, nil
+		return core.Nil{}, nil
 	}
+	// eval to vector or function-call
 	val, err := Eval(ast[0], env)
 	if err != nil {
 		return core.Nil{}, err
@@ -87,7 +87,7 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 		// tail-call function (unevaluated ast)
 		return FnFuture(fn, ast, env), nil
 	}
-	// not a function
+	// vector
 	first := core.Vector{val}
 	if len(ast) == 1 {
 		return first, nil
