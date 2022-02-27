@@ -631,7 +631,8 @@ func _map(ast core.List, env *base.Env) (core.Any, error) {
 		}
 		res := make(core.Vector, len(seq))
 		for i, item := range seq {
-			val, err := base.Eval(core.List{fn, item}, env)
+			quote := core.Symbol{Val: "quote", Pos: nil}
+			val, err := base.Eval(core.List{fn, core.List{quote, item}}, env)
 			if err != nil {
 				return core.Nil{}, err
 			}
