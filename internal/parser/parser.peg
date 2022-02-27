@@ -15,19 +15,26 @@ Expr ←  _* first:Any? rest:(_+ Any)* _* {
 }
 
 // parent `any` type
-Any ←  Number / String / Nil / Bool / Symbol / Key / List / Vector / Map
+Any ←   Atom / Symbol / List
+
+// types that don't eval to another type (contents may)
+Atom ←  Number / String / Nil / Bool / Key / Vector / Map
 
 // expression list
-List ←  '(' expr:Expr ')' {
+List ←  '(' !Atom expr:Expr ')' {
   return core.List(expr.([]core.Any)), nil
-} / '(' Expr !')' {
+} / '(' !Atom Expr !')' {
   return core.Nil{}, errors.New("not terminated")
 }
 
 // vector
 Vector ←  '[' expr:Expr ']' {
   return core.Vector(expr.([]core.Any)), nil
+} / '(' &Atom expr:Expr ')' {
+  return core.Vector(expr.([]core.Any)), nil
 } / '[' Expr !']' {
+  return core.Nil{}, errors.New("not terminated")
+} / '(' &Atom Expr !')' {
   return core.Nil{}, errors.New("not terminated")
 }
 
