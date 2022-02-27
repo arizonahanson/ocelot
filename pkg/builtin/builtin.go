@@ -355,7 +355,7 @@ func _func(ast core.List, env *base.Env) (core.Any, error) {
 		}
 	}
 	body := ast[2]
-	lambda := func(args core.List, outer *base.Env) (core.Any, error) {
+	fn := func(args core.List, outer *base.Env) (core.Any, error) {
 		err := exactLen(args, len(symbols)+1)
 		if err != nil {
 			return nil, err
@@ -363,12 +363,12 @@ func _func(ast core.List, env *base.Env) (core.Any, error) {
 		local := base.NewEnv(env)
 		for i, symbol := range symbols {
 			// bind sym to arg in local, but lazy eval arg in outer
-			local.SetFuture(symbol, base.EvalFuture(args[i+1], outer))
+			local.Set(symbol, base.EvalFuture(args[i+1], outer))
 		}
 		// lazy eval body in local
 		return base.EvalFuture(body, local), nil
 	}
-	return base.Func(lambda), nil
+	return base.Func(fn), nil
 }
 
 func _prn(ast core.List, env *base.Env) (core.Any, error) {
