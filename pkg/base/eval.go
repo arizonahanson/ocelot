@@ -72,33 +72,31 @@ func evalAst(ast core.Any, env *Env) (core.Any, error) {
 }
 
 func evalList(ast core.List, env *Env) (core.Any, error) {
-	var res core.List
-	for i, item := range ast {
-		if i == 0 {
-			// check for function
-			val, err := Eval(item, env)
-			if err != nil {
-				return core.Nil{}, err
-			}
-			switch fn := val.(type) {
-			default:
-				// not a function
-				res = make(core.List, len(ast))
-				res[0] = val
-				continue
-			case Func:
-				// tail-call function (unevaluated ast)
-				return FnFuture(fn, ast, env), nil
-			}
-		}
-		// default list resolution for rest
-		val, err := Eval(item, env)
-		if err != nil {
-			return core.Nil{}, err
-		}
-		res[i] = val
+	// eval to vector or function-call
+	if len(ast) == 0 {
+		return core.Vector{}, nil
 	}
-	return res, nil
+	val, err := Eval(ast[0], env)
+	if err != nil {
+		return core.Nil{}, err
+	}
+	switch fn := val.(type) {
+	default:
+		break
+	case Func:
+		// tail-call function (unevaluated ast)
+		return FnFuture(fn, ast, env), nil
+	}
+	// not a function
+	first := core.Vector{val}
+	if len(ast) == 1 {
+		return first, nil
+	}
+	rest, err := evalVector(core.Vector(ast[1:]), env)
+	if err != nil {
+		return core.Nil{}, err
+	}
+	return append(first, rest.(core.Vector)...), nil
 }
 
 func evalVector(ast core.Vector, env *Env) (core.Any, error) {

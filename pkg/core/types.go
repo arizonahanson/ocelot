@@ -150,21 +150,29 @@ func (val Key) Equal(any Any) bool {
 type List []Any
 
 func (val List) String() string {
-	str := ""
+	str := "("
 	for i, item := range val {
 		if i != 0 {
 			str += " "
 		}
-		switch item.(type) {
-		default:
-			str += fmt.Sprintf("%v", item)
-			break
-		case List:
-			str += fmt.Sprintf("(%v)", item)
+		str += fmt.Sprintf("%v", item)
+	}
+	return str + ")"
+}
+
+func (val List) GoString() string {
+	str := "("
+	for i, item := range val {
+		if i != 0 {
+			str += " "
+		}
+		if i == 1 && len(val) > 2 {
+			str += "..."
 			break
 		}
+		str += fmt.Sprintf("%#v", item)
 	}
-	return str
+	return str + ")"
 }
 
 func (val List) Equal(any Any) bool {
@@ -185,40 +193,18 @@ func (val List) Equal(any Any) bool {
 	}
 }
 
-func (val List) GoString() string {
-	str := "("
-	for i, item := range val {
-		if i != 0 {
-			str += " "
-		}
-		if i == 1 && len(val) > 2 {
-			str += "..."
-			break
-		}
-		str += fmt.Sprintf("%#v", item)
-	}
-	return str + ")"
-}
-
 // type:vector
 type Vector []Any
 
 func (val Vector) String() string {
-	str := ""
+	str := "["
 	for i, item := range val {
 		if i != 0 {
 			str += " "
 		}
-		switch item.(type) {
-		default:
-			str += fmt.Sprintf("%v", item)
-			break
-		case List:
-			str += fmt.Sprintf("(%v)", item)
-			break
-		}
+		str += fmt.Sprintf("%v", item)
 	}
-	return "[" + str + "]"
+	return str + "]"
 }
 
 func (val Vector) GoString() string {
@@ -231,14 +217,7 @@ func (val Vector) GoString() string {
 			str += "..."
 			break
 		}
-		switch item.(type) {
-		default:
-			str += fmt.Sprintf("%#v", item)
-			break
-		case List:
-			str += fmt.Sprintf("(%#v)", item)
-			break
-		}
+		str += fmt.Sprintf("%#v", item)
 	}
 	return str + "]"
 }
@@ -269,14 +248,7 @@ func (val Map) String() string {
 	i := 0
 	for key, item := range val {
 		res[i] = fmt.Sprintf("%v", key)
-		switch item.(type) {
-		default:
-			res[i+1] = fmt.Sprintf("%v", item)
-			break
-		case List:
-			res[i+1] = fmt.Sprintf("(%v)", item)
-			break
-		}
+		res[i+1] = fmt.Sprintf("%v", item)
 		i += 2
 	}
 	return "{" + strings.Join(res, " ") + "}"

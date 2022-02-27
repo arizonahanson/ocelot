@@ -49,7 +49,7 @@ func print(ast core.Any) {
 	switch any := ast.(type) {
 	default:
 		fmt.Printf("%#v\n", any)
-	case core.List:
+	case core.Vector:
 		for _, item := range any {
 			fmt.Printf("%#v ", item)
 		}

@@ -49,9 +49,6 @@ var Builtin = map[string]core.Any{
 	"eval":   base.Func(_eval),
 	"quote":  base.Func(_quote),
 	// lists
-	"list":    base.Func(_list),
-	"list?":   base.Func(_listQ),
-	"vector":  base.Func(_vector),
 	"vector?": base.Func(_vectorQ),
 	"empty?":  base.Func(_emptyQ),
 	"count":   base.Func(_count),
@@ -268,13 +265,17 @@ func _let(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Nil{}, err
 	}
-	switch ast[1].(type) {
+	var pairs core.Vector
+	switch arg1 := ast[1].(type) {
 	default:
-		return core.Nil{}, fmt.Errorf("%#v: called with non-list %#v", ast[0], ast[1])
+		return core.Nil{}, fmt.Errorf("%#v: called with non-sequence %#v", ast[0], ast[1])
+	case core.Vector:
+		pairs = arg1
+		break
 	case core.List:
+		pairs = core.Vector(arg1)
 		break
 	}
-	pairs := ast[1].(core.List)
 	if len(pairs)%2 != 0 {
 		return core.Nil{}, fmt.Errorf("%#v: binding missing", ast[0])
 	}
@@ -363,62 +364,21 @@ func _func(ast core.List, env *base.Env) (core.Any, error) {
 }
 
 func _prn(ast core.List, env *base.Env) (core.Any, error) {
-	vals, err := _list(ast, env)
-	if err != nil {
-		return core.Nil{}, err
+	if len(ast) > 0 {
+		var str string
+		for i, arg := range ast[1:] {
+			if i != 0 {
+				str += " "
+			}
+			val, err := base.Eval(arg, env)
+			if err != nil {
+				return val, err
+			}
+			str += fmt.Sprintf("%v", val)
+		}
+		fmt.Println(str)
 	}
-	fmt.Printf("%s\n", vals)
 	return core.Nil{}, nil
-}
-
-func _vector(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
-	}
-	val, err := base.Eval(ast[1], env)
-	if err != nil {
-		return core.Nil{}, err
-	}
-	switch seq := val.(type) {
-	default:
-		return core.Nil{}, fmt.Errorf("%#v: called with non-sequence: %#v", ast[0], val)
-	case core.Vector:
-		return seq, nil
-	case core.List:
-		vec := make(core.Vector, len(seq))
-		for i, item := range seq {
-			vec[i] = item
-		}
-		return vec, nil
-	}
-}
-
-func _list(ast core.List, env *base.Env) (core.Any, error) {
-	res := make(core.List, len(ast)-1)
-	for i, item := range ast[1:] {
-		val, err := base.Eval(item, env)
-		if err != nil {
-			return core.Nil{}, err
-		}
-		res[i] = val
-	}
-	return res, nil
-}
-
-func _listQ(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
-	}
-	val, err := base.Eval(ast[1], env)
-	if err != nil {
-		return core.Nil{}, err
-	}
-	switch val.(type) {
-	default:
-		return core.Bool(false), nil
-	case core.List:
-		return core.Bool(true), nil
-	}
 }
 
 func _vectorQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -658,29 +618,25 @@ func _map(ast core.List, env *base.Env) (core.Any, error) {
 		if err != nil {
 			return core.Nil{}, err
 		}
-		switch seq := val2.(type) {
+		var seq core.Vector
+		switch val2.(type) {
 		default:
 			return core.Nil{}, fmt.Errorf("%#v: called with non-sequence: %#v", ast[0], val2)
 		case core.List:
-			res := make(core.List, len(seq))
-			for i, item := range seq {
-				val, err := base.Eval(core.List{fn, item}, env)
-				if err != nil {
-					return core.Nil{}, err
-				}
-				res[i] = val
-			}
-			return res, nil
+			seq = core.Vector(val2.(core.List))
+			break
 		case core.Vector:
-			res := make(core.Vector, len(seq))
-			for i, item := range seq {
-				val, err := base.Eval(core.List{fn, item}, env)
-				if err != nil {
-					return core.Nil{}, err
-				}
-				res[i] = val
-			}
-			return res, nil
+			seq = val2.(core.Vector)
+			break
 		}
+		res := make(core.Vector, len(seq))
+		for i, item := range seq {
+			val, err := base.Eval(core.List{fn, item}, env)
+			if err != nil {
+				return core.Nil{}, err
+			}
+			res[i] = val
+		}
+		return res, nil
 	}
 }
