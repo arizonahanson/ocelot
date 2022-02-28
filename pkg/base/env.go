@@ -33,7 +33,8 @@ func (env *Env) Set(sym core.Symbol, val core.Any) core.Any {
 		// not a future
 		break
 	case Future:
-		// wrap future in future that updates binding
+		// wrap future in future that updates binding async
+		future = future.Async()
 		rebind := func() (core.Any, error) {
 			val, err := future.Get()
 			return env.Set(sym, val), err
