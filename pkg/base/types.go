@@ -45,6 +45,25 @@ func (future Future) Get() (val core.Any, err error) {
 	}
 }
 
+// async
+func (future Future) Async() Future {
+	// future channel
+	channel := make(chan Future, 1)
+	// await future
+	await := func() (core.Any, error) {
+		defer close(channel)
+		return <-channel, nil
+	}
+	async := func() {
+		val, err := future.Get()
+		channel <- func() (core.Any, error) {
+			return val, err
+		}
+	}
+	go async()
+	return Future(await)
+}
+
 func (future Future) String() string {
 	return "?← " // should not happen
 }

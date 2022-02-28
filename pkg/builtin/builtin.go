@@ -2,6 +2,7 @@ package builtin
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/starlight/ocelot/pkg/base"
 	"github.com/starlight/ocelot/pkg/core"
@@ -48,6 +49,8 @@ var Builtin = map[string]core.Any{
 	"prn":    base.Func(_prn),
 	"eval":   base.Func(_eval),
 	"quote":  base.Func(_quote),
+	"async":  base.Func(_async),
+	"wait":   base.Func(_wait),
 	// lists
 	"vector?": base.Func(_vectorQ),
 	"empty?":  base.Func(_emptyQ),
@@ -112,7 +115,7 @@ func _and(ast core.List, env *base.Env) (core.Any, error) {
 			return val, nil
 		}
 	}
-	return base.EvalFuture(ast[len(ast)-1], env), nil
+	return base.EvalFuture(ast[len(ast)-1], env).Async(), nil
 }
 
 func _or(ast core.List, env *base.Env) (core.Any, error) {
@@ -128,7 +131,7 @@ func _or(ast core.List, env *base.Env) (core.Any, error) {
 			return val, nil
 		}
 	}
-	return base.EvalFuture(ast[len(ast)-1], env), nil
+	return base.EvalFuture(ast[len(ast)-1], env).Async(), nil
 }
 
 func _numberQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -257,7 +260,7 @@ func _defE(ast core.List, env *base.Env) (core.Any, error) {
 	default:
 		return core.Nil{}, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], ast[1])
 	case core.Symbol:
-		return env.Set(sym, base.EvalFuture(ast[2], env)), nil
+		return env.Set(sym, base.EvalFuture(ast[2], env).Async()), nil
 	}
 }
 
@@ -288,11 +291,11 @@ func _let(ast core.List, env *base.Env) (core.Any, error) {
 		default:
 			return core.Nil{}, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], pairs[0])
 		case core.Symbol:
-			newEnv.Set(sym, base.EvalFuture(pairs[1], newEnv))
+			newEnv.Set(sym, base.EvalFuture(pairs[1], newEnv).Async())
 			pairs = pairs[2:]
 		}
 	}
-	return base.EvalFuture(ast[2], newEnv), nil
+	return base.EvalFuture(ast[2], newEnv).Async(), nil
 }
 
 func _do(ast core.List, env *base.Env) (core.Any, error) {
@@ -305,7 +308,7 @@ func _do(ast core.List, env *base.Env) (core.Any, error) {
 			return core.Nil{}, err
 		}
 	}
-	return base.EvalFuture(ast[len(ast)-1], env), nil
+	return base.EvalFuture(ast[len(ast)-1], env).Async(), nil
 }
 
 func _if(ast core.List, env *base.Env) (core.Any, error) {
@@ -317,10 +320,10 @@ func _if(ast core.List, env *base.Env) (core.Any, error) {
 		return core.Nil{}, err
 	}
 	if (val != core.Bool(false) && val != core.Nil{}) {
-		return base.EvalFuture(ast[2], env), nil
+		return base.EvalFuture(ast[2], env).Async(), nil
 	}
 	if len(ast) == 4 {
-		return base.EvalFuture(ast[3], env), nil
+		return base.EvalFuture(ast[3], env).Async(), nil
 	}
 	return core.Nil{}, nil
 }
@@ -355,10 +358,10 @@ func _func(ast core.List, env *base.Env) (core.Any, error) {
 		local := base.NewEnv(env)
 		for i, sym := range symbols {
 			// bind sym to arg in local, but lazy eval arg in outer
-			local.Set(sym, base.EvalFuture(args[i+1], outer))
+			local.Set(sym, base.EvalFuture(args[i+1], outer).Async())
 		}
 		// lazy eval body in local
-		return base.EvalFuture(body, local), nil
+		return base.EvalFuture(body, local).Async(), nil
 	}
 	return base.Func(fn), nil
 }
@@ -599,7 +602,14 @@ func _eval(ast core.List, env *base.Env) (core.Any, error) {
 		return core.Nil{}, err
 	}
 	// double-eval TCO'd
-	return dualEvalFuture(ast[1], env), nil
+	return dualEvalFuture(ast[1], env).Async(), nil
+}
+
+func _async(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return core.Nil{}, err
+	}
+	return base.EvalFuture(ast[1], env).Async(), nil
 }
 
 func _map(ast core.List, env *base.Env) (core.Any, error) {
@@ -640,4 +650,20 @@ func _map(ast core.List, env *base.Env) (core.Any, error) {
 		}
 		return res, nil
 	}
+}
+
+func _wait(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return core.Nil{}, err
+	}
+	arg, err := evalNumber(ast[1], env)
+	if err != nil {
+		return nil, fmt.Errorf("%#v: %v", ast[0], err)
+	}
+	dur, err := time.ParseDuration(fmt.Sprintf("%ss", arg))
+	if err != nil {
+		return core.Nil{}, nil
+	}
+	time.Sleep(dur)
+	return core.Nil{}, nil
 }
