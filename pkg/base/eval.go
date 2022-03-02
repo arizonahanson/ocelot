@@ -47,13 +47,6 @@ func EvalFuture(ast core.Any, env *Env) Future {
 	}
 }
 
-// lazy function call
-func FnFuture(fn Func, ast core.List, env *Env) Future {
-	return func() (core.Any, error) {
-		return fn(ast, env)
-	}
-}
-
 // primary eval entrypoint
 func evalAst(ast core.Any, env *Env) (core.Any, error) {
 	switch any := ast.(type) {
@@ -88,7 +81,7 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 		break
 	case Func:
 		// function
-		return FnFuture(fn, ast, env), nil
+		return fn.Future(ast, env), nil
 	}
 	// vector
 	first := core.Vector{val}
