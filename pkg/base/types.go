@@ -45,15 +45,14 @@ func (future Future) Get() (val core.Any, err error) {
 	}
 }
 
-// async
+// get future value async
 func (future Future) Async() Future {
-	// future channel
-	channel := make(chan Future, 1)
 	// await future
+	channel := make(chan Future, 1)
 	await := func() (core.Any, error) {
-		defer close(channel)
 		return <-channel, nil
 	}
+	// resolve future
 	async := func() {
 		val, err := future.Get()
 		channel <- func() (core.Any, error) {
