@@ -26,7 +26,7 @@ func EvalStr(in string, env *Env) (core.Any, error) {
 	return Eval(ast, env)
 }
 
-// eval that resolves future values
+// eager eval
 func Eval(ast core.Any, env *Env) (val core.Any, err error) {
 	val, err = evalAst(ast, env)
 	if err != nil {
@@ -40,21 +40,21 @@ func Eval(ast core.Any, env *Env) (val core.Any, err error) {
 	}
 }
 
-// thunked eval for tail-calls (lazy)
+// lazy eval and tail-call
 func EvalFuture(ast core.Any, env *Env) Future {
 	return func() (core.Any, error) {
 		return evalAst(ast, env)
 	}
 }
 
-// thunked function call (always lazy)
+// lazy function call
 func FnFuture(fn Func, ast core.List, env *Env) Future {
 	return func() (core.Any, error) {
 		return fn(ast, env)
 	}
 }
 
-// eval impl
+// primary eval entrypoint
 func evalAst(ast core.Any, env *Env) (core.Any, error) {
 	switch any := ast.(type) {
 	default:
@@ -71,20 +71,23 @@ func evalAst(ast core.Any, env *Env) (core.Any, error) {
 	}
 }
 
+// (eval list expressions)
 func evalList(ast core.List, env *Env) (core.Any, error) {
+	// () == nil
 	if len(ast) == 0 {
 		return core.Nil{}, nil
 	}
-	// eval to vector or function-call
+	// eval first item
 	val, err := Eval(ast[0], env)
 	if err != nil {
 		return core.Nil{}, err
 	}
+	// inspect type
 	switch fn := val.(type) {
 	default:
 		break
 	case Func:
-		// tail-call function (unevaluated ast)
+		// function
 		return FnFuture(fn, ast, env), nil
 	}
 	// vector
@@ -99,6 +102,7 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 	return append(first, rest.(core.Vector)...), nil
 }
 
+// [eval vectors]
 func evalVector(ast core.Vector, env *Env) (core.Any, error) {
 	res := make(core.Vector, len(ast))
 	for i, item := range ast {
@@ -111,6 +115,7 @@ func evalVector(ast core.Vector, env *Env) (core.Any, error) {
 	return res, nil
 }
 
+// {:eval maps}
 func evalMap(ast core.Map, env *Env) (core.Any, error) {
 	res := make(core.Map, len(ast))
 	for key, item := range ast {

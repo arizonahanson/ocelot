@@ -29,40 +29,6 @@ func (fn Func) Equal(any core.Any) bool {
 // type:future
 type Future func() (core.Any, error)
 
-// trampoline to resolve future values
-func (future Future) Get() (val core.Any, err error) {
-	val, err = future()
-	for {
-		if err != nil {
-			return
-		}
-		switch future := val.(type) {
-		default:
-			return
-		case Future:
-			val, err = future()
-		}
-	}
-}
-
-// get future value async
-func (future Future) Async() Future {
-	// await future
-	channel := make(chan Future, 1)
-	await := func() (core.Any, error) {
-		return <-channel, nil
-	}
-	// resolve future
-	async := func() {
-		val, err := future.Get()
-		channel <- func() (core.Any, error) {
-			return val, err
-		}
-	}
-	go async()
-	return Future(await)
-}
-
 func (future Future) String() string {
 	return "?← " // should not happen
 }
