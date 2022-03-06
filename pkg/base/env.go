@@ -17,11 +17,8 @@ func NewEnv(outer *Env) *Env {
 }
 
 func (env *Env) Get(sym core.Symbol) (core.Any, error) {
-	val, ok := env.data[sym.Val]
-	if !ok {
-		if env.outer != nil {
-			return env.outer.Get(sym)
-		}
+	scope, val := env.find(sym)
+	if scope == nil {
 		return core.Nil{}, fmt.Errorf("%#v: unable to resolve symbol", sym)
 	}
 	return val, nil
@@ -30,10 +27,9 @@ func (env *Env) Get(sym core.Symbol) (core.Any, error) {
 func (env *Env) Set(sym core.Symbol, val core.Any) core.Any {
 	switch future := val.(type) {
 	default:
-		// not a future
 		break
 	case Future:
-		// wrap `future` in rebinding future
+		// memoize futures
 		rebind := func() (core.Any, error) {
 			val, err := future.Get()
 			return env.Set(sym, val), err
@@ -44,17 +40,28 @@ func (env *Env) Set(sym core.Symbol, val core.Any) core.Any {
 	return val
 }
 
-// cause a bound future to resolve async
-func (env *Env) Touch(sym core.Symbol) error {
-	val, err := env.Get(sym)
-	if err != nil {
-		return err
+// cause a future binding to resolve async
+func (env *Env) Async(sym core.Symbol) error {
+	scope, val := env.find(sym)
+	if scope == nil {
+		return fmt.Errorf("%#v: unable to resolve symbol", sym)
 	}
 	switch future := val.(type) {
 	default:
 		break
 	case Future:
-		env.data[sym.Val] = future.Async()
+		scope.data[sym.Val] = future.Async()
 	}
 	return nil
+}
+
+func (env *Env) find(sym core.Symbol) (*Env, core.Any) {
+	val, ok := env.data[sym.Val]
+	if !ok {
+		if env.outer != nil {
+			return env.outer.find(sym)
+		}
+		return nil, core.Nil{}
+	}
+	return env, val
 }

@@ -38,10 +38,10 @@ var Builtin = map[string]core.Any{
 	"gteq?": base.Func(_gteqQ),
 	// special
 	"equal?": base.Func(_equalQ),
-	"func":   base.Func(_func),
 	"def!":   base.Func(_defE),
-	"let":    base.Func(_let),
 	"do":     base.Func(_do),
+	"func":   base.Func(_func),
+	"let":    base.Func(_let),
 	"wait":   base.Func(_wait),
 	"async":  base.Func(_async),
 	"if":     base.Func(_if),
@@ -627,30 +627,32 @@ func _eval(ast core.List, env *base.Env) (core.Any, error) {
 	return dualEvalFuture(ast[1], env), nil
 }
 
-func _async(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+// converts lazy-futures to async-futures
+func _async(ast core.List, env *base.Env) (res core.Any, err error) {
+	res = core.Nil{}
+	if err = exactLen(ast, 2); err != nil {
+		return
 	}
 	switch arg := ast[1].(type) {
 	default:
-		return core.Nil{}, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], ast[1])
+		err = fmt.Errorf("%#v: called with non-symbol %#v", ast[0], ast[1])
 	case core.Symbol:
-		if err := env.Touch(arg); err != nil {
-			return core.Nil{}, err
-		}
+		err = env.Async(arg)
 	case core.Vector:
+	loop:
 		for _, item := range arg {
 			switch sym := item.(type) {
 			default:
-				return core.Nil{}, fmt.Errorf("%#v: expression contained non-symbol %#v", ast[0], item)
+				err = fmt.Errorf("%#v: called with non-symbol %#v", ast[0], item)
+				break loop
 			case core.Symbol:
-				if err := env.Touch(sym); err != nil {
-					return core.Nil{}, err
+				if err = env.Async(sym); err != nil {
+					break loop
 				}
 			}
 		}
 	}
-	return core.Nil{}, nil
+	return
 }
 
 func _map(ast core.List, env *base.Env) (core.Any, error) {
