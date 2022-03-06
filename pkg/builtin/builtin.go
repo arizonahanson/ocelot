@@ -21,44 +21,47 @@ var Builtin = map[string]core.Any{
 	"nil?":   base.Func(_nilQ),
 	"true?":  base.Func(_trueQ),
 	"false?": base.Func(_falseQ),
-	"bool?":  base.Func(_boolQ),
 	"bool":   base.Func(_bool),
 	"not":    base.Func(_not),
 	"and":    base.Func(_and),
 	"or":     base.Func(_or),
 	// numbers
-	"number?": base.Func(_numberQ),
-	"add":     base.Func(_add),
-	"sub":     base.Func(_sub),
-	"mul":     base.Func(_mul),
-	"quot":    base.Func(_quot),
-	"rem":     base.Func(_rem),
-	"quot*":   base.Func(_quotS),
-	"lt?":     base.Func(_ltQ),
-	"lteq?":   base.Func(_lteqQ),
-	"gt?":     base.Func(_gtQ),
-	"gteq?":   base.Func(_gteqQ),
+	"add":   base.Func(_add),
+	"sub":   base.Func(_sub),
+	"mul":   base.Func(_mul),
+	"div":   base.Func(_div),
+	"rem":   base.Func(_rem),
+	"div*":  base.Func(_divS),
+	"lt?":   base.Func(_ltQ),
+	"lteq?": base.Func(_lteqQ),
+	"gt?":   base.Func(_gtQ),
+	"gteq?": base.Func(_gteqQ),
 	// special
-	"func":   base.Func(_func),
-	"type":   base.Func(_type),
 	"equal?": base.Func(_equalQ),
+	"func":   base.Func(_func),
 	"def!":   base.Func(_defE),
 	"let":    base.Func(_let),
 	"do":     base.Func(_do),
+	"wait":   base.Func(_wait),
+	"async":  base.Func(_async),
 	"if":     base.Func(_if),
 	"prn":    base.Func(_prn),
 	"eval":   base.Func(_eval),
 	"quote":  base.Func(_quote),
-	"wait":   base.Func(_wait),
-	// lists
-	"vector?": base.Func(_vectorQ),
-	"empty?":  base.Func(_emptyQ),
-	"count":   base.Func(_count),
-	"map":     base.Func(_map),
-	"map?":    base.Func(_mapQ),
+	"map":    base.Func(_map),
+	// type check
+	"type":    base.Func(_type),
+	"bool?":   base.Func(_boolQ),
+	"number?": base.Func(_numberQ),
 	"string?": base.Func(_stringQ),
 	"symbol?": base.Func(_symbolQ),
 	"key?":    base.Func(_keyQ),
+	"list?":   base.Func(_listQ),
+	"vector?": base.Func(_vectorQ),
+	"map?":    base.Func(_mapQ),
+	// sequences
+	"empty?": base.Func(_emptyQ),
+	"count":  base.Func(_count),
 }
 
 func _nilQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -186,7 +189,7 @@ func _mul(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Number(res), nil
 }
 
-func _quot(ast core.List, env *base.Env) (core.Any, error) {
+func _div(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 4); err != nil {
 		return core.Nil{}, err
 	}
@@ -226,7 +229,7 @@ func _rem(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Number(r), nil
 }
 
-func _quotS(ast core.List, env *base.Env) (core.Any, error) {
+func _divS(ast core.List, env *base.Env) (core.Any, error) {
 	res := core.One.Decimal()
 	for i, item := range ast[1:] {
 		val, err := evalNumber(item, env)
@@ -246,6 +249,9 @@ func _type(ast core.List, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
 		return core.Nil{}, err
+	}
+	if (val == core.Nil{}) {
+		return val, err
 	}
 	str := core.String{Val: fmt.Sprintf("%T", val)}
 	return str, nil
@@ -382,6 +388,22 @@ func _prn(ast core.List, env *base.Env) (core.Any, error) {
 		fmt.Println(str)
 	}
 	return core.Nil{}, nil
+}
+
+func _listQ(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return core.Nil{}, err
+	}
+	val, err := base.Eval(ast[1], env)
+	if err != nil {
+		return core.Nil{}, err
+	}
+	switch val.(type) {
+	default:
+		return core.Bool(false), nil
+	case core.List:
+		return core.Bool(true), nil
+	}
 }
 
 func _vectorQ(ast core.List, env *base.Env) (core.Any, error) {
@@ -603,6 +625,32 @@ func _eval(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	// double-eval TCO'd
 	return dualEvalFuture(ast[1], env), nil
+}
+
+func _async(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return core.Nil{}, err
+	}
+	switch arg := ast[1].(type) {
+	default:
+		return core.Nil{}, fmt.Errorf("%#v: called with non-symbol %#v", ast[0], ast[1])
+	case core.Symbol:
+		if err := env.Touch(arg); err != nil {
+			return core.Nil{}, err
+		}
+	case core.Vector:
+		for _, item := range arg {
+			switch sym := item.(type) {
+			default:
+				return core.Nil{}, fmt.Errorf("%#v: expression contained non-symbol %#v", ast[0], item)
+			case core.Symbol:
+				if err := env.Touch(sym); err != nil {
+					return core.Nil{}, err
+				}
+			}
+		}
+	}
+	return core.Nil{}, nil
 }
 
 func _map(ast core.List, env *base.Env) (core.Any, error) {

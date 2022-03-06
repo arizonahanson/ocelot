@@ -33,15 +33,28 @@ func (env *Env) Set(sym core.Symbol, val core.Any) core.Any {
 		// not a future
 		break
 	case Future:
-		// start resolution async
-		await := future.Async()
-		// wrap `await` in rebinding future
+		// wrap `future` in rebinding future
 		rebind := func() (core.Any, error) {
-			val, err := await.Get()
+			val, err := future.Get()
 			return env.Set(sym, val), err
 		}
 		val = Future(rebind)
 	}
 	env.data[sym.Val] = val
 	return val
+}
+
+// cause a bound future to resolve async
+func (env *Env) Touch(sym core.Symbol) error {
+	val, err := env.Get(sym)
+	if err != nil {
+		return err
+	}
+	switch future := val.(type) {
+	default:
+		break
+	case Future:
+		env.data[sym.Val] = future.Async()
+	}
+	return nil
 }
