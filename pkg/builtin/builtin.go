@@ -49,6 +49,7 @@ var Builtin = map[string]core.Any{
 	"eval":   base.Func(_eval),
 	"quote":  base.Func(_quote),
 	"map":    base.Func(_map),
+	"apply":  base.Func(_apply),
 	// type check
 	"type":    base.Func(_type),
 	"bool?":   base.Func(_boolQ),
@@ -653,6 +654,43 @@ func _async(ast core.List, env *base.Env) (res core.Any, err error) {
 		}
 	}
 	return
+}
+
+func _apply(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 3); err != nil {
+		return core.Nil{}, err
+	}
+	val1, err := base.Eval(ast[1], env)
+	if err != nil {
+		return core.Nil{}, err
+	}
+	switch fn := val1.(type) {
+	default:
+		return core.Nil{}, fmt.Errorf("%#v: called with non-function: %#v", ast[0], val1)
+	case base.Func:
+		val2, err := base.Eval(ast[2], env)
+		if err != nil {
+			return core.Nil{}, err
+		}
+		var seq core.Vector
+		switch val2.(type) {
+		default:
+			return core.Nil{}, fmt.Errorf("%#v: called with non-sequence: %#v", ast[0], val2)
+		case core.List:
+			seq = core.Vector(val2.(core.List))
+			break
+		case core.Vector:
+			seq = val2.(core.Vector)
+			break
+		}
+		ast2 := make(core.List, len(seq)+1)
+		ast2[0] = fn
+		for i, item := range seq {
+			quote := core.Symbol{Val: "quote", Pos: nil}
+			ast2[i+1] = core.List{quote, item}
+		}
+		return base.EvalFuture(ast2, env), nil
+	}
 }
 
 func _map(ast core.List, env *base.Env) (core.Any, error) {
