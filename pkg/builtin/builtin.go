@@ -672,20 +672,15 @@ func _apply(ast core.List, env *base.Env) (core.Any, error) {
 		if err != nil {
 			return core.Nil{}, err
 		}
-		var seq core.Vector
 		switch val2.(type) {
 		default:
-			return core.Nil{}, fmt.Errorf("%#v: called with non-sequence: %#v", ast[0], val2)
-		case core.List:
-			seq = core.Vector(val2.(core.List))
-			break
+			return core.Nil{}, fmt.Errorf("%#v: called with non-vector: %#v", ast[0], val2)
 		case core.Vector:
-			seq = val2.(core.Vector)
 			break
 		}
-		ast2 := make(core.List, len(seq)+1)
+		ast2 := make(core.List, len(val2.(core.Vector))+1)
 		ast2[0] = fn
-		for i, item := range seq {
+		for i, item := range val2.(core.Vector) {
 			quote := core.Symbol{Val: "quote", Pos: nil}
 			ast2[i+1] = core.List{quote, item}
 		}
@@ -709,19 +704,14 @@ func _map(ast core.List, env *base.Env) (core.Any, error) {
 		if err != nil {
 			return core.Nil{}, err
 		}
-		var seq core.Vector
 		switch val2.(type) {
 		default:
-			return core.Nil{}, fmt.Errorf("%#v: called with non-sequence: %#v", ast[0], val2)
-		case core.List:
-			seq = core.Vector(val2.(core.List))
-			break
+			return core.Nil{}, fmt.Errorf("%#v: called with non-vector: %#v", ast[0], val2)
 		case core.Vector:
-			seq = val2.(core.Vector)
 			break
 		}
-		res := make(core.Vector, len(seq))
-		for i, item := range seq {
+		res := make(core.Vector, len(val2.(core.Vector)))
+		for i, item := range val2.(core.Vector) {
 			quote := core.Symbol{Val: "quote", Pos: nil}
 			val, err := base.Eval(core.List{fn, core.List{quote, item}}, env)
 			if err != nil {
