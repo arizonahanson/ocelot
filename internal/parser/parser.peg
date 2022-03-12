@@ -60,8 +60,8 @@ runeEsc ←  `\` ([abfnrtv"\\] /
            ('U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit))
 hexDigit ← [0-9a-f]i
 
-// identifiers (like ϕa_2)
-Symbol ←  word suffix? {
+// identifiers (like num.ϕa_2)
+Symbol ←  word ('.' word)* suffix? {
   str := string(c.text)
   if str == "nil" {
     return core.Nil{}, nil
