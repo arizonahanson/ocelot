@@ -11,7 +11,7 @@ import (
 func BuiltinEnv() (*base.Env, error) {
 	env := base.NewEnv(nil)
 	for sym, val := range Builtin {
-		env.Set(core.Symbol{Val: sym, Pos: nil}, val)
+		env.Set(core.NewSymbol(sym, nil), val)
 	}
 	return env, nil
 }
@@ -39,6 +39,7 @@ var Builtin = map[string]core.Any{
 	// special
 	"equal?": base.Func(_equalQ),
 	"def!":   base.Func(_defE),
+	"deffn!": base.Func(_deffnE),
 	"do":     base.Func(_do),
 	"func":   base.Func(_func),
 	"let":    base.Func(_let),
@@ -271,6 +272,15 @@ func _defE(ast core.List, env *base.Env) (core.Any, error) {
 	}
 }
 
+func _deffnE(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 4); err != nil {
+		return core.Nil{}, err
+	}
+	fn := core.NewSymbol("func", nil)
+	newast := append(ast[:2], append(core.List{fn}, ast[2:]...))
+	return _defE(newast, env)
+}
+
 func _let(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Nil{}, err
@@ -367,8 +377,15 @@ func _func(ast core.List, env *base.Env) (core.Any, error) {
 			// bind sym to arg in local, but lazy eval arg in outer
 			local.Set(sym, base.EvalFuture(args[i+1], outer))
 		}
-		// lazy eval body in local
-		return base.EvalFuture(body, local), nil
+		// future that traces errors
+		future := func() (val core.Any, err error) {
+			val, err = base.Eval(body, local)
+			if err != nil {
+				err = fmt.Errorf("%#v: error\n  %v", args[0], err)
+			}
+			return
+		}
+		return base.Future(future), nil
 	}
 	return base.Func(fn), nil
 }
@@ -681,7 +698,7 @@ func _apply(ast core.List, env *base.Env) (core.Any, error) {
 		ast2 := make(core.List, len(val2.(core.Vector))+1)
 		ast2[0] = fn
 		for i, item := range val2.(core.Vector) {
-			quote := core.Symbol{Val: "quote", Pos: nil}
+			quote := core.NewSymbol("quote", nil)
 			ast2[i+1] = core.List{quote, item}
 		}
 		return base.EvalFuture(ast2, env), nil
@@ -712,7 +729,7 @@ func _map(ast core.List, env *base.Env) (core.Any, error) {
 		}
 		res := make(core.Vector, len(val2.(core.Vector)))
 		for i, item := range val2.(core.Vector) {
-			quote := core.Symbol{Val: "quote", Pos: nil}
+			quote := core.NewSymbol("quote", nil)
 			val, err := base.Eval(core.List{fn, core.List{quote, item}}, env)
 			if err != nil {
 				return core.Nil{}, err
