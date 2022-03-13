@@ -6,24 +6,6 @@ import (
 	"github.com/starlight/ocelot/pkg/core"
 )
 
-// lazy function call
-func (fn Func) Future(ast core.List, env *Env) Future {
-	future := func() (val core.Any, err error) {
-		return fn(ast, env)
-	}
-	return Future(future).Trace(ast)
-}
-
-func (future Future) Trace(ast core.List) Future {
-	return func() (val core.Any, err error) {
-		val, err = future.Get()
-		if err != nil {
-			err = fmt.Errorf("%#v: %s", ast[0], err)
-		}
-		return
-	}
-}
-
 // trampoline to resolve future values
 func (future Future) Get() (val core.Any, err error) {
 	val, err = future()
@@ -61,4 +43,23 @@ func (future Future) Async() Future {
 		return <-tunnel, nil
 	}
 	return recv
+}
+
+// trace errors mapped to source ast
+func (future Future) Trace(ast core.List) Future {
+	return func() (val core.Any, err error) {
+		val, err = future.Get()
+		if err != nil {
+			err = fmt.Errorf("%#v: %s", ast[0], err)
+		}
+		return
+	}
+}
+
+// lazy function call
+func (fn Func) Future(ast core.List, env *Env) Future {
+	future := func() (core.Any, error) {
+		return fn(ast, env)
+	}
+	return Future(future).Trace(ast)
 }
