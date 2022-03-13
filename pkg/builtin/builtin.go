@@ -51,6 +51,7 @@ var Builtin = map[string]core.Any{
 	"quote":  base.Func(_quote),
 	"map":    base.Func(_map),
 	"apply":  base.Func(_apply),
+	"throw":  base.Func(_throw),
 	// type check
 	"type":    base.Func(_type),
 	"bool?":   base.Func(_boolQ),
@@ -382,7 +383,7 @@ func _func(ast core.List, env *base.Env) (core.Any, error) {
 			// bind sym to arg in local, but lazy eval arg in outer
 			local.Set(sym, base.EvalFuture(args[i+1], outer))
 		}
-		// future that traces errors
+		// future that places breaks in error trace
 		future := func() (val core.Any, err error) {
 			val, err = base.Eval(body, local)
 			if err != nil {
@@ -754,4 +755,15 @@ func _wait(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	time.Sleep(dur)
 	return core.Nil{}, nil
+}
+
+func _throw(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return core.Nil{}, err
+	}
+	arg, err := base.Eval(ast[1], env)
+	if err != nil {
+		return core.Nil{}, err
+	}
+	return core.Nil{}, fmt.Errorf("%s", arg)
 }
