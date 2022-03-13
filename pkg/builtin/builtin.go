@@ -37,21 +37,22 @@ var Builtin = map[string]core.Any{
 	"gt?":   base.Func(_gtQ),
 	"gteq?": base.Func(_gteqQ),
 	// special
-	"equal?": base.Func(_equalQ),
-	"def!":   base.Func(_defE),
-	"deffn!": base.Func(_deffnE),
-	"do":     base.Func(_do),
-	"func":   base.Func(_func),
-	"let":    base.Func(_let),
-	"wait":   base.Func(_wait),
-	"async":  base.Func(_async),
-	"if":     base.Func(_if),
-	"prn":    base.Func(_prn),
-	"eval":   base.Func(_eval),
-	"quote":  base.Func(_quote),
-	"map":    base.Func(_map),
-	"apply":  base.Func(_apply),
-	"throw":  base.Func(_throw),
+	"equal?":   base.Func(_equalQ),
+	"def!":     base.Func(_defE),
+	"deffn!":   base.Func(_deffnE),
+	"do":       base.Func(_do),
+	"func":     base.Func(_func),
+	"let":      base.Func(_let),
+	"wait":     base.Func(_wait),
+	"async":    base.Func(_async),
+	"if":       base.Func(_if),
+	"prn":      base.Func(_prn),
+	"eval":     base.Func(_eval),
+	"quote":    base.Func(_quote),
+	"map":      base.Func(_map),
+	"apply":    base.Func(_apply),
+	"throw":    base.Func(_throw),
+	"trycatch": base.Func(_trycatch),
 	// type check
 	"type":    base.Func(_type),
 	"bool?":   base.Func(_boolQ),
@@ -759,4 +760,22 @@ func _throw(ast core.List, env *base.Env) (core.Any, error) {
 		return core.Nil{}, err
 	}
 	return core.Nil{}, fmt.Errorf("%s", arg)
+}
+
+func _trycatch(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 4); err != nil {
+		return core.Nil{}, err
+	}
+	switch sym := ast[1].(type) {
+	default:
+		return core.Nil{}, fmt.Errorf("called with non-symbol %#v", ast[1])
+	case core.Symbol:
+		res, err := base.Eval(ast[2], env)
+		if err != nil {
+			newEnv := base.NewEnv(env)
+			newEnv.Set(sym, core.String{Val: fmt.Sprintf("%s", err)})
+			return base.EvalFuture(ast[3], newEnv), nil
+		}
+		return res, nil
+	}
 }
