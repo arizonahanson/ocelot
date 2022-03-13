@@ -31,3 +31,7 @@ func NewNumber(num int) Number {
 func (val Number) Decimal() decimal.Decimal {
 	return decimal.Decimal(val)
 }
+
+func NewSymbol(sym string, pos *Position) Symbol {
+	return Symbol{Val: sym, Pos: pos}
+}

@@ -72,7 +72,7 @@ Symbol ←  word ('.' word)* suffix? {
   if str == "false" {
     return core.Bool(false), nil
   }
-  return core.Symbol{Val: str, Pos: pos(c.pos)}, nil
+  return core.NewSymbol(str, pos(c.pos)), nil
 }
 
 // key
