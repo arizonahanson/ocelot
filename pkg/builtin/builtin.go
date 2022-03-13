@@ -276,9 +276,14 @@ func _deffnE(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 4); err != nil {
 		return core.Nil{}, err
 	}
-	fn := core.NewSymbol("func", nil)
-	newast := append(ast[:2], append(core.List{fn}, ast[2:]...))
-	return _defE(newast, env)
+	switch ast[2].(type) {
+	default:
+		return core.Nil{}, fmt.Errorf("%#v: called with non-vector %#v", ast[0], ast[2])
+	case core.Vector:
+		break
+	}
+	fn := base.Func(_func).Future(cons(ast[0], ast[2:]), env)
+	return _defE(append(ast[:2], fn), env)
 }
 
 func _let(ast core.List, env *base.Env) (core.Any, error) {
@@ -689,19 +694,16 @@ func _apply(ast core.List, env *base.Env) (core.Any, error) {
 		if err != nil {
 			return core.Nil{}, err
 		}
-		switch val2.(type) {
+		switch vec := val2.(type) {
 		default:
 			return core.Nil{}, fmt.Errorf("%#v: called with non-vector: %#v", ast[0], val2)
 		case core.Vector:
-			break
+			res, err := fn(cons(ast[1], core.List(vec)), env)
+			if err != nil {
+				return core.Nil{}, fmt.Errorf("%#v: %s", ast[0], err)
+			}
+			return res, nil
 		}
-		ast2 := make(core.List, len(val2.(core.Vector))+1)
-		ast2[0] = fn
-		for i, item := range val2.(core.Vector) {
-			quote := core.NewSymbol("quote", nil)
-			ast2[i+1] = core.List{quote, item}
-		}
-		return base.EvalFuture(ast2, env), nil
 	}
 }
 
@@ -729,12 +731,10 @@ func _map(ast core.List, env *base.Env) (core.Any, error) {
 		}
 		res := make(core.Vector, len(val2.(core.Vector)))
 		for i, item := range val2.(core.Vector) {
-			quote := core.NewSymbol("quote", nil)
-			val, err := base.Eval(core.List{fn, core.List{quote, item}}, env)
+			res[i], err = fn(cons(ast[1], core.List{item}), env)
 			if err != nil {
-				return core.Nil{}, err
+				return core.Nil{}, fmt.Errorf("%#v: %s", ast[0], err)
 			}
-			res[i] = val
 		}
 		return res, nil
 	}

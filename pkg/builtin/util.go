@@ -62,3 +62,12 @@ func dualEvalFuture(ast core.Any, env *base.Env) base.Future {
 		return base.Eval(val, env)
 	}
 }
+
+func cons(first core.Any, rest core.List) core.List {
+	ast := make(core.List, len(rest)+1)
+	ast[0] = first
+	for i, item := range rest {
+		ast[i+1] = item
+	}
+	return ast
+}
