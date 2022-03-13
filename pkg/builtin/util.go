@@ -9,21 +9,21 @@ import (
 
 func exactLen(ast core.List, num int) error {
 	if len(ast) != num {
-		return fmt.Errorf("%#v: wanted %d arg(s), got %d", ast[0], num-1, len(ast)-1)
+		return fmt.Errorf("wanted %d arg(s), got %d", num-1, len(ast)-1)
 	}
 	return nil
 }
 
 func rangeLen(ast core.List, min int, max int) error {
 	if len(ast) < min || len(ast) > max {
-		return fmt.Errorf("%#v: wanted %d-%d args, got %d", ast[0], min-1, max-1, len(ast)-1)
+		return fmt.Errorf("wanted %d-%d args, got %d", min-1, max-1, len(ast)-1)
 	}
 	return nil
 }
 
 func minLen(ast core.List, min int) error {
 	if len(ast) < min {
-		return fmt.Errorf("%#v: wanted at least %d args, got %d", ast[0], min-1, len(ast)-1)
+		return fmt.Errorf("wanted at least %d args, got %d", min-1, len(ast)-1)
 	}
 	return nil
 }

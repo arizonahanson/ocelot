@@ -1,11 +1,26 @@
 package base
 
-import "github.com/starlight/ocelot/pkg/core"
+import (
+	"fmt"
+
+	"github.com/starlight/ocelot/pkg/core"
+)
 
 // lazy function call
 func (fn Func) Future(ast core.List, env *Env) Future {
-	return func() (core.Any, error) {
+	future := func() (val core.Any, err error) {
 		return fn(ast, env)
+	}
+	return Future(future).Trace(ast)
+}
+
+func (future Future) Trace(ast core.List) Future {
+	return func() (val core.Any, err error) {
+		val, err = future.Get()
+		if err != nil {
+			err = fmt.Errorf("%#v: %s", ast[0], err)
+		}
+		return
 	}
 }
 
