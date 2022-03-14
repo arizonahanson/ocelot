@@ -53,7 +53,7 @@ var Builtin = map[string]core.Any{
 	"apply":  base.Func(_apply),
 	"throw":  base.Func(_throw),
 	"try":    base.Func(_try),
-	"catch":  base.Func(_catch),
+	"catch":  base.Func(_func), // alias
 	// type check
 	"type":    base.Func(_type),
 	"bool?":   base.Func(_boolQ),
@@ -778,21 +778,8 @@ func _try(ast core.List, env *base.Env) (core.Any, error) {
 			return core.Nil{}, fmt.Errorf("called with non-function catch %#v", res2)
 		case base.Func:
 			// lazy-call catch-function
-			return catch.Future(core.List{ast[2], core.String{Val: fmt.Sprintf("%s", err)}}, env), nil
+			return catch.Future(core.List{ast[2], core.String{Val: err.Error()}}, env), nil
 		}
 	}
 	return res, nil
-}
-
-func _catch(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
-	}
-	switch sym := ast[1].(type) {
-	default:
-		return core.Nil{}, fmt.Errorf("called with non-symbol %#v", ast[1])
-	case core.Symbol:
-		// lazy-call catch-function factory
-		return base.Func(_func).Future(core.List{ast[0], core.Vector{sym}, ast[2]}, env), nil
-	}
 }
