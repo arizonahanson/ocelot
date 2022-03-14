@@ -39,6 +39,7 @@ var Builtin = map[string]core.Any{
 	// special
 	"equal?": base.Func(_equalQ),
 	"def!":   base.Func(_defE),
+	"undef!": base.Func(_undefE),
 	"deffn!": base.Func(_deffnE),
 	"do":     base.Func(_do),
 	"func":   base.Func(_func),
@@ -272,6 +273,18 @@ func _defE(ast core.List, env *base.Env) (core.Any, error) {
 	case core.Symbol:
 		env.Set(sym, base.EvalFuture(ast[2], env))
 		return core.Nil{}, nil
+	}
+}
+
+func _undefE(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return core.Nil{}, err
+	}
+	switch sym := ast[1].(type) {
+	default:
+		return core.Nil{}, fmt.Errorf("called with non-symbol %#v", ast[1])
+	case core.Symbol:
+		return core.Nil{}, env.Del(sym)
 	}
 }
 

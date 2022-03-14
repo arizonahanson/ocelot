@@ -65,3 +65,12 @@ func (env *Env) find(sym core.Symbol) (*Env, core.Any) {
 	}
 	return env, val
 }
+
+func (env *Env) Del(sym core.Symbol) error {
+	scope, _ := env.find(sym)
+	if scope == nil {
+		return fmt.Errorf("%#v: unable to resolve symbol", sym)
+	}
+	delete(scope.data, sym.Val)
+	return nil
+}

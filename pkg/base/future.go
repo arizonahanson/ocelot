@@ -22,20 +22,15 @@ func (future Future) Get() (val core.Any, err error) {
 	}
 }
 
-// resolve future synchronously and return new future
-func (future Future) Sync() Future {
-	val, err := future.Get()
-	return func() (core.Any, error) {
-		return val, err
-	}
-}
-
 // resolve future asynchronously and return new future
 func (future Future) Async() Future {
 	tunnel := make(chan Future, 1)
 	// resolve
 	send := func() {
-		tunnel <- future.Sync()
+		val, err := future.Get()
+		tunnel <- func() (core.Any, error) {
+			return val, err
+		}
 	}
 	go send()
 	// await future
