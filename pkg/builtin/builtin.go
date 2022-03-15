@@ -714,7 +714,12 @@ func _apply(ast core.List, env *base.Env) (core.Any, error) {
 		default:
 			return core.Nil{}, fmt.Errorf("called with non-vector: %#v", val2)
 		case core.Vector:
-			return fn.Future(cons(ast[1], core.List(vec)), env), nil
+			lst := make(core.List, len(vec)+1)
+			lst[0] = ast[1]
+			for i, item := range vec {
+				lst[i+1] = core.List{core.NewSymbol("quote", nil), item}
+			}
+			return fn.Future(lst, env), nil
 		}
 	}
 }
@@ -743,7 +748,8 @@ func _map(ast core.List, env *base.Env) (core.Any, error) {
 		}
 		res := make(core.Vector, len(val2.(core.Vector)))
 		for i, item := range val2.(core.Vector) {
-			res[i] = fn.Future(cons(ast[1], core.List{item}), env)
+			ast2 := core.List{ast[1], core.List{core.NewSymbol("quote", nil), item}}
+			res[i] = fn.Future(ast2, env)
 		}
 		return base.EvalFuture(res, env), nil
 	}
