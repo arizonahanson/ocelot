@@ -43,11 +43,11 @@ func evalNumber(ast core.Any, env *base.Env) (*core.Number, error) {
 
 func oneLen(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return val, nil
 }

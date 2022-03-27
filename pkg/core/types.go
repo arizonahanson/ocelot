@@ -15,21 +15,21 @@ type Any interface {
 }
 
 // type:nil
-type Nil struct{}
+type Null struct{}
 
-func (val Nil) String() string {
-	return "nil"
+func (val Null) String() string {
+	return "null"
 }
 
-func (val Nil) GoString() string {
+func (val Null) GoString() string {
 	return val.String()
 }
 
-func (val Nil) Equal(any Any) bool {
+func (val Null) Equal(any Any) bool {
 	switch any.(type) {
 	default:
 		return false
-	case Nil:
+	case Null:
 		return true
 	}
 }

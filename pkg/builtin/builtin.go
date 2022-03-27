@@ -17,8 +17,8 @@ func BuiltinEnv() (*base.Env, error) {
 }
 
 var Builtin = map[string]core.Any{
-	// nil / bool
-	"nil?":   base.Func(_nilQ),
+	// null / bool
+	"null?":  base.Func(_nullQ),
 	"true?":  base.Func(_trueQ),
 	"false?": base.Func(_falseQ),
 	"bool":   base.Func(_bool),
@@ -70,18 +70,18 @@ var Builtin = map[string]core.Any{
 	"count":  base.Func(_count),
 }
 
-func _nilQ(ast core.List, env *base.Env) (core.Any, error) {
+func _nullQ(ast core.List, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
-	return core.Bool(val == core.Nil{}), nil
+	return core.Bool(val == core.Null{}), nil
 }
 
 func _trueQ(ast core.List, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return core.Bool(val == core.Bool(true)), nil
 }
@@ -89,7 +89,7 @@ func _trueQ(ast core.List, env *base.Env) (core.Any, error) {
 func _falseQ(ast core.List, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return core.Bool(val == core.Bool(false)), nil
 }
@@ -97,17 +97,17 @@ func _falseQ(ast core.List, env *base.Env) (core.Any, error) {
 func _bool(ast core.List, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
-	return core.Bool(val != core.Bool(false) && val != core.Nil{}), nil
+	return core.Bool(val != core.Bool(false) && val != core.Null{}), nil
 }
 
 func _not(ast core.List, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
-	return core.Bool(val == core.Bool(false) || val == core.Nil{}), nil
+	return core.Bool(val == core.Bool(false) || val == core.Null{}), nil
 }
 
 func _and(ast core.List, env *base.Env) (core.Any, error) {
@@ -117,9 +117,9 @@ func _and(ast core.List, env *base.Env) (core.Any, error) {
 	for _, item := range ast[1 : len(ast)-1] {
 		val, err := base.Eval(item, env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
-		if (val == core.Bool(false) || val == core.Nil{}) {
+		if (val == core.Bool(false) || val == core.Null{}) {
 			return val, nil
 		}
 	}
@@ -133,9 +133,9 @@ func _or(ast core.List, env *base.Env) (core.Any, error) {
 	for _, item := range ast[1 : len(ast)-1] {
 		val, err := base.Eval(item, env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
-		if (val != core.Bool(false) && val != core.Nil{}) {
+		if (val != core.Bool(false) && val != core.Null{}) {
 			return val, nil
 		}
 	}
@@ -145,7 +145,7 @@ func _or(ast core.List, env *base.Env) (core.Any, error) {
 func _numberQ(ast core.List, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch val.(type) {
 	default:
@@ -160,7 +160,7 @@ func _add(ast core.List, env *base.Env) (core.Any, error) {
 	for _, item := range ast[1:] {
 		val, err := evalNumber(item, env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		res = res.Add(val.Decimal())
 	}
@@ -172,7 +172,7 @@ func _sub(ast core.List, env *base.Env) (core.Any, error) {
 	for i, item := range ast[1:] {
 		val, err := evalNumber(item, env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		if i == 0 && len(ast) > 2 {
 			res = val.Decimal()
@@ -188,7 +188,7 @@ func _mul(ast core.List, env *base.Env) (core.Any, error) {
 	for _, item := range ast[1:] {
 		val, err := evalNumber(item, env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		res = res.Mul(val.Decimal())
 	}
@@ -197,19 +197,19 @@ func _mul(ast core.List, env *base.Env) (core.Any, error) {
 
 func _div(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 4); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val3, err := evalNumber(ast[3], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	q, _ := val1.Decimal().QuoRem(val2.Decimal(), int32(val3.Decimal().IntPart()))
 	return core.Number(q), nil
@@ -217,19 +217,19 @@ func _div(ast core.List, env *base.Env) (core.Any, error) {
 
 func _rem(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 4); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val3, err := evalNumber(ast[3], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	_, r := val1.Decimal().QuoRem(val2.Decimal(), int32(val3.Decimal().IntPart()))
 	return core.Number(r), nil
@@ -240,7 +240,7 @@ func _divS(ast core.List, env *base.Env) (core.Any, error) {
 	for i, item := range ast[1:] {
 		val, err := evalNumber(item, env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		if i == 0 && len(ast) > 2 {
 			res = val.Decimal()
@@ -254,10 +254,10 @@ func _divS(ast core.List, env *base.Env) (core.Any, error) {
 func _type(ast core.List, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
-	if (val == core.Nil{}) {
-		return core.Nil{}, nil
+	if (val == core.Null{}) {
+		return core.Null{}, nil
 	}
 	str := core.String{Val: fmt.Sprintf("%T", val)}
 	return str, nil
@@ -265,36 +265,36 @@ func _type(ast core.List, env *base.Env) (core.Any, error) {
 
 func _defE(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch sym := ast[1].(type) {
 	default:
-		return core.Nil{}, fmt.Errorf("called with non-symbol %#v", ast[1])
+		return core.Null{}, fmt.Errorf("called with non-symbol %#v", ast[1])
 	case core.Symbol:
 		env.Set(sym, base.EvalFuture(ast[2], env))
-		return core.Nil{}, nil
+		return core.Null{}, nil
 	}
 }
 
 func _undefE(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch sym := ast[1].(type) {
 	default:
-		return core.Nil{}, fmt.Errorf("called with non-symbol %#v", ast[1])
+		return core.Null{}, fmt.Errorf("called with non-symbol %#v", ast[1])
 	case core.Symbol:
-		return core.Nil{}, env.Del(sym)
+		return core.Null{}, env.Del(sym)
 	}
 }
 
 func _deffnE(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 4); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch ast[2].(type) {
 	default:
-		return core.Nil{}, fmt.Errorf("called with non-vector %#v", ast[2])
+		return core.Null{}, fmt.Errorf("called with non-vector %#v", ast[2])
 	case core.Vector:
 		break
 	}
@@ -304,12 +304,12 @@ func _deffnE(ast core.List, env *base.Env) (core.Any, error) {
 
 func _let(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	var pairs core.Vector
 	switch arg1 := ast[1].(type) {
 	default:
-		return core.Nil{}, fmt.Errorf("called with non-sequence %#v", ast[1])
+		return core.Null{}, fmt.Errorf("called with non-sequence %#v", ast[1])
 	case core.Vector:
 		pairs = arg1
 		break
@@ -318,7 +318,7 @@ func _let(ast core.List, env *base.Env) (core.Any, error) {
 		break
 	}
 	if len(pairs)%2 != 0 {
-		return core.Nil{}, fmt.Errorf("binding missing")
+		return core.Null{}, fmt.Errorf("binding missing")
 	}
 	newEnv := base.NewEnv(env)
 	for {
@@ -327,7 +327,7 @@ func _let(ast core.List, env *base.Env) (core.Any, error) {
 		}
 		switch sym := pairs[0].(type) {
 		default:
-			return core.Nil{}, fmt.Errorf("called with non-symbol %#v", pairs[0])
+			return core.Null{}, fmt.Errorf("called with non-symbol %#v", pairs[0])
 		case core.Symbol:
 			newEnv.Set(sym, base.EvalFuture(pairs[1], newEnv))
 			pairs = pairs[2:]
@@ -338,12 +338,12 @@ func _let(ast core.List, env *base.Env) (core.Any, error) {
 
 func _do(ast core.List, env *base.Env) (core.Any, error) {
 	if len(ast) == 1 {
-		return core.Nil{}, nil
+		return core.Null{}, nil
 	}
 	for _, item := range ast[1 : len(ast)-1] {
 		_, err := base.Eval(item, env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 	}
 	return base.EvalFuture(ast[len(ast)-1], env), nil
@@ -351,28 +351,28 @@ func _do(ast core.List, env *base.Env) (core.Any, error) {
 
 func _if(ast core.List, env *base.Env) (core.Any, error) {
 	if err := rangeLen(ast, 3, 4); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
-	if (val != core.Bool(false) && val != core.Nil{}) {
+	if (val != core.Bool(false) && val != core.Null{}) {
 		return base.EvalFuture(ast[2], env), nil
 	}
 	if len(ast) == 4 {
 		return base.EvalFuture(ast[3], env), nil
 	}
-	return core.Nil{}, nil
+	return core.Null{}, nil
 }
 
 func _func(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch ast[1].(type) {
 	default:
-		return core.Nil{}, fmt.Errorf("called with non-vector %#v", ast[1])
+		return core.Null{}, fmt.Errorf("called with non-vector %#v", ast[1])
 	case core.Vector:
 		break
 	}
@@ -381,7 +381,7 @@ func _func(ast core.List, env *base.Env) (core.Any, error) {
 	for i, item := range binds {
 		switch sym := item.(type) {
 		default:
-			return core.Nil{}, fmt.Errorf("bind expression contained non-symbol %#v", item)
+			return core.Null{}, fmt.Errorf("bind expression contained non-symbol %#v", item)
 		case core.Symbol:
 			symbols[i] = sym
 			break
@@ -391,7 +391,7 @@ func _func(ast core.List, env *base.Env) (core.Any, error) {
 	fn := func(args core.List, outer *base.Env) (core.Any, error) {
 		err := exactLen(args, len(symbols)+1)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		local := base.NewEnv(env)
 		for i, sym := range symbols {
@@ -420,22 +420,22 @@ func _prn(ast core.List, env *base.Env) (core.Any, error) {
 			}
 			val, err := base.Eval(arg, env)
 			if err != nil {
-				return core.Nil{}, err
+				return core.Null{}, err
 			}
 			str += fmt.Sprintf("%v", val)
 		}
 		fmt.Println(str)
 	}
-	return core.Nil{}, nil
+	return core.Null{}, nil
 }
 
 func _listQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch val.(type) {
 	default:
@@ -447,11 +447,11 @@ func _listQ(ast core.List, env *base.Env) (core.Any, error) {
 
 func _vectorQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch val.(type) {
 	default:
@@ -463,11 +463,11 @@ func _vectorQ(ast core.List, env *base.Env) (core.Any, error) {
 
 func _symbolQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch val.(type) {
 	default:
@@ -479,11 +479,11 @@ func _symbolQ(ast core.List, env *base.Env) (core.Any, error) {
 
 func _boolQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch val.(type) {
 	default:
@@ -495,11 +495,11 @@ func _boolQ(ast core.List, env *base.Env) (core.Any, error) {
 
 func _stringQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch val.(type) {
 	default:
@@ -511,11 +511,11 @@ func _stringQ(ast core.List, env *base.Env) (core.Any, error) {
 
 func _mapQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch val.(type) {
 	default:
@@ -527,42 +527,42 @@ func _mapQ(ast core.List, env *base.Env) (core.Any, error) {
 
 func _get(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	arg1, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch map1 := arg1.(type) {
 	default:
-		return core.Nil{}, fmt.Errorf("called with non-map %#v", ast[1])
+		return core.Null{}, fmt.Errorf("called with non-map %#v", ast[1])
 	case core.Map:
 		key, err := base.Eval(ast[2], env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		switch str := key.(type) {
 		default:
-			return core.Nil{}, fmt.Errorf("called with non-string key %#v", ast[2])
+			return core.Null{}, fmt.Errorf("called with non-string key %#v", ast[2])
 		case core.String:
 			val, ok := map1[str]
 			if ok {
 				return val, nil
 			}
 		}
-		return core.Nil{}, nil
+		return core.Null{}, nil
 	}
 }
 
 func _count(ast core.List, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	var cnt int
 	switch any := val.(type) {
 	default:
-		return core.Nil{}, fmt.Errorf("called with non-collection %#v", any)
+		return core.Null{}, fmt.Errorf("called with non-collection %#v", any)
 	case core.Vector:
 		cnt = len(any)
 		break
@@ -579,23 +579,23 @@ func _count(ast core.List, env *base.Env) (core.Any, error) {
 func _emptyQ(ast core.List, env *base.Env) (core.Any, error) {
 	cnt, err := _count(ast, env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return core.Bool(cnt.Equal(core.Zero)), nil
 }
 
 func _equalQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := minLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val1, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	for _, item := range ast[2:] {
 		val2, err := base.Eval(item, env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		if !val1.Equal(val2) {
 			return core.Bool(false), nil
@@ -606,74 +606,74 @@ func _equalQ(ast core.List, env *base.Env) (core.Any, error) {
 
 func _ltQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return core.Bool(val1.Decimal().LessThan(val2.Decimal())), nil
 }
 
 func _lteqQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return core.Bool(val1.Decimal().LessThanOrEqual(val2.Decimal())), nil
 }
 
 func _gtQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return core.Bool(val1.Decimal().GreaterThan(val2.Decimal())), nil
 }
 
 func _gteqQ(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val1, err := evalNumber(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val2, err := evalNumber(ast[2], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return core.Bool(val1.Decimal().GreaterThanOrEqual(val2.Decimal())), nil
 }
 
 func _quote(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return ast[1], nil
 }
 
 func _eval(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	// double-eval TCO'd
 	return dualEvalFuture(ast[1], env), nil
@@ -681,7 +681,7 @@ func _eval(ast core.List, env *base.Env) (core.Any, error) {
 
 // converts lazy-futures to async-futures
 func _async(ast core.List, env *base.Env) (res core.Any, err error) {
-	res = core.Nil{}
+	res = core.Null{}
 	if err = exactLen(ast, 2); err != nil {
 		return
 	}
@@ -709,23 +709,23 @@ func _async(ast core.List, env *base.Env) (res core.Any, err error) {
 
 func _apply(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val1, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch fn := val1.(type) {
 	default:
-		return core.Nil{}, fmt.Errorf("called with non-function: %#v", val1)
+		return core.Null{}, fmt.Errorf("called with non-function: %#v", val1)
 	case base.Func:
 		val2, err := base.Eval(ast[2], env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		switch vec := val2.(type) {
 		default:
-			return core.Nil{}, fmt.Errorf("called with non-vector: %#v", val2)
+			return core.Null{}, fmt.Errorf("called with non-vector: %#v", val2)
 		case core.Vector:
 			lst := make(core.List, len(vec)+1)
 			lst[0] = ast[1]
@@ -739,23 +739,23 @@ func _apply(ast core.List, env *base.Env) (core.Any, error) {
 
 func _map(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	val1, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	switch fn := val1.(type) {
 	default:
-		return core.Nil{}, fmt.Errorf("called with non-function: %#v", val1)
+		return core.Null{}, fmt.Errorf("called with non-function: %#v", val1)
 	case base.Func:
 		val2, err := base.Eval(ast[2], env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		switch val2.(type) {
 		default:
-			return core.Nil{}, fmt.Errorf("called with non-vector: %#v", val2)
+			return core.Null{}, fmt.Errorf("called with non-vector: %#v", val2)
 		case core.Vector:
 			break
 		}
@@ -770,44 +770,44 @@ func _map(ast core.List, env *base.Env) (core.Any, error) {
 
 func _wait(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	arg, err := evalNumber(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	dur, err := time.ParseDuration(fmt.Sprintf("%ss", arg))
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	time.Sleep(dur)
-	return core.Nil{}, nil
+	return core.Null{}, nil
 }
 
 func _throw(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	arg, err := base.Eval(ast[1], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
-	return core.Nil{}, fmt.Errorf("%s", arg)
+	return core.Null{}, fmt.Errorf("%s", arg)
 }
 
 func _try(ast core.List, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	res, err := base.Eval(ast[1], env)
 	if err != nil {
 		res2, err2 := base.Eval(ast[2], env)
 		if err2 != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		switch catch := res2.(type) {
 		default:
-			return core.Nil{}, fmt.Errorf("called with non-function catch %#v", res2)
+			return core.Null{}, fmt.Errorf("called with non-function catch %#v", res2)
 		case base.Func:
 			// lazy-call catch-function
 			return catch.Future(core.List{ast[2], core.String{Val: err.Error()}}, env), nil

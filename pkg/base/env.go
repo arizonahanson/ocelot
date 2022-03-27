@@ -19,7 +19,7 @@ func NewEnv(outer *Env) *Env {
 func (env *Env) Get(sym core.Symbol) (core.Any, error) {
 	scope, val := env.find(sym)
 	if scope == nil {
-		return core.Nil{}, fmt.Errorf("%#v: unable to resolve symbol", sym)
+		return core.Null{}, fmt.Errorf("%#v: unable to resolve symbol", sym)
 	}
 	return val, nil
 }
@@ -61,7 +61,7 @@ func (env *Env) find(sym core.Symbol) (*Env, core.Any) {
 		if env.outer != nil {
 			return env.outer.find(sym)
 		}
-		return nil, core.Nil{}
+		return nil, core.Null{}
 	}
 	return env, val
 }

@@ -10,18 +10,18 @@ import (
 func Parse(in string) (core.Any, error) {
 	ast, err := parser.Parse("parse", []byte(in))
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return ast.(core.Any), nil
 }
 
 func EvalStr(in string, env *Env) (core.Any, error) {
 	if env == nil {
-		return core.Nil{}, errors.New("evaluation with nil env")
+		return core.Null{}, errors.New("evaluation with nil env")
 	}
 	ast, err := Parse(in)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return Eval(ast, env)
 }
@@ -51,7 +51,7 @@ func EvalFuture(ast core.Any, env *Env) Future {
 func evalAst(ast core.Any, env *Env) (core.Any, error) {
 	switch any := ast.(type) {
 	default:
-		// String, Number, Bool, Nil
+		// String, Number, Bool, Null
 		return any, nil
 	case core.Symbol:
 		return env.Get(any)
@@ -68,12 +68,12 @@ func evalAst(ast core.Any, env *Env) (core.Any, error) {
 func evalList(ast core.List, env *Env) (core.Any, error) {
 	// () == nil
 	if len(ast) == 0 {
-		return core.Nil{}, nil
+		return core.Null{}, nil
 	}
 	// eval first item
 	val, err := Eval(ast[0], env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	// inspect type
 	switch fn := val.(type) {
@@ -90,7 +90,7 @@ func evalList(ast core.List, env *Env) (core.Any, error) {
 	}
 	rest, err := evalVector(core.Vector(ast[1:]), env)
 	if err != nil {
-		return core.Nil{}, err
+		return core.Null{}, err
 	}
 	return append(first, rest.(core.Vector)...), nil
 }
@@ -101,7 +101,7 @@ func evalVector(ast core.Vector, env *Env) (core.Any, error) {
 	for i, item := range ast {
 		val, err := Eval(item, env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		res[i] = val
 	}
@@ -114,7 +114,7 @@ func evalMap(ast core.Map, env *Env) (core.Any, error) {
 	for key, item := range ast {
 		val, err := Eval(item, env)
 		if err != nil {
-			return core.Nil{}, err
+			return core.Null{}, err
 		}
 		res[key] = val
 	}
