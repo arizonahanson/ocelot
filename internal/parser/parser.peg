@@ -48,13 +48,14 @@ Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
 
 // literal string
 String ←  '"' runeChr* '"' {
-  return core.String{Val: string(c.text)}.Unquote()
+  val := strings.Replace(string(c.text), "\\/", "/", -1)
+  return core.String{Val: val}.Unquote()
 } / '"' runeChr* !'"' {
 	return core.Null{}, errors.New("not terminated")
 }
-// no bare " or \ inside a String, supports \\, \", \abfnrtv, \xff, \uffff, \Uffffffff
+// no bare " or \ inside a String, supports \\, \/, \", \abfnrtv, \xff, \uffff, \Uffffffff
 runeChr ←  [^"\\] / runeEsc
-runeEsc ←  `\` ([abfnrtv"\\] /
+runeEsc ←  `\` (["\\/abfnrtv] /
            ('x' hexDigit hexDigit) /
            ('u' hexDigit hexDigit hexDigit hexDigit) /
            ('U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit))
