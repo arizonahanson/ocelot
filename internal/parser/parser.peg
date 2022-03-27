@@ -48,8 +48,7 @@ Number ←  '-'? digit+ ('.' digit+)? ('e'i ('+' / '-')? digit+)? {
 
 // quoted string
 String ←  '"' runeChr* '"' {
-  val := strings.Replace(string(c.text), "\\/", "/", -1)
-  return core.String{Val: val}.Unquote()
+  return core.String{Val: string(c.text)}.Unquote()
 } / '"' runeChr* !'"' {
 	return core.Null{}, errors.New("not terminated")
 }

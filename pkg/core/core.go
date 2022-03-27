@@ -2,13 +2,16 @@ package core
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/shopspring/decimal"
 )
 
 // parse quoted, escaped string
 func (val String) Unquote() (String, error) {
-	str, err := strconv.Unquote(val.Val)
+	// Go Unquote doesn't support solidus-escape: "\/"
+	str := strings.Replace(val.Val, "\\/", "/", -1)
+	str, err := strconv.Unquote(str)
 	return String{str}, err
 }
 
