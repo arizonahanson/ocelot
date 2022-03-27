@@ -17,43 +17,43 @@ Expr ←  _* first:Any? rest:(_+ Any)* _* {
 // parent `any` type
 Any ←   Atom / Symbol / List
 
-// types that don't eval to another type (contents may)
+// core ECMA-404 types (literals)
 Atom ←  Number / String / Vector / Map
 
-// list expression (non-atom first)
+// s-expression
 List ←  '(' expr:Expr ')' {
   return core.List(expr.([]core.Any)), nil
 } / '(' Expr !')' {
   return core.Null{}, errors.New("not terminated")
 }
 
-// vector
+// vector (array)
 Vector ←  '[' expr:Expr ']' {
   return core.Vector(expr.([]core.Any)), nil
 } / '[' Expr !']' {
   return core.Null{}, errors.New("not terminated")
 }
 
-// map
+// hash-map (object)
 Map ←  '{' _* first:(String _* ':' _* Any)? rest:(_+ String _* ':' _* Any)* _* '}' {
   return core.Map(merge(first, rest, 0, 4)), nil
 } / '{' _* (String _* ':' _* Any) (_+ String _* ':' _* Any)* _* !'}' {
   return core.Null{}, errors.New("not terminated")
 }
 
-// literal real number like (-123.45e-67)
-Number ←  '-'? digit+ ('.' digit+)? ('e'i '-'? digit+)? {
+// real number (eg. -123.45e-67)
+Number ←  '-'? digit+ ('.' digit+)? ('e'i ('+' / '-')? digit+)? {
   return core.String{Val: string(c.text)}.Number()
 }
 
-// literal string
+// quoted string
 String ←  '"' runeChr* '"' {
   val := strings.Replace(string(c.text), "\\/", "/", -1)
   return core.String{Val: val}.Unquote()
 } / '"' runeChr* !'"' {
 	return core.Null{}, errors.New("not terminated")
 }
-// no bare " or \ inside a String, supports \\, \/, \", \abfnrtv, \xff, \uffff, \Uffffffff
+// no naked " or \ inside a String, supports \\, \/, \", \abfnrtv, \xff, \uffff, \Uffffffff
 runeChr ←  [^"\\] / runeEsc
 runeEsc ←  `\` (["\\/abfnrtv] /
            ('x' hexDigit hexDigit) /
@@ -61,7 +61,7 @@ runeEsc ←  `\` (["\\/abfnrtv] /
            ('U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit))
 hexDigit ← [0-9a-f]i
 
-// identifiers (like num.ϕa_2)
+// null, true, false and symbols (identifiers)
 Symbol ←  word ('.' word)* suffix? {
   str := string(c.text)
   if str == "null" {
@@ -75,14 +75,14 @@ Symbol ←  word ('.' word)* suffix? {
   }
   return core.NewSymbol(str, pos(c.pos)), nil
 }
-
+// symbol component
 word ←  letter (letter / digit)*
-// suffix
-suffix ←  [!?*]
-// integer part of Number
-digit ←  [0-9]
-// unicode letters, and underscore, in indentifiers
+// unicode "letters" for symbols
 letter ←  [\p{L}] / '_'
+// numerals
+digit ←  [0-9]
+// symbol suffix
+suffix ←  [!?*]
 
 // UTF-8: whitespace and control chars/unused codes
 _ "whitespace" ←  [\p{Z}] / [\p{C}] / ',' / Comment
@@ -94,6 +94,5 @@ MultiLineComment ←  "/*" (!"*/" .)* "*/"
 
 // end of line
 EOL ←  '\n' / EOF
-
 // End of file
 EOF ←  !.
