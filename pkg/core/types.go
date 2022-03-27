@@ -126,26 +126,6 @@ func (val Symbol) Equal(any Any) bool {
 	}
 }
 
-// type:key
-type Key string
-
-func (val Key) String() string {
-	return fmt.Sprintf("%s", string(val))
-}
-
-func (val Key) GoString() string {
-	return val.String()
-}
-
-func (val Key) Equal(any Any) bool {
-	switch arg := any.(type) {
-	default:
-		return false
-	case Key:
-		return val == arg
-	}
-}
-
 // type:list
 type List []Any
 
@@ -241,21 +221,26 @@ func (val Vector) Equal(any Any) bool {
 }
 
 // type:map
-type Map map[Key]Any
+type Map map[Any]Any
 
 func (val Map) String() string {
-	res := make([]string, len(val)*2)
+	res := make([]string, len(val))
 	i := 0
 	for key, item := range val {
-		res[i] = fmt.Sprintf("%v", key)
-		res[i+1] = fmt.Sprintf("%v", item)
-		i += 2
+		res[i] = fmt.Sprintf("%v:%v", key, item)
+		i += 1
 	}
 	return "{" + strings.Join(res, " ") + "}"
 }
 
 func (val Map) GoString() string {
-	return val.String()
+	res := make([]string, len(val))
+	i := 0
+	for key, item := range val {
+		res[i] = fmt.Sprintf("%#v:%#v", key, item)
+		i += 1
+	}
+	return "{" + strings.Join(res, " ") + "}"
 }
 
 func (val Map) Equal(any Any) bool {

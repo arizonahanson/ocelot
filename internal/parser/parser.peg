@@ -18,7 +18,7 @@ Expr ←  _* first:Any? rest:(_+ Any)* _* {
 Any ←   Atom / Symbol / List
 
 // types that don't eval to another type (contents may)
-Atom ←  Number / String / Key / Vector / Map
+Atom ←  Number / String / Vector / Map
 
 // list expression (non-atom first)
 List ←  '(' expr:Expr ')' {
@@ -35,9 +35,9 @@ Vector ←  '[' expr:Expr ']' {
 }
 
 // map
-Map ←  '{' _* first:(Key _+ Any)? rest:(_+ Key _+ Any)* _* '}' {
-  return core.Map(merge(first, rest, 0, 2)), nil
-} / '{' _* (Key _+ Any) (_+ Key _+ Any)* _* !'}' {
+Map ←  '{' _* first:(Any ':' _* Any)? rest:(_+ Any ':' _* Any)* _* '}' {
+  return core.Map(merge(first, rest, 0, 3)), nil
+} / '{' _* (Any ':' _* Any) (_+ Any ':' _* Any)* _* !'}' {
   return core.Nil{}, errors.New("not terminated")
 }
 
@@ -75,11 +75,6 @@ Symbol ←  word ('.' word)* suffix? {
   return core.NewSymbol(str, pos(c.pos)), nil
 }
 
-// key
-Key ←  ':' (word (':' word)*)? {
-  return core.Key(string(c.text)), nil
-}
-
 word ←  letter (letter / digit)*
 // suffix
 suffix ←  [!?*]
@@ -89,7 +84,7 @@ digit ←  [0-9]
 letter ←  [\p{L}] / '_'
 
 // UTF-8: whitespace and control chars/unused codes
-_ "whitespace" ←  [\p{Z}] / [\p{C}] / Comment
+_ "whitespace" ←  [\p{Z}] / [\p{C}] / ',' / Comment
 
 // comments
 Comment ←  SingleLineComment / MultiLineComment

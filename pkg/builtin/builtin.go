@@ -61,7 +61,6 @@ var Builtin = map[string]core.Any{
 	"number?": base.Func(_numberQ),
 	"string?": base.Func(_stringQ),
 	"symbol?": base.Func(_symbolQ),
-	"key?":    base.Func(_keyQ),
 	"list?":   base.Func(_listQ),
 	"vector?": base.Func(_vectorQ),
 	"map?":    base.Func(_mapQ),
@@ -489,22 +488,6 @@ func _boolQ(ast core.List, env *base.Env) (core.Any, error) {
 	default:
 		return core.Bool(false), nil
 	case core.Bool:
-		return core.Bool(true), nil
-	}
-}
-
-func _keyQ(ast core.List, env *base.Env) (core.Any, error) {
-	if err := exactLen(ast, 2); err != nil {
-		return core.Nil{}, err
-	}
-	val, err := base.Eval(ast[1], env)
-	if err != nil {
-		return core.Nil{}, err
-	}
-	switch val.(type) {
-	default:
-		return core.Bool(false), nil
-	case core.Key:
 		return core.Bool(true), nil
 	}
 }

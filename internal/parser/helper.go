@@ -25,16 +25,16 @@ func join(first, rest interface{}, index int) []core.Any {
 	return result
 }
 
-func merge(first, rest interface{}, keyIndex int, valueIndex int) map[core.Key]core.Any {
+func merge(first, rest interface{}, keyIndex int, valueIndex int) map[core.Any]core.Any {
 	pair := slice(first)
 	if pair == nil {
-		return map[core.Key]core.Any{}
+		return map[core.Any]core.Any{}
 	}
 	more := slice(rest)
-	result := make(map[core.Key]core.Any, len(more)+1)
+	result := make(map[core.Any]core.Any, len(more)+1)
 	// assign helper
 	assign := func(keyval []interface{}, keyN int, valN int) {
-		key := keyval[keyN].(core.Key)
+		key := keyval[keyN].(core.Any)
 		result[key] = keyval[valN].(core.Any)
 	}
 	// assign pairs
