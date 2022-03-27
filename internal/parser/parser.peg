@@ -35,9 +35,9 @@ Vector ←  '[' expr:Expr ']' {
 }
 
 // map
-Map ←  '{' _* first:(Any ':' _* Any)? rest:(_+ Any ':' _* Any)* _* '}' {
+Map ←  '{' _* first:(String ':' _* Any)? rest:(_+ String ':' _* Any)* _* '}' {
   return core.Map(merge(first, rest, 0, 3)), nil
-} / '{' _* (Any ':' _* Any) (_+ Any ':' _* Any)* _* !'}' {
+} / '{' _* (String ':' _* Any) (_+ String ':' _* Any)* _* !'}' {
   return core.Nil{}, errors.New("not terminated")
 }
 

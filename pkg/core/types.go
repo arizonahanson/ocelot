@@ -221,7 +221,7 @@ func (val Vector) Equal(any Any) bool {
 }
 
 // type:map
-type Map map[Any]Any
+type Map map[String]Any
 
 func (val Map) String() string {
 	res := make([]string, len(val))
