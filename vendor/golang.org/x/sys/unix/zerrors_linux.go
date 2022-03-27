@@ -1286,6 +1286,8 @@ const (
 	IUTF8                                       = 0x4000
 	IXANY                                       = 0x800
 	JFFS2_SUPER_MAGIC                           = 0x72b6
+	KCMPROTO_CONNECTED                          = 0x0
+	KCM_RECV_DISABLE                            = 0x1
 	KEXEC_ARCH_386                              = 0x30000
 	KEXEC_ARCH_68K                              = 0x40000
 	KEXEC_ARCH_AARCH64                          = 0xb70000
@@ -2133,6 +2135,10 @@ const (
 	PTRACE_SYSCALL_INFO_NONE                    = 0x0
 	PTRACE_SYSCALL_INFO_SECCOMP                 = 0x3
 	PTRACE_TRACEME                              = 0x0
+	P_ALL                                       = 0x0
+	P_PGID                                      = 0x2
+	P_PID                                       = 0x1
+	P_PIDFD                                     = 0x3
 	QNX4_SUPER_MAGIC                            = 0x2f
 	QNX6_SUPER_MAGIC                            = 0x68191122
 	RAMFS_MAGIC                                 = 0x858458f6
@@ -2458,6 +2464,9 @@ const (
 	SIOCGSTAMPNS                                = 0x8907
 	SIOCGSTAMPNS_OLD                            = 0x8907
 	SIOCGSTAMP_OLD                              = 0x8906
+	SIOCKCMATTACH                               = 0x89e0
+	SIOCKCMCLONE                                = 0x89e2
+	SIOCKCMUNATTACH                             = 0x89e1
 	SIOCOUTQNSD                                 = 0x894b
 	SIOCPROTOPRIVATE                            = 0x89e0
 	SIOCRTMSG                                   = 0x890d

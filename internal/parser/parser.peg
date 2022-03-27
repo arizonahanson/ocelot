@@ -62,17 +62,16 @@ hexDigit ← [0-9a-f]i
 
 // null, true, false and symbols (identifiers)
 Symbol ←  word ('.' word)* suffix? {
-  str := string(c.text)
-  if str == "null" {
+  switch str := string(c.text); {
+  default:
+    return core.NewSymbol(str, pos(c.pos)), nil
+  case str == "null":
     return core.Null{}, nil
-  }
-  if str == "true" {
+  case str == "true":
     return core.Bool(true), nil
-  }
-  if str == "false" {
+  case str == "false":
     return core.Bool(false), nil
   }
-  return core.NewSymbol(str, pos(c.pos)), nil
 }
 // symbol component
 word ←  letter (letter / digit)*
