@@ -64,6 +64,7 @@ var Builtin = map[string]core.Any{
 	"list?":   base.Func(_listQ),
 	"vector?": base.Func(_vectorQ),
 	"map?":    base.Func(_mapQ),
+	"get":     base.Func(_get),
 	// sequences
 	"empty?": base.Func(_emptyQ),
 	"count":  base.Func(_count),
@@ -521,6 +522,40 @@ func _mapQ(ast core.List, env *base.Env) (core.Any, error) {
 		return core.Bool(false), nil
 	case core.Map:
 		return core.Bool(true), nil
+	}
+}
+
+func _get(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 3); err != nil {
+		return core.Nil{}, err
+	}
+	arg1, err := base.Eval(ast[1], env)
+	if err != nil {
+		return core.Nil{}, err
+	}
+	switch map1 := arg1.(type) {
+	default:
+		return core.Nil{}, fmt.Errorf("called with non-map %#v", ast[1])
+	case core.Map:
+		key, err := base.Eval(ast[2], env)
+		if err != nil {
+			return core.Nil{}, err
+		}
+		switch key.(type) {
+		default:
+			val, ok := map1[key]
+			if ok {
+				return val, nil
+			}
+		case core.Number:
+			// numbers as key inefficient
+			for k, val := range map1 {
+				if key.Equal(k) {
+					return val, nil
+				}
+			}
+		}
+		return core.Nil{}, nil
 	}
 }
 
