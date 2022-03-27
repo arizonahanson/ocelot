@@ -39,8 +39,8 @@ var Builtin = map[string]core.Any{
 	// special
 	"equal?": base.Func(_equalQ),
 	"def!":   base.Func(_defE),
-	"undef!": base.Func(_undefE),
-	"deffn!": base.Func(_deffnE),
+	"free!":  base.Func(_freeE),
+	"defn!":  base.Func(_defnE),
 	"do":     base.Func(_do),
 	"func":   base.Func(_func),
 	"let":    base.Func(_let),
@@ -64,7 +64,7 @@ var Builtin = map[string]core.Any{
 	"symbol?": base.Func(_symbolQ),
 	"expr?":   base.Func(_exprQ),
 	"vector?": base.Func(_vectorQ),
-	"map?":    base.Func(_mapQ),
+	"hash?":   base.Func(_hashQ),
 	"get":     base.Func(_get),
 	// sequences
 	"empty?": base.Func(_emptyQ),
@@ -277,7 +277,7 @@ func _defE(ast core.Expr, env *base.Env) (core.Any, error) {
 	}
 }
 
-func _undefE(ast core.Expr, env *base.Env) (core.Any, error) {
+func _freeE(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -289,7 +289,7 @@ func _undefE(ast core.Expr, env *base.Env) (core.Any, error) {
 	}
 }
 
-func _deffnE(ast core.Expr, env *base.Env) (core.Any, error) {
+func _defnE(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 4); err != nil {
 		return core.Null{}, err
 	}
@@ -510,7 +510,7 @@ func _stringQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	}
 }
 
-func _mapQ(ast core.Expr, env *base.Env) (core.Any, error) {
+func _hashQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
