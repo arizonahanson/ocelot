@@ -44,17 +44,18 @@ var Builtin = map[string]core.Any{
 	"do":     base.Func(_do),
 	"func":   base.Func(_func),
 	"let":    base.Func(_let),
-	"wait":   base.Func(_wait),
 	"async":  base.Func(_async),
 	"if":     base.Func(_if),
 	"prn":    base.Func(_prn),
 	"eval":   base.Func(_eval),
+	"parse":  base.Func(_parse),
 	"quote":  base.Func(_quote),
 	"map":    base.Func(_map),
 	"apply":  base.Func(_apply),
 	"throw":  base.Func(_throw),
 	"try":    base.Func(_try),
 	"catch":  base.Func(_func), // alias
+	"wait":   base.Func(_wait),
 	// type check
 	"type":    base.Func(_type),
 	"bool?":   base.Func(_boolQ),
@@ -677,6 +678,26 @@ func _eval(ast core.List, env *base.Env) (core.Any, error) {
 	}
 	// double-eval TCO'd
 	return dualEvalFuture(ast[1], env), nil
+}
+
+func _parse(ast core.List, env *base.Env) (core.Any, error) {
+	if err := exactLen(ast, 2); err != nil {
+		return core.Null{}, err
+	}
+	val, err := base.Eval(ast[1], env)
+	if err != nil {
+		return core.Null{}, err
+	}
+	switch str := val.(type) {
+	default:
+		return core.Null{}, fmt.Errorf("called with non-string %#v", ast[1])
+	case core.String:
+		arg, err := base.Parse(str.String())
+		if err != nil {
+			return core.Null{}, err
+		}
+		return arg, nil
+	}
 }
 
 // converts lazy-futures to async-futures
