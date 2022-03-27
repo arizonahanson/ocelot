@@ -76,7 +76,7 @@ Symbol ←  word ('.' word)* suffix? {
 }
 
 // key
-Key ←  ':' word {
+Key ←  ':' (word (':' word)*)? {
   return core.Key(string(c.text)), nil
 }
 
