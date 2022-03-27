@@ -5,38 +5,38 @@ import "github.com/starlight/ocelot/pkg/core"
 }
 
 // root of AST
-Module ←  expr:Expr EOF {
-  return core.List(expr.([]core.Any)), nil
+Module ←  seq:Seq EOF {
+  return core.Expr(seq.([]core.Any)), nil
 }
 
 // expression sequence without delimiters
-Expr ←  _* first:Any? rest:(_+ Any)* _* {
+Seq ←  _* first:Any? rest:(_+ Any)* _* {
   return join(first, rest, 1), nil
 }
 
 // parent `any` type
-Any ←   Atom / Symbol / List
+Any ←   Atom / Symbol / Expr
 
 // core ECMA-404 types (literals)
-Atom ←  Number / String / Vector / Map
+Atom ←  Number / String / Vector / Hash
 
 // s-expression
-List ←  '(' expr:Expr ')' {
-  return core.List(expr.([]core.Any)), nil
-} / '(' Expr !')' {
+Expr ←  '(' seq:Seq ')' {
+  return core.Expr(seq.([]core.Any)), nil
+} / '(' Seq !')' {
   return core.Null{}, errors.New("not terminated")
 }
 
 // vector (array)
-Vector ←  '[' expr:Expr ']' {
-  return core.Vector(expr.([]core.Any)), nil
-} / '[' Expr !']' {
+Vector ←  '[' seq:Seq ']' {
+  return core.Vector(seq.([]core.Any)), nil
+} / '[' Seq !']' {
   return core.Null{}, errors.New("not terminated")
 }
 
 // hash-map (object)
-Map ←  '{' _* first:(String _* ':' _* Any)? rest:(_+ String _* ':' _* Any)* _* '}' {
-  return core.Map(merge(first, rest, 0, 4)), nil
+Hash ←  '{' _* first:(String _* ':' _* Any)? rest:(_+ String _* ':' _* Any)* _* '}' {
+  return core.Hash(merge(first, rest, 0, 4)), nil
 } / '{' _* (String _* ':' _* Any) (_+ String _* ':' _* Any)* _* !'}' {
   return core.Null{}, errors.New("not terminated")
 }

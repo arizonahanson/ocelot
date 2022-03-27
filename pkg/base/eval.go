@@ -55,17 +55,17 @@ func evalAst(ast core.Any, env *Env) (core.Any, error) {
 		return any, nil
 	case core.Symbol:
 		return env.Get(any)
-	case core.List:
-		return evalList(any, env)
+	case core.Expr:
+		return evalExpr(any, env)
 	case core.Vector:
 		return evalVector(any, env)
-	case core.Map:
-		return evalMap(any, env)
+	case core.Hash:
+		return evalHash(any, env)
 	}
 }
 
-// (eval list expressions)
-func evalList(ast core.List, env *Env) (core.Any, error) {
+// (eval s-expressions)
+func evalExpr(ast core.Expr, env *Env) (core.Any, error) {
 	// () == nil
 	if len(ast) == 0 {
 		return core.Null{}, nil
@@ -109,8 +109,8 @@ func evalVector(ast core.Vector, env *Env) (core.Any, error) {
 }
 
 // {:eval maps}
-func evalMap(ast core.Map, env *Env) (core.Any, error) {
-	res := make(core.Map, len(ast))
+func evalHash(ast core.Hash, env *Env) (core.Any, error) {
+	res := make(core.Hash, len(ast))
 	for key, item := range ast {
 		val, err := Eval(item, env)
 		if err != nil {

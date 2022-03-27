@@ -41,7 +41,7 @@ func (future Future) Async() Future {
 }
 
 // trace errors mapped to source ast
-func (future Future) Trace(ast core.List) Future {
+func (future Future) Trace(ast core.Expr) Future {
 	return func() (val core.Any, err error) {
 		val, err = future.Get()
 		if err != nil {
@@ -52,7 +52,7 @@ func (future Future) Trace(ast core.List) Future {
 }
 
 // lazy function call
-func (fn Func) Future(ast core.List, env *Env) Future {
+func (fn Func) Future(ast core.Expr, env *Env) Future {
 	future := func() (core.Any, error) {
 		return fn(ast, env)
 	}

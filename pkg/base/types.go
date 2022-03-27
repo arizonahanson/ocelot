@@ -9,7 +9,7 @@ import (
 )
 
 // type:func
-type Func func(ast core.List, env *Env) (core.Any, error)
+type Func func(ast core.Expr, env *Env) (core.Any, error)
 
 func (fn Func) String() string {
 	name := runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()

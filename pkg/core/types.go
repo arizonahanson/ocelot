@@ -126,10 +126,10 @@ func (val Symbol) Equal(any Any) bool {
 	}
 }
 
-// type:list
-type List []Any
+// type:expr
+type Expr []Any
 
-func (val List) String() string {
+func (val Expr) String() string {
 	str := "("
 	for i, item := range val {
 		if i != 0 {
@@ -140,7 +140,7 @@ func (val List) String() string {
 	return str + ")"
 }
 
-func (val List) GoString() string {
+func (val Expr) GoString() string {
 	str := "("
 	for i, item := range val {
 		if i != 0 {
@@ -155,11 +155,11 @@ func (val List) GoString() string {
 	return str + ")"
 }
 
-func (val List) Equal(any Any) bool {
+func (val Expr) Equal(any Any) bool {
 	switch arg := any.(type) {
 	default:
 		return false
-	case List:
+	case Expr:
 		if len(val) != len(arg) {
 			return false
 		}
@@ -221,9 +221,9 @@ func (val Vector) Equal(any Any) bool {
 }
 
 // type:map
-type Map map[String]Any
+type Hash map[String]Any
 
-func (val Map) String() string {
+func (val Hash) String() string {
 	res := make([]string, len(val))
 	i := 0
 	for key, item := range val {
@@ -233,7 +233,7 @@ func (val Map) String() string {
 	return "{" + strings.Join(res, " ") + "}"
 }
 
-func (val Map) GoString() string {
+func (val Hash) GoString() string {
 	res := make([]string, len(val))
 	i := 0
 	for key, item := range val {
@@ -243,11 +243,11 @@ func (val Map) GoString() string {
 	return "{" + strings.Join(res, " ") + "}"
 }
 
-func (val Map) Equal(any Any) bool {
+func (val Hash) Equal(any Any) bool {
 	switch arg := any.(type) {
 	default:
 		return false
-	case Map:
+	case Hash:
 		if len(val) != len(arg) {
 			return false
 		}

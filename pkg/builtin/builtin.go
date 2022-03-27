@@ -62,7 +62,7 @@ var Builtin = map[string]core.Any{
 	"number?": base.Func(_numberQ),
 	"string?": base.Func(_stringQ),
 	"symbol?": base.Func(_symbolQ),
-	"list?":   base.Func(_listQ),
+	"expr?":   base.Func(_exprQ),
 	"vector?": base.Func(_vectorQ),
 	"map?":    base.Func(_mapQ),
 	"get":     base.Func(_get),
@@ -71,7 +71,7 @@ var Builtin = map[string]core.Any{
 	"count":  base.Func(_count),
 }
 
-func _nullQ(ast core.List, env *base.Env) (core.Any, error) {
+func _nullQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
 		return core.Null{}, err
@@ -79,7 +79,7 @@ func _nullQ(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Bool(val == core.Null{}), nil
 }
 
-func _trueQ(ast core.List, env *base.Env) (core.Any, error) {
+func _trueQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
 		return core.Null{}, err
@@ -87,7 +87,7 @@ func _trueQ(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Bool(val == core.Bool(true)), nil
 }
 
-func _falseQ(ast core.List, env *base.Env) (core.Any, error) {
+func _falseQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
 		return core.Null{}, err
@@ -95,7 +95,7 @@ func _falseQ(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Bool(val == core.Bool(false)), nil
 }
 
-func _bool(ast core.List, env *base.Env) (core.Any, error) {
+func _bool(ast core.Expr, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
 		return core.Null{}, err
@@ -103,7 +103,7 @@ func _bool(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Bool(val != core.Bool(false) && val != core.Null{}), nil
 }
 
-func _not(ast core.List, env *base.Env) (core.Any, error) {
+func _not(ast core.Expr, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
 		return core.Null{}, err
@@ -111,7 +111,7 @@ func _not(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Bool(val == core.Bool(false) || val == core.Null{}), nil
 }
 
-func _and(ast core.List, env *base.Env) (core.Any, error) {
+func _and(ast core.Expr, env *base.Env) (core.Any, error) {
 	if len(ast) == 1 {
 		return core.Bool(true), nil
 	}
@@ -127,7 +127,7 @@ func _and(ast core.List, env *base.Env) (core.Any, error) {
 	return base.EvalFuture(ast[len(ast)-1], env), nil
 }
 
-func _or(ast core.List, env *base.Env) (core.Any, error) {
+func _or(ast core.Expr, env *base.Env) (core.Any, error) {
 	if len(ast) == 1 {
 		return core.Bool(false), nil
 	}
@@ -143,7 +143,7 @@ func _or(ast core.List, env *base.Env) (core.Any, error) {
 	return base.EvalFuture(ast[len(ast)-1], env), nil
 }
 
-func _numberQ(ast core.List, env *base.Env) (core.Any, error) {
+func _numberQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
 		return core.Null{}, err
@@ -156,7 +156,7 @@ func _numberQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 }
 
-func _add(ast core.List, env *base.Env) (core.Any, error) {
+func _add(ast core.Expr, env *base.Env) (core.Any, error) {
 	res := core.Zero.Decimal()
 	for _, item := range ast[1:] {
 		val, err := evalNumber(item, env)
@@ -168,7 +168,7 @@ func _add(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Number(res), nil
 }
 
-func _sub(ast core.List, env *base.Env) (core.Any, error) {
+func _sub(ast core.Expr, env *base.Env) (core.Any, error) {
 	res := core.Zero.Decimal()
 	for i, item := range ast[1:] {
 		val, err := evalNumber(item, env)
@@ -184,7 +184,7 @@ func _sub(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Number(res), nil
 }
 
-func _mul(ast core.List, env *base.Env) (core.Any, error) {
+func _mul(ast core.Expr, env *base.Env) (core.Any, error) {
 	res := core.One.Decimal()
 	for _, item := range ast[1:] {
 		val, err := evalNumber(item, env)
@@ -196,7 +196,7 @@ func _mul(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Number(res), nil
 }
 
-func _div(ast core.List, env *base.Env) (core.Any, error) {
+func _div(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 4); err != nil {
 		return core.Null{}, err
 	}
@@ -216,7 +216,7 @@ func _div(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Number(q), nil
 }
 
-func _rem(ast core.List, env *base.Env) (core.Any, error) {
+func _rem(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 4); err != nil {
 		return core.Null{}, err
 	}
@@ -236,7 +236,7 @@ func _rem(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Number(r), nil
 }
 
-func _divS(ast core.List, env *base.Env) (core.Any, error) {
+func _divS(ast core.Expr, env *base.Env) (core.Any, error) {
 	res := core.One.Decimal()
 	for i, item := range ast[1:] {
 		val, err := evalNumber(item, env)
@@ -252,7 +252,7 @@ func _divS(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Number(res), nil
 }
 
-func _type(ast core.List, env *base.Env) (core.Any, error) {
+func _type(ast core.Expr, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
 		return core.Null{}, err
@@ -264,7 +264,7 @@ func _type(ast core.List, env *base.Env) (core.Any, error) {
 	return str, nil
 }
 
-func _defE(ast core.List, env *base.Env) (core.Any, error) {
+func _defE(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -277,7 +277,7 @@ func _defE(ast core.List, env *base.Env) (core.Any, error) {
 	}
 }
 
-func _undefE(ast core.List, env *base.Env) (core.Any, error) {
+func _undefE(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -289,7 +289,7 @@ func _undefE(ast core.List, env *base.Env) (core.Any, error) {
 	}
 }
 
-func _deffnE(ast core.List, env *base.Env) (core.Any, error) {
+func _deffnE(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 4); err != nil {
 		return core.Null{}, err
 	}
@@ -303,7 +303,7 @@ func _deffnE(ast core.List, env *base.Env) (core.Any, error) {
 	return _defE(append(ast[:2], fn), env)
 }
 
-func _let(ast core.List, env *base.Env) (core.Any, error) {
+func _let(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -314,7 +314,7 @@ func _let(ast core.List, env *base.Env) (core.Any, error) {
 	case core.Vector:
 		pairs = arg1
 		break
-	case core.List:
+	case core.Expr:
 		pairs = core.Vector(arg1)
 		break
 	}
@@ -337,7 +337,7 @@ func _let(ast core.List, env *base.Env) (core.Any, error) {
 	return base.EvalFuture(ast[2], newEnv), nil
 }
 
-func _do(ast core.List, env *base.Env) (core.Any, error) {
+func _do(ast core.Expr, env *base.Env) (core.Any, error) {
 	if len(ast) == 1 {
 		return core.Null{}, nil
 	}
@@ -350,7 +350,7 @@ func _do(ast core.List, env *base.Env) (core.Any, error) {
 	return base.EvalFuture(ast[len(ast)-1], env), nil
 }
 
-func _if(ast core.List, env *base.Env) (core.Any, error) {
+func _if(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := rangeLen(ast, 3, 4); err != nil {
 		return core.Null{}, err
 	}
@@ -367,7 +367,7 @@ func _if(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Null{}, nil
 }
 
-func _func(ast core.List, env *base.Env) (core.Any, error) {
+func _func(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -389,7 +389,7 @@ func _func(ast core.List, env *base.Env) (core.Any, error) {
 		}
 	}
 	body := ast[2]
-	fn := func(args core.List, outer *base.Env) (core.Any, error) {
+	fn := func(args core.Expr, outer *base.Env) (core.Any, error) {
 		err := exactLen(args, len(symbols)+1)
 		if err != nil {
 			return core.Null{}, err
@@ -412,7 +412,7 @@ func _func(ast core.List, env *base.Env) (core.Any, error) {
 	return base.Func(fn), nil
 }
 
-func _prn(ast core.List, env *base.Env) (core.Any, error) {
+func _prn(ast core.Expr, env *base.Env) (core.Any, error) {
 	if len(ast) > 0 {
 		var str string
 		for i, arg := range ast[1:] {
@@ -430,7 +430,7 @@ func _prn(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Null{}, nil
 }
 
-func _listQ(ast core.List, env *base.Env) (core.Any, error) {
+func _exprQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -441,12 +441,12 @@ func _listQ(ast core.List, env *base.Env) (core.Any, error) {
 	switch val.(type) {
 	default:
 		return core.Bool(false), nil
-	case core.List:
+	case core.Expr:
 		return core.Bool(true), nil
 	}
 }
 
-func _vectorQ(ast core.List, env *base.Env) (core.Any, error) {
+func _vectorQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -462,7 +462,7 @@ func _vectorQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 }
 
-func _symbolQ(ast core.List, env *base.Env) (core.Any, error) {
+func _symbolQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -478,7 +478,7 @@ func _symbolQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 }
 
-func _boolQ(ast core.List, env *base.Env) (core.Any, error) {
+func _boolQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -494,7 +494,7 @@ func _boolQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 }
 
-func _stringQ(ast core.List, env *base.Env) (core.Any, error) {
+func _stringQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -510,7 +510,7 @@ func _stringQ(ast core.List, env *base.Env) (core.Any, error) {
 	}
 }
 
-func _mapQ(ast core.List, env *base.Env) (core.Any, error) {
+func _mapQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -521,12 +521,12 @@ func _mapQ(ast core.List, env *base.Env) (core.Any, error) {
 	switch val.(type) {
 	default:
 		return core.Bool(false), nil
-	case core.Map:
+	case core.Hash:
 		return core.Bool(true), nil
 	}
 }
 
-func _get(ast core.List, env *base.Env) (core.Any, error) {
+func _get(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -537,7 +537,7 @@ func _get(ast core.List, env *base.Env) (core.Any, error) {
 	switch map1 := arg1.(type) {
 	default:
 		return core.Null{}, fmt.Errorf("called with non-map %#v", ast[1])
-	case core.Map:
+	case core.Hash:
 		key, err := base.Eval(ast[2], env)
 		if err != nil {
 			return core.Null{}, err
@@ -555,7 +555,7 @@ func _get(ast core.List, env *base.Env) (core.Any, error) {
 	}
 }
 
-func _count(ast core.List, env *base.Env) (core.Any, error) {
+func _count(ast core.Expr, env *base.Env) (core.Any, error) {
 	val, err := oneLen(ast, env)
 	if err != nil {
 		return core.Null{}, err
@@ -567,17 +567,17 @@ func _count(ast core.List, env *base.Env) (core.Any, error) {
 	case core.Vector:
 		cnt = len(any)
 		break
-	case core.Map:
+	case core.Hash:
 		cnt = len(any)
 		break
-	case core.List:
+	case core.Expr:
 		cnt = len(any)
 		break
 	}
 	return core.NewNumber(cnt), nil
 }
 
-func _emptyQ(ast core.List, env *base.Env) (core.Any, error) {
+func _emptyQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	cnt, err := _count(ast, env)
 	if err != nil {
 		return core.Null{}, err
@@ -585,7 +585,7 @@ func _emptyQ(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Bool(cnt.Equal(core.Zero)), nil
 }
 
-func _equalQ(ast core.List, env *base.Env) (core.Any, error) {
+func _equalQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := minLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -605,7 +605,7 @@ func _equalQ(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Bool(true), nil
 }
 
-func _ltQ(ast core.List, env *base.Env) (core.Any, error) {
+func _ltQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -620,7 +620,7 @@ func _ltQ(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Bool(val1.Decimal().LessThan(val2.Decimal())), nil
 }
 
-func _lteqQ(ast core.List, env *base.Env) (core.Any, error) {
+func _lteqQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -635,7 +635,7 @@ func _lteqQ(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Bool(val1.Decimal().LessThanOrEqual(val2.Decimal())), nil
 }
 
-func _gtQ(ast core.List, env *base.Env) (core.Any, error) {
+func _gtQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -650,7 +650,7 @@ func _gtQ(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Bool(val1.Decimal().GreaterThan(val2.Decimal())), nil
 }
 
-func _gteqQ(ast core.List, env *base.Env) (core.Any, error) {
+func _gteqQ(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -665,14 +665,14 @@ func _gteqQ(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Bool(val1.Decimal().GreaterThanOrEqual(val2.Decimal())), nil
 }
 
-func _quote(ast core.List, env *base.Env) (core.Any, error) {
+func _quote(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
 	return ast[1], nil
 }
 
-func _eval(ast core.List, env *base.Env) (core.Any, error) {
+func _eval(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -680,7 +680,7 @@ func _eval(ast core.List, env *base.Env) (core.Any, error) {
 	return dualEvalFuture(ast[1], env), nil
 }
 
-func _parse(ast core.List, env *base.Env) (core.Any, error) {
+func _parse(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -701,7 +701,7 @@ func _parse(ast core.List, env *base.Env) (core.Any, error) {
 }
 
 // converts lazy-futures to async-futures
-func _async(ast core.List, env *base.Env) (res core.Any, err error) {
+func _async(ast core.Expr, env *base.Env) (res core.Any, err error) {
 	res = core.Null{}
 	if err = exactLen(ast, 2); err != nil {
 		return
@@ -728,7 +728,7 @@ func _async(ast core.List, env *base.Env) (res core.Any, err error) {
 	return
 }
 
-func _apply(ast core.List, env *base.Env) (core.Any, error) {
+func _apply(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -748,17 +748,17 @@ func _apply(ast core.List, env *base.Env) (core.Any, error) {
 		default:
 			return core.Null{}, fmt.Errorf("called with non-vector: %#v", val2)
 		case core.Vector:
-			lst := make(core.List, len(vec)+1)
+			lst := make(core.Expr, len(vec)+1)
 			lst[0] = ast[1]
 			for i, item := range vec {
-				lst[i+1] = core.List{core.NewSymbol("quote", nil), item}
+				lst[i+1] = core.Expr{core.NewSymbol("quote", nil), item}
 			}
 			return fn.Future(lst, env), nil
 		}
 	}
 }
 
-func _map(ast core.List, env *base.Env) (core.Any, error) {
+func _map(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -782,14 +782,14 @@ func _map(ast core.List, env *base.Env) (core.Any, error) {
 		}
 		res := make(core.Vector, len(val2.(core.Vector)))
 		for i, item := range val2.(core.Vector) {
-			ast2 := core.List{ast[1], core.List{core.NewSymbol("quote", nil), item}}
+			ast2 := core.Expr{ast[1], core.Expr{core.NewSymbol("quote", nil), item}}
 			res[i] = fn.Future(ast2, env)
 		}
 		return base.EvalFuture(res, env), nil
 	}
 }
 
-func _wait(ast core.List, env *base.Env) (core.Any, error) {
+func _wait(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -805,7 +805,7 @@ func _wait(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Null{}, nil
 }
 
-func _throw(ast core.List, env *base.Env) (core.Any, error) {
+func _throw(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -816,7 +816,7 @@ func _throw(ast core.List, env *base.Env) (core.Any, error) {
 	return core.Null{}, fmt.Errorf("%s", arg)
 }
 
-func _try(ast core.List, env *base.Env) (core.Any, error) {
+func _try(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 3); err != nil {
 		return core.Null{}, err
 	}
@@ -831,7 +831,7 @@ func _try(ast core.List, env *base.Env) (core.Any, error) {
 			return core.Null{}, fmt.Errorf("called with non-function catch %#v", res2)
 		case base.Func:
 			// lazy-call catch-function
-			return catch.Future(core.List{ast[2], core.String{Val: err.Error()}}, env), nil
+			return catch.Future(core.Expr{ast[2], core.String{Val: err.Error()}}, env), nil
 		}
 	}
 	return res, nil

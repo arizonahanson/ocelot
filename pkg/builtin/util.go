@@ -7,21 +7,21 @@ import (
 	"github.com/starlight/ocelot/pkg/core"
 )
 
-func exactLen(ast core.List, num int) error {
+func exactLen(ast core.Expr, num int) error {
 	if len(ast) != num {
 		return fmt.Errorf("wanted %d arg(s), got %d", num-1, len(ast)-1)
 	}
 	return nil
 }
 
-func rangeLen(ast core.List, min int, max int) error {
+func rangeLen(ast core.Expr, min int, max int) error {
 	if len(ast) < min || len(ast) > max {
 		return fmt.Errorf("wanted %d-%d args, got %d", min-1, max-1, len(ast)-1)
 	}
 	return nil
 }
 
-func minLen(ast core.List, min int) error {
+func minLen(ast core.Expr, min int) error {
 	if len(ast) < min {
 		return fmt.Errorf("wanted at least %d args, got %d", min-1, len(ast)-1)
 	}
@@ -41,7 +41,7 @@ func evalNumber(ast core.Any, env *base.Env) (*core.Number, error) {
 	}
 }
 
-func oneLen(ast core.List, env *base.Env) (core.Any, error) {
+func oneLen(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}
@@ -63,8 +63,8 @@ func dualEvalFuture(ast core.Any, env *base.Env) base.Future {
 	}
 }
 
-func cons(first core.Any, rest core.List) core.List {
-	ast := make(core.List, len(rest)+1)
+func cons(first core.Any, rest core.Expr) core.Expr {
+	ast := make(core.Expr, len(rest)+1)
 	ast[0] = first
 	for i, item := range rest {
 		ast[i+1] = item
