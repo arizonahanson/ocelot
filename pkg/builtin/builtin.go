@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/starlight/ocelot/internal/parser"
 	"github.com/starlight/ocelot/pkg/base"
 	"github.com/starlight/ocelot/pkg/core"
 )
@@ -692,11 +693,11 @@ func _parse(ast core.Expr, env *base.Env) (core.Any, error) {
 	default:
 		return core.Null{}, fmt.Errorf("called with non-string %#v", ast[1])
 	case core.String:
-		arg, err := base.Parse(str.String())
+		arg, err := parser.Parse("parse", []byte(str.String()))
 		if err != nil {
 			return core.Null{}, err
 		}
-		return arg, nil
+		return arg.(core.Any), nil
 	}
 }
 

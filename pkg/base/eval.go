@@ -7,23 +7,26 @@ import (
 	"github.com/starlight/ocelot/pkg/core"
 )
 
-func Parse(in string) (core.Any, error) {
-	ast, err := parser.Parse("parse", []byte(in))
+func EvalFile(filename string, env *Env) (core.Any, error) {
+	if env == nil {
+		return core.Null{}, errors.New("evaluation with nil env")
+	}
+	ast, err := parser.ParseFile(filename)
 	if err != nil {
 		return core.Null{}, err
 	}
-	return ast.(core.Any), nil
+	return Eval(ast.(core.Any), env)
 }
 
 func EvalStr(in string, env *Env) (core.Any, error) {
 	if env == nil {
 		return core.Null{}, errors.New("evaluation with nil env")
 	}
-	ast, err := Parse(in)
+	ast, err := parser.Parse("parse", []byte(in))
 	if err != nil {
 		return core.Null{}, err
 	}
-	return Eval(ast, env)
+	return Eval(ast.(core.Any), env)
 }
 
 // eager eval
