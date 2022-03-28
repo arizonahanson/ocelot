@@ -41,7 +41,7 @@ func evalNumber(ast core.Any, env *base.Env) (*core.Number, error) {
 	}
 }
 
-func oneLen(ast core.Expr, env *base.Env) (core.Any, error) {
+func oneArg(ast core.Expr, env *base.Env) (core.Any, error) {
 	if err := exactLen(ast, 2); err != nil {
 		return core.Null{}, err
 	}

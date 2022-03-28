@@ -73,7 +73,7 @@ var Builtin = map[string]base.Func{
 }
 
 func _nullQ(ast core.Expr, env *base.Env) (core.Any, error) {
-	val, err := oneLen(ast, env)
+	val, err := oneArg(ast, env)
 	if err != nil {
 		return core.Null{}, err
 	}
@@ -81,7 +81,7 @@ func _nullQ(ast core.Expr, env *base.Env) (core.Any, error) {
 }
 
 func _trueQ(ast core.Expr, env *base.Env) (core.Any, error) {
-	val, err := oneLen(ast, env)
+	val, err := oneArg(ast, env)
 	if err != nil {
 		return core.Null{}, err
 	}
@@ -89,7 +89,7 @@ func _trueQ(ast core.Expr, env *base.Env) (core.Any, error) {
 }
 
 func _falseQ(ast core.Expr, env *base.Env) (core.Any, error) {
-	val, err := oneLen(ast, env)
+	val, err := oneArg(ast, env)
 	if err != nil {
 		return core.Null{}, err
 	}
@@ -97,7 +97,7 @@ func _falseQ(ast core.Expr, env *base.Env) (core.Any, error) {
 }
 
 func _bool(ast core.Expr, env *base.Env) (core.Any, error) {
-	val, err := oneLen(ast, env)
+	val, err := oneArg(ast, env)
 	if err != nil {
 		return core.Null{}, err
 	}
@@ -105,7 +105,7 @@ func _bool(ast core.Expr, env *base.Env) (core.Any, error) {
 }
 
 func _not(ast core.Expr, env *base.Env) (core.Any, error) {
-	val, err := oneLen(ast, env)
+	val, err := oneArg(ast, env)
 	if err != nil {
 		return core.Null{}, err
 	}
@@ -145,7 +145,7 @@ func _or(ast core.Expr, env *base.Env) (core.Any, error) {
 }
 
 func _numberQ(ast core.Expr, env *base.Env) (core.Any, error) {
-	val, err := oneLen(ast, env)
+	val, err := oneArg(ast, env)
 	if err != nil {
 		return core.Null{}, err
 	}
@@ -254,7 +254,7 @@ func _divS(ast core.Expr, env *base.Env) (core.Any, error) {
 }
 
 func _type(ast core.Expr, env *base.Env) (core.Any, error) {
-	val, err := oneLen(ast, env)
+	val, err := oneArg(ast, env)
 	if err != nil {
 		return core.Null{}, err
 	}
@@ -557,7 +557,7 @@ func _get(ast core.Expr, env *base.Env) (core.Any, error) {
 }
 
 func _count(ast core.Expr, env *base.Env) (core.Any, error) {
-	val, err := oneLen(ast, env)
+	val, err := oneArg(ast, env)
 	if err != nil {
 		return core.Null{}, err
 	}
