@@ -40,6 +40,10 @@ func (env *Env) Set(sym core.Symbol, val core.Any) core.Any {
 	return val
 }
 
+func (env *Env) SetFunc(str string, fn Func) {
+	env.Set(core.NewSymbol(str, nil), fn)
+}
+
 // cause a future binding to resolve async
 func (env *Env) Async(sym core.Symbol) error {
 	scope, val := env.find(sym)

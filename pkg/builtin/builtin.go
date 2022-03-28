@@ -12,64 +12,64 @@ import (
 func BuiltinEnv() (*base.Env, error) {
 	env := base.NewEnv(nil)
 	for sym, val := range Builtin {
-		env.Set(core.NewSymbol(sym, nil), val)
+		env.SetFunc(sym, val)
 	}
 	return env, nil
 }
 
-var Builtin = map[string]core.Any{
+var Builtin = map[string]base.Func{
 	// null / bool
-	"null?":  base.Func(_nullQ),
-	"true?":  base.Func(_trueQ),
-	"false?": base.Func(_falseQ),
-	"bool":   base.Func(_bool),
-	"not":    base.Func(_not),
-	"and":    base.Func(_and),
-	"or":     base.Func(_or),
+	"null?":  _nullQ,
+	"true?":  _trueQ,
+	"false?": _falseQ,
+	"bool":   _bool,
+	"not":    _not,
+	"and":    _and,
+	"or":     _or,
 	// numbers
-	"add":   base.Func(_add),
-	"sub":   base.Func(_sub),
-	"mul":   base.Func(_mul),
-	"div":   base.Func(_div),
-	"rem":   base.Func(_rem),
-	"div*":  base.Func(_divS),
-	"lt?":   base.Func(_ltQ),
-	"lteq?": base.Func(_lteqQ),
-	"gt?":   base.Func(_gtQ),
-	"gteq?": base.Func(_gteqQ),
+	"add":   _add,
+	"sub":   _sub,
+	"mul":   _mul,
+	"div":   _div,
+	"rem":   _rem,
+	"div*":  _divS,
+	"lt?":   _ltQ,
+	"lteq?": _lteqQ,
+	"gt?":   _gtQ,
+	"gteq?": _gteqQ,
 	// special
-	"equal?": base.Func(_equalQ),
-	"def!":   base.Func(_defE),
-	"free!":  base.Func(_freeE),
-	"defn!":  base.Func(_defnE),
-	"do":     base.Func(_do),
-	"func":   base.Func(_func),
-	"let":    base.Func(_let),
-	"async":  base.Func(_async),
-	"if":     base.Func(_if),
-	"prn":    base.Func(_prn),
-	"eval":   base.Func(_eval),
-	"parse":  base.Func(_parse),
-	"quote":  base.Func(_quote),
-	"map":    base.Func(_map),
-	"apply":  base.Func(_apply),
-	"throw":  base.Func(_throw),
-	"try":    base.Func(_try),
-	"catch":  base.Func(_func), // alias
-	"wait":   base.Func(_wait),
+	"equal?": _equalQ,
+	"def!":   _defE,
+	"free!":  _freeE,
+	"defn!":  _defnE,
+	"do":     _do,
+	"func":   _func,
+	"let":    _let,
+	"async":  _async,
+	"if":     _if,
+	"prn":    _prn,
+	"eval":   _eval,
+	"parse":  _parse,
+	"quote":  _quote,
+	"map":    _map,
+	"apply":  _apply,
+	"throw":  _throw,
+	"try":    _try,
+	"catch":  _func, // alias
+	"wait":   _wait,
 	// type check
-	"type":    base.Func(_type),
-	"bool?":   base.Func(_boolQ),
-	"number?": base.Func(_numberQ),
-	"string?": base.Func(_stringQ),
-	"symbol?": base.Func(_symbolQ),
-	"expr?":   base.Func(_exprQ),
-	"vector?": base.Func(_vectorQ),
-	"hash?":   base.Func(_hashQ),
-	"get":     base.Func(_get),
+	"type":    _type,
+	"bool?":   _boolQ,
+	"number?": _numberQ,
+	"string?": _stringQ,
+	"symbol?": _symbolQ,
+	"expr?":   _exprQ,
+	"vector?": _vectorQ,
+	"hash?":   _hashQ,
+	"get":     _get,
 	// sequences
-	"empty?": base.Func(_emptyQ),
-	"count":  base.Func(_count),
+	"empty?": _emptyQ,
+	"count":  _count,
 }
 
 func _nullQ(ast core.Expr, env *base.Env) (core.Any, error) {
