@@ -22,11 +22,10 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/starlight/ocelot/pkg/base"
 	"github.com/starlight/ocelot/pkg/builtin"
+	"github.com/starlight/ocelot/pkg/ocelot"
 )
 
 // runCmd represents the run command
@@ -44,7 +43,7 @@ to quickly create a Cobra application.`,
 		cobra.CheckErr(err)
 		any, err := base.EvalFile(args[0], env)
 		cobra.CheckErr(err)
-		fmt.Println(any)
+		ocelot.Print(any)
 	},
 }
 

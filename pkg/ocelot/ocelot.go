@@ -44,7 +44,7 @@ func Repl(prompt string) error {
 	return nil
 }
 
-func print(ast core.Any) {
+func Print(ast core.Any) {
 	fmt.Print(color.WhiteString("→ "))
 	switch any := ast.(type) {
 	default:
