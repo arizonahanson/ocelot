@@ -26,7 +26,7 @@ func Repl(prompt string) error {
 			fmt.Println(err)
 			return
 		}
-		print(val)
+		Print(val)
 	}
 	completer := func(d goprompt.Document) []goprompt.Suggest {
 		return []goprompt.Suggest{}

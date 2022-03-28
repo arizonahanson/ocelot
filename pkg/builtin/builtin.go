@@ -125,7 +125,7 @@ func _and(ast core.Expr, env *base.Env) (core.Any, error) {
 			return val, nil
 		}
 	}
-	return base.EvalFuture(ast[len(ast)-1], env), nil
+	return base.FutureEval(ast[len(ast)-1], env), nil
 }
 
 func _or(ast core.Expr, env *base.Env) (core.Any, error) {
@@ -141,7 +141,7 @@ func _or(ast core.Expr, env *base.Env) (core.Any, error) {
 			return val, nil
 		}
 	}
-	return base.EvalFuture(ast[len(ast)-1], env), nil
+	return base.FutureEval(ast[len(ast)-1], env), nil
 }
 
 func _numberQ(ast core.Expr, env *base.Env) (core.Any, error) {
@@ -273,7 +273,7 @@ func _defE(ast core.Expr, env *base.Env) (core.Any, error) {
 	default:
 		return core.Null{}, fmt.Errorf("called with non-symbol %#v", ast[1])
 	case core.Symbol:
-		env.Set(sym, base.EvalFuture(ast[2], env))
+		env.Set(sym, base.FutureEval(ast[2], env))
 		return core.Null{}, nil
 	}
 }
@@ -331,11 +331,11 @@ func _let(ast core.Expr, env *base.Env) (core.Any, error) {
 		default:
 			return core.Null{}, fmt.Errorf("called with non-symbol %#v", pairs[0])
 		case core.Symbol:
-			newEnv.Set(sym, base.EvalFuture(pairs[1], newEnv))
+			newEnv.Set(sym, base.FutureEval(pairs[1], newEnv))
 			pairs = pairs[2:]
 		}
 	}
-	return base.EvalFuture(ast[2], newEnv), nil
+	return base.FutureEval(ast[2], newEnv), nil
 }
 
 func _do(ast core.Expr, env *base.Env) (core.Any, error) {
@@ -348,7 +348,7 @@ func _do(ast core.Expr, env *base.Env) (core.Any, error) {
 			return core.Null{}, err
 		}
 	}
-	return base.EvalFuture(ast[len(ast)-1], env), nil
+	return base.FutureEval(ast[len(ast)-1], env), nil
 }
 
 func _if(ast core.Expr, env *base.Env) (core.Any, error) {
@@ -360,10 +360,10 @@ func _if(ast core.Expr, env *base.Env) (core.Any, error) {
 		return core.Null{}, err
 	}
 	if (val != core.Bool(false) && val != core.Null{}) {
-		return base.EvalFuture(ast[2], env), nil
+		return base.FutureEval(ast[2], env), nil
 	}
 	if len(ast) == 4 {
-		return base.EvalFuture(ast[3], env), nil
+		return base.FutureEval(ast[3], env), nil
 	}
 	return core.Null{}, nil
 }
@@ -398,7 +398,7 @@ func _func(ast core.Expr, env *base.Env) (core.Any, error) {
 		local := base.NewEnv(env)
 		for i, sym := range symbols {
 			// bind sym to arg in local, but lazy eval arg in outer
-			local.Set(sym, base.EvalFuture(args[i+1], outer))
+			local.Set(sym, base.FutureEval(args[i+1], outer))
 		}
 		// future that places breaks in error trace
 		future := func() (val core.Any, err error) {
@@ -678,7 +678,7 @@ func _eval(ast core.Expr, env *base.Env) (core.Any, error) {
 		return core.Null{}, err
 	}
 	// double-eval TCO'd
-	return dualEvalFuture(ast[1], env), nil
+	return dualFutureEval(ast[1], env), nil
 }
 
 func _parse(ast core.Expr, env *base.Env) (core.Any, error) {
@@ -786,7 +786,7 @@ func _map(ast core.Expr, env *base.Env) (core.Any, error) {
 			ast2 := core.Expr{ast[1], core.Expr{core.NewSymbol("quote", nil), item}}
 			res[i] = fn.Future(ast2, env)
 		}
-		return base.EvalFuture(res, env), nil
+		return base.FutureEval(res, env), nil
 	}
 }
 

@@ -44,7 +44,7 @@ func Eval(ast core.Any, env *Env) (val core.Any, err error) {
 }
 
 // lazy eval and tail-call
-func EvalFuture(ast core.Any, env *Env) Future {
+func FutureEval(ast core.Any, env *Env) Future {
 	return func() (core.Any, error) {
 		return evalAst(ast, env)
 	}

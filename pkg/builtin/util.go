@@ -53,7 +53,7 @@ func oneLen(ast core.Expr, env *base.Env) (core.Any, error) {
 }
 
 // eval then eval the result (lazy)
-func dualEvalFuture(ast core.Any, env *base.Env) base.Future {
+func dualFutureEval(ast core.Any, env *base.Env) base.Future {
 	return func() (core.Any, error) {
 		val, err := base.Eval(ast, env)
 		if err != nil {
